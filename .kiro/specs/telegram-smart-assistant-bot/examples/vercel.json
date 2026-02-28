@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "name": "telegram-smart-assistant-bot",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "backend/api/main.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/api/main.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "REDIS_URL": "@redis_url",
+    "GROQ_API_KEY": "@groq_api_key",
+    "TELEGRAM_BOT_TOKEN": "@telegram_bot_token",
+    "GOOGLE_CLIENT_ID": "@google_client_id",
+    "GOOGLE_CLIENT_SECRET": "@google_client_secret",
+    "ENCRYPTION_KEY": "@encryption_key",
+    "STORAGE_URL": "@storage_url",
+    "STORAGE_KEY": "@storage_key",
+    "FRONTEND_URL": "@frontend_url"
+  }
+}

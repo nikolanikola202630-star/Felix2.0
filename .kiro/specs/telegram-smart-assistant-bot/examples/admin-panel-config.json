@@ -1,0 +1,67 @@
+{
+  "botConfigs": [
+    {
+      "key": "welcome_message",
+      "value": "Привет! Я твой умный ассистент. Чем могу помочь?",
+      "description": "Приветственное сообщение для новых пользователей"
+    },
+    {
+      "key": "groq_model_default",
+      "value": "llama-3.3-70b-versatile",
+      "description": "Модель Groq по умолчанию для обработки"
+    },
+    {
+      "key": "groq_model_premium",
+      "value": "llama-3.3-70b-versatile",
+      "description": "Модель Groq для premium пользователей"
+    },
+    {
+      "key": "menu_config",
+      "value": {
+        "items": [
+          {"id": "conspect", "label": "Конспекты", "icon": "📝"},
+          {"id": "dialog", "label": "Диалог", "icon": "💬"},
+          {"id": "profile", "label": "Профиль", "icon": "👤"},
+          {"id": "settings", "label": "Настройки", "icon": "⚙️"}
+        ]
+      },
+      "description": "Конфигурация меню Mini App"
+    },
+    {
+      "key": "max_audio_duration",
+      "value": 7200,
+      "description": "Максимальная длительность аудио в секундах (2 часа)"
+    },
+    {
+      "key": "max_audio_size_mb",
+      "value": 100,
+      "description": "Максимальный размер аудиофайла в MB"
+    }
+  ],
+  "featureFlags": [
+    {
+      "name": "new_groq_model",
+      "enabled": true,
+      "rollout": 10,
+      "description": "Постепенный rollout новой модели Groq (10% пользователей)"
+    },
+    {
+      "name": "google_docs_export",
+      "enabled": true,
+      "rollout": 100,
+      "description": "Экспорт в Google Docs (включено для всех)"
+    },
+    {
+      "name": "voice_responses",
+      "enabled": true,
+      "rollout": 50,
+      "description": "Озвучка ответов в диалоге (A/B тест 50%)"
+    },
+    {
+      "name": "pdf_export",
+      "enabled": false,
+      "rollout": 0,
+      "description": "Экспорт в PDF (пока отключено)"
+    }
+  ]
+}
