@@ -90,6 +90,9 @@ export default async function handler(req, res) {
         if (text === '/start') {
           const keyboard = telegram.createKeyboard([
             [
+              { text: '📱 Открыть Mini App', web_app: { url: 'https://felix-black.vercel.app/miniapp/' } }
+            ],
+            [
               { text: '📊 Статистика', callback_data: 'get_stats' },
               { text: '📝 Саммари', callback_data: 'get_summary' }
             ],
@@ -105,6 +108,7 @@ export default async function handler(req, res) {
 • 🧠 Помню контекст диалога
 • 🎤 Транскрибирую голосовые сообщения
 • 📝 Создаю саммари диалогов
+• 📱 Mini App для удобного просмотра истории
 
 <b>Команды:</b>
 /start - это сообщение

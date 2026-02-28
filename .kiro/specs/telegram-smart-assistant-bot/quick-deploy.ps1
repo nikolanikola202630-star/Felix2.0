@@ -87,5 +87,6 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "   git config --global user.name 'Your Name'" -ForegroundColor Gray
     Write-Host "   git config --global user.email 'your@email.com'" -ForegroundColor Gray
     Write-Host "   git push -u origin main" -ForegroundColor Gray
+    Write-Host ""
 }
-}
+
