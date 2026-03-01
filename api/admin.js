@@ -5,6 +5,7 @@ const ADMIN_IDS = [8264612178]; // Telegram ID администраторов
 const partnerRequests = new Map(); // Заявки на партнерство
 const courses = new Map(); // Курсы академии
 const partners = new Map(); // Партнеры
+const userSettings = new Map(); // Настройки пользователей
 
 // Инициализация данных из JSON
 let initialized = false;
@@ -103,6 +104,12 @@ export default async function handler(req, res) {
             
             case 'isAdmin':
                 return res.status(200).json({ isAdmin });
+            
+            case 'getUserSettings':
+                return handleGetUserSettings(res, userId);
+            
+            case 'updateUserSettings':
+                return handleUpdateUserSettings(res, userId, data);
             
             default:
                 return res.status(400).json({ error: 'Invalid action' });
@@ -351,5 +358,61 @@ function handleDeletePartner(res, data) {
     return res.status(200).json({
         success: true,
         message: 'Партнер удален'
+    });
+}
+
+
+// Функции для работы с настройками пользователей
+function handleGetUserSettings(res, userId) {
+    if (!userId) {
+        return res.status(400).json({ error: 'userId is required' });
+    }
+    
+    const settings = userSettings.get(userId) || {
+        userId,
+        avatar: null,
+        communicationStyle: 'casual', // casual, formal, mixed
+        language: 'ru', // ru, en, uk
+        theme: 'dark', // dark, light
+        notifications: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    };
+    
+    return res.status(200).json({
+        success: true,
+        settings
+    });
+}
+
+function handleUpdateUserSettings(res, userId, data) {
+    if (!userId) {
+        return res.status(400).json({ error: 'userId is required' });
+    }
+    
+    const currentSettings = userSettings.get(userId) || {
+        userId,
+        avatar: null,
+        communicationStyle: 'casual',
+        language: 'ru',
+        theme: 'dark',
+        notifications: true,
+        createdAt: Date.now()
+    };
+    
+    // Обновляем настройки
+    const updatedSettings = {
+        ...currentSettings,
+        ...data,
+        userId,
+        updatedAt: Date.now()
+    };
+    
+    userSettings.set(userId, updatedSettings);
+    
+    return res.status(200).json({
+        success: true,
+        message: 'Настройки обновлены',
+        settings: updatedSettings
     });
 }

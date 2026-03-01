@@ -23,17 +23,41 @@
             min-height: 100vh;
             padding: 0;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%);
+            animation: backgroundMove 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -20px); }
         }
 
         .container {
+            position: relative;
+            z-index: 1;
             max-width: 100%;
             margin: 0 auto;
             padding-bottom: 80px;
         }
 
         .header {
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 20px;
             text-align: center;
             position: sticky;
@@ -41,6 +65,7 @@
             z-index: 100;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             animation: slideDown 0.5s ease-out;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .header h1 {
@@ -75,17 +100,22 @@
 
         .tab {
             flex: 1;
-            min-width: 80px;
-            padding: 10px 15px;
+            min-width: 90px;
+            padding: 10px 12px;
             background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 12px;
             color: #fff;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         .tab:hover {
@@ -114,13 +144,33 @@
 
         .card {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 20px;
             margin-bottom: 15px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             animation: scaleIn 0.4s ease-out;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card:hover {
@@ -154,6 +204,25 @@
             margin: 0 auto 15px;
             animation: bounceIn 0.6s ease-out, float 3s ease-in-out infinite;
             box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .profile-avatar::after {
+            content: '';
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            border-radius: 50%;
+            border: 2px solid #ffd700;
+            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
         }
 
         .profile-name {
@@ -548,6 +617,43 @@
         .emoji {
             font-size: 20px;
         }
+
+        /* Personalization Styles */
+        .style-btn, .theme-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .style-btn:hover, .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .style-btn.active, .theme-btn.active {
+            background: linear-gradient(135deg, #ffd700, #ff6b6b);
+            border-color: #ffd700;
+            color: #1a1a2e;
+            transform: scale(1.05);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -559,11 +665,26 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('profile')">👤 Профиль</button>
-            <button class="tab" onclick="switchTab('commands')">⚡ Команды</button>
-            <button class="tab" onclick="switchTab('academy')">🎓 Академия</button>
-            <button class="tab" onclick="switchTab('partners')">🤝 Партнеры</button>
-            <button class="tab" onclick="switchTab('settings')">⚙️ Настройки</button>
+            <button class="tab active" onclick="switchTab('profile')">
+                <span style="font-size: 18px;">👤</span>
+                <span style="font-size: 10px;">Профиль</span>
+            </button>
+            <button class="tab" onclick="switchTab('commands')">
+                <span style="font-size: 18px;">⚡</span>
+                <span style="font-size: 10px;">Команды</span>
+            </button>
+            <button class="tab" onclick="switchTab('academy')">
+                <span style="font-size: 18px;">🎓</span>
+                <span style="font-size: 10px;">Академия</span>
+            </button>
+            <button class="tab" onclick="switchTab('partners')">
+                <span style="font-size: 18px;">🤝</span>
+                <span style="font-size: 10px;">Партнеры</span>
+            </button>
+            <button class="tab" onclick="switchTab('settings')">
+                <span style="font-size: 18px;">⚙️</span>
+                <span style="font-size: 10px;">Настройки</span>
+            </button>
         </div>
 
         <div class="content">
@@ -703,6 +824,84 @@
 
             <!-- Settings Tab -->
             <div id="settings" class="tab-content">
+                <!-- Персонализация -->
+                <div class="card">
+                    <h2>🎨 Персонализация <span class="badge new">NEW</span></h2>
+                    
+                    <!-- Аватар -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Аватар</div>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div id="currentAvatar" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #ff6b6b); display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                                🧠
+                            </div>
+                            <div style="flex: 1;">
+                                <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                                <button class="btn" onclick="document.getElementById('avatarInput').click()" style="margin: 0;">
+                                    📷 Загрузить фото
+                                </button>
+                                <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">
+                                    Или выберите эмодзи: 
+                                    <span onclick="setEmojiAvatar('🧠')" style="cursor: pointer; font-size: 20px; margin: 0 4px;">🧠</span>
+                                    <span onclick="setEmojiAvatar('😎')" style="cursor: pointer; font-size: 20px; margin: 0 4px;">😎</span>
+                                    <span onclick="setEmojiAvatar('🤖')" style="cursor: pointer; font-size: 20px; margin: 0 4px;">🤖</span>
+                                    <span onclick="setEmojiAvatar('👨‍💻')" style="cursor: pointer; font-size: 20px; margin: 0 4px;">👨‍💻</span>
+                                    <span onclick="setEmojiAvatar('🦊')" style="cursor: pointer; font-size: 20px; margin: 0 4px;">🦊</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Стиль общения -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Стиль общения</div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                            <button class="style-btn active" data-style="casual" onclick="selectStyle('casual')">
+                                <div style="font-size: 20px; margin-bottom: 4px;">😎</div>
+                                <div style="font-size: 11px;">Неформальный</div>
+                            </button>
+                            <button class="style-btn" data-style="formal" onclick="selectStyle('formal')">
+                                <div style="font-size: 20px; margin-bottom: 4px;">🎩</div>
+                                <div style="font-size: 11px;">Формальный</div>
+                            </button>
+                            <button class="style-btn" data-style="mixed" onclick="selectStyle('mixed')">
+                                <div style="font-size: 20px; margin-bottom: 4px;">🤝</div>
+                                <div style="font-size: 11px;">Смешанный</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Язык -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Язык интерфейса</div>
+                        <select id="languageSelect" class="form-select" onchange="changeLanguage(this.value)" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; color: #fff; font-size: 14px;">
+                            <option value="ru">🇷🇺 Русский</option>
+                            <option value="en">🇬🇧 English</option>
+                            <option value="uk">🇺🇦 Українська</option>
+                        </select>
+                    </div>
+
+                    <!-- Тема -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Тема оформления</div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button class="theme-btn active" data-theme="dark" onclick="selectTheme('dark')">
+                                <div style="font-size: 20px; margin-bottom: 4px;">🌙</div>
+                                <div style="font-size: 11px;">Темная</div>
+                            </button>
+                            <button class="theme-btn" data-theme="light" onclick="selectTheme('light')">
+                                <div style="font-size: 20px; margin-bottom: 4px;">☀️</div>
+                                <div style="font-size: 11px;">Светлая</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="savePersonalization()">
+                        💾 Сохранить настройки
+                    </button>
+                </div>
+
+                <!-- О боте -->
                 <div class="card">
                     <h2>ℹ️ О боте</h2>
                     <ul class="feature-list">
@@ -992,6 +1191,171 @@
 
         function openBot() {
             tg.close();
+        }
+
+        // Персонализация
+        let userSettings = {
+            avatar: null,
+            avatarType: 'emoji',
+            avatarEmoji: '🧠',
+            communicationStyle: 'casual',
+            language: 'ru',
+            theme: 'dark'
+        };
+
+        // Загрузка настроек при старте
+        async function loadUserSettings() {
+            try {
+                const response = await fetch(`https://felix-black.vercel.app/api/admin?action=getUserSettings&userId=${user.id}`);
+                const data = await response.json();
+                
+                if (data.success && data.settings) {
+                    userSettings = { ...userSettings, ...data.settings };
+                    applySettings();
+                }
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+            }
+        }
+
+        // Применение настроек
+        function applySettings() {
+            // Аватар
+            if (userSettings.avatarType === 'emoji') {
+                document.getElementById('currentAvatar').innerHTML = userSettings.avatarEmoji || '🧠';
+                document.querySelector('.profile-avatar').innerHTML = userSettings.avatarEmoji || '🧠';
+            } else if (userSettings.avatar) {
+                document.getElementById('currentAvatar').style.backgroundImage = `url(${userSettings.avatar})`;
+                document.getElementById('currentAvatar').style.backgroundSize = 'cover';
+                document.getElementById('currentAvatar').innerHTML = '';
+                document.querySelector('.profile-avatar').style.backgroundImage = `url(${userSettings.avatar})`;
+                document.querySelector('.profile-avatar').style.backgroundSize = 'cover';
+                document.querySelector('.profile-avatar').innerHTML = '';
+            }
+
+            // Стиль общения
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.style === userSettings.communicationStyle) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Язык
+            document.getElementById('languageSelect').value = userSettings.language || 'ru';
+
+            // Тема
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.theme === userSettings.theme) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Загрузка аватара
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                tg.showAlert('Файл слишком большой! Максимум 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                userSettings.avatar = e.target.result;
+                userSettings.avatarType = 'image';
+                document.getElementById('currentAvatar').style.backgroundImage = `url(${e.target.result})`;
+                document.getElementById('currentAvatar').style.backgroundSize = 'cover';
+                document.getElementById('currentAvatar').innerHTML = '';
+                tg.HapticFeedback.impactOccurred('medium');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Установка эмодзи аватара
+        function setEmojiAvatar(emoji) {
+            userSettings.avatarType = 'emoji';
+            userSettings.avatarEmoji = emoji;
+            userSettings.avatar = null;
+            document.getElementById('currentAvatar').style.backgroundImage = 'none';
+            document.getElementById('currentAvatar').innerHTML = emoji;
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Выбор стиля общения
+        function selectStyle(style) {
+            userSettings.communicationStyle = style;
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.style === style) {
+                    btn.classList.add('active');
+                }
+            });
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Смена языка
+        function changeLanguage(lang) {
+            userSettings.language = lang;
+            tg.HapticFeedback.impactOccurred('light');
+            // Здесь можно добавить перевод интерфейса
+        }
+
+        // Выбор темы
+        function selectTheme(theme) {
+            userSettings.theme = theme;
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                }
+            });
+            tg.HapticFeedback.impactOccurred('light');
+            // Применение темы
+            if (theme === 'light') {
+                document.body.style.background = 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)';
+                document.body.style.color = '#1a1a2e';
+            } else {
+                document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                document.body.style.color = '#fff';
+            }
+        }
+
+        // Сохранение настроек
+        async function savePersonalization() {
+            try {
+                const response = await fetch('https://felix-black.vercel.app/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'updateUserSettings',
+                        userId: user.id,
+                        data: userSettings
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    tg.showAlert('✅ Настройки сохранены!');
+                    applySettings();
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    tg.showAlert('❌ Ошибка сохранения');
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            } catch (error) {
+                console.error('Save settings error:', error);
+                tg.showAlert('❌ Ошибка сохранения');
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+        }
+
+        // Загрузка настроек при старте
+        if (user.id) {
+            loadUserSettings();
         }
 
         // Set theme colors
