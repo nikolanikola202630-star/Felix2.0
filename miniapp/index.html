@@ -3,9 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Felix - AI Ассистент</title>
+    <title>Felix AI Assistant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #475569;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,85 +27,100 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            padding: 0;
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        .container {
+        .app-container {
             max-width: 100%;
-            padding: 20px;
-            padding-bottom: 80px;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 24px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 15px;
-        }
-
-        .tabs {
+            min-height: 100vh;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            scrollbar-width: none;
+            flex-direction: column;
         }
 
-        .tabs::-webkit-scrollbar {
-            display: none;
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 24px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        .tab {
-            padding: 12px 24px;
-            border-radius: 25px;
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 56px;
+            height: 56px;
             background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            white-space: nowrap;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
         }
 
-        .tab:active {
-            transform: scale(0.95);
+        .header-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        .tab.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-            border-color: rgba(255, 255, 255, 0.95);
+        .header-text p {
+            font-size: 14px;
+            opacity: 0.9;
         }
 
-        .content {
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            padding: 8px;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-tabs::-webkit-scrollbar {
             display: none;
-            animation: fadeIn 0.3s;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 16px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 20px;
+            display: none;
         }
 
         .content.active {
             display: block;
+            animation: fadeIn 0.3s;
         }
 
         @keyframes fadeIn {
@@ -99,20 +128,36 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Cards */
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Messages */
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .message {
-            margin-bottom: 16px;
             padding: 16px;
             border-radius: 16px;
             animation: slideIn 0.3s;
+            max-width: 85%;
         }
 
         @keyframes slideIn {
@@ -121,102 +166,117 @@
         }
 
         .message.user {
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-            margin-left: 15%;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: var(--primary);
+            align-self: flex-end;
+            margin-left: auto;
         }
 
         .message.assistant {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            margin-right: 15%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-secondary);
+            align-self: flex-start;
+            border: 1px solid var(--border);
         }
 
         .message-content {
-            line-height: 1.5;
+            line-height: 1.6;
             word-wrap: break-word;
+            white-space: pre-wrap;
         }
 
         .message-time {
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.7;
             margin-top: 8px;
         }
 
-        .stat-grid {
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
+            background: var(--bg-secondary);
             padding: 20px;
             border-radius: 16px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border);
         }
 
         .stat-value {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
+            color: var(--primary);
             margin-bottom: 8px;
         }
 
         .stat-label {
             font-size: 13px;
-            opacity: 0.9;
+            color: var(--text-secondary);
         }
 
-        .button {
+        /* Buttons */
+        .btn {
             width: 100%;
             padding: 16px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
+            border-radius: 12px;
             border: none;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 12px;
             transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .button:active {
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: var(--primary-dark);
             transform: scale(0.98);
         }
 
-        .button.secondary {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            backdrop-filter: blur(10px);
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
 
-        .loading {
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn + .btn {
+            margin-top: 12px;
+        }
+
+        /* Loading & Empty States */
+        .loading, .empty {
             text-align: center;
             padding: 60px 20px;
-            opacity: 0.8;
+            color: var(--text-secondary);
         }
 
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s infinite;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        .empty {
-            text-align: center;
-            padding: 60px 20px;
-            opacity: 0.8;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .empty-icon {
@@ -224,16 +284,16 @@
             margin-bottom: 16px;
         }
 
+        /* Settings */
         .setting-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
             margin-bottom: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border);
         }
 
         .setting-label {
@@ -242,25 +302,25 @@
         }
 
         .toggle {
-            width: 56px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
+            width: 52px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
             position: relative;
             cursor: pointer;
             transition: background 0.3s;
         }
 
         .toggle.active {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--primary);
         }
 
         .toggle::after {
             content: '';
             position: absolute;
-            width: 28px;
-            height: 28px;
-            background: #667eea;
+            width: 24px;
+            height: 24px;
+            background: white;
             border-radius: 50%;
             top: 2px;
             left: 2px;
@@ -269,23 +329,21 @@
 
         .toggle.active::after {
             left: 26px;
-            background: #764ba2;
         }
 
+        /* Info Card */
         .info-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: var(--bg-secondary);
+            border-radius: 12px;
             padding: 16px;
-            border-radius: 16px;
-            margin-top: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border);
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
         }
 
         .info-row:last-child {
@@ -293,7 +351,7 @@
         }
 
         .info-label {
-            opacity: 0.8;
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
@@ -301,77 +359,152 @@
             font-weight: 600;
             font-size: 14px;
         }
+
+        /* Feature Card */
+        .feature-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .code-block {
+            background: var(--bg-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
+        <!-- Header -->
         <div class="header">
-            <h1>🤖 Felix AI</h1>
-            <p>Умный ассистент с голосовым вводом</p>
+            <div class="header-content">
+                <div class="header-icon">🤖</div>
+                <div class="header-text">
+                    <h1>Felix AI</h1>
+                    <p>Умный ассистент с голосовым вводом</p>
+                </div>
+            </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('history')">📜 История</button>
-            <button class="tab" onclick="showTab('stats')">📊 Статистика</button>
-            <button class="tab" onclick="showTab('organize')">📝 Организация</button>
-            <button class="tab" onclick="showTab('settings')">⚙️ Настройки</button>
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="history">📜 История</button>
+            <button class="nav-tab" data-tab="stats">📊 Статистика</button>
+            <button class="nav-tab" data-tab="features">✨ Функции</button>
+            <button class="nav-tab" data-tab="settings">⚙️ Настройки</button>
         </div>
 
         <!-- History Tab -->
         <div id="history" class="content active">
-            <div id="historyContent" class="loading">Загрузка истории</div>
+            <div id="historyContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка истории...</p>
+                </div>
+            </div>
         </div>
 
         <!-- Stats Tab -->
         <div id="stats" class="content">
-            <div id="statsContent" class="loading">Загрузка статистики</div>
+            <div id="statsContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка статистики...</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Organize Tab -->
-        <div id="organize" class="content">
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">📝 Организация текста</h3>
-                <p style="opacity: 0.9; margin-bottom: 16px; line-height: 1.5;">
-                    Отправьте боту команду <code style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">/organize</code> с текстом, и AI структурирует его для вас.
-                </p>
-                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                    <strong>Пример:</strong><br>
-                    <code style="font-size: 13px;">/organize Купить молоко яйца хлеб позвонить врачу записаться на стрижку</code>
+        <!-- Features Tab -->
+        <div id="features" class="content">
+            <div class="feature-card">
+                <div class="feature-icon">🎤</div>
+                <div class="feature-title">Голосовые сообщения</div>
+                <div class="feature-desc">
+                    Отправьте голосовое сообщение боту - оно будет автоматически распознано через Groq Whisper Large v3 и обработано AI.
                 </div>
-                <button class="button" onclick="openBot()">Открыть бота</button>
+                <button class="btn btn-primary" onclick="openBot()">
+                    Попробовать
+                </button>
             </div>
-            
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">🎤 Голосовые сообщения</h3>
-                <p style="opacity: 0.9; line-height: 1.5;">
-                    Отправьте голосовое сообщение боту - оно будет автоматически распознано и обработано AI.
-                </p>
+
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <div class="feature-title">Организация текста</div>
+                <div class="feature-desc">
+                    Используйте команду для структурирования любого текста. AI создаст списки, категории и выделит ключевые моменты.
+                </div>
+                <div class="code-block">/organize Купить молоко яйца хлеб позвонить врачу</div>
+                <button class="btn btn-primary" onclick="openBot()">
+                    Попробовать
+                </button>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <div class="feature-title">Контекстные диалоги</div>
+                <div class="feature-desc">
+                    Бот помнит последние 10 сообщений и ведет естественный диалог с учетом контекста разговора.
+                </div>
+                <button class="btn btn-primary" onclick="openBot()">
+                    Начать диалог
+                </button>
             </div>
         </div>
 
         <!-- Settings Tab -->
         <div id="settings" class="content">
-            <div class="setting-item">
-                <span class="setting-label">🌙 Темная тема</span>
-                <div class="toggle active" id="themeToggle" onclick="toggleTheme()"></div>
+            <div class="card">
+                <div class="card-title">⚙️ Настройки</div>
+                
+                <div class="setting-item">
+                    <span class="setting-label">🔔 Уведомления</span>
+                    <div class="toggle active" onclick="toggleSetting(this)"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <span class="setting-label">💾 Сохранять историю</span>
+                    <div class="toggle active" onclick="toggleSetting(this)"></div>
+                </div>
             </div>
-            <div class="setting-item">
-                <span class="setting-label">🔔 Уведомления</span>
-                <div class="toggle active" id="notifToggle" onclick="toggleNotifications()"></div>
+
+            <div class="card">
+                <div class="card-title">🗂 Управление данными</div>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    📥 Экспорт данных
+                </button>
+                <button class="btn btn-danger" onclick="clearHistory()">
+                    🗑 Очистить историю
+                </button>
             </div>
-            <div class="setting-item">
-                <span class="setting-label">💾 Сохранять историю</span>
-                <div class="toggle active" id="historyToggle" onclick="toggleHistory()"></div>
-            </div>
-            
-            <button class="button" onclick="exportData()">📥 Экспорт данных</button>
-            <button class="button secondary" onclick="clearHistory()">🗑 Очистить историю</button>
-            <button class="button secondary" onclick="sendFeedback()">💬 Обратная связь</button>
-            
+
             <div class="info-card">
                 <div class="info-row">
                     <span class="info-label">Версия</span>
-                    <span class="info-value">3.0.0</span>
+                    <span class="info-value">3.1.0</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">AI Модель</span>
@@ -381,79 +514,132 @@
                     <span class="info-label">Голосовой ввод</span>
                     <span class="info-value">Whisper Large v3</span>
                 </div>
+                <div class="info-row">
+                    <span class="info-label">База данных</span>
+                    <span class="info-value">PostgreSQL</span>
+                </div>
             </div>
+
+            <button class="btn btn-secondary" onclick="sendFeedback()" style="margin-top: 16px;">
+                💬 Обратная связь
+            </button>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        // Initialize Telegram WebApp
+        let tg;
+        try {
+            tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            console.log('Telegram WebApp initialized');
+        } catch (e) {
+            console.error('Telegram WebApp init error:', e);
+        }
 
-        const user = tg.initDataUnsafe?.user;
-        const userId = user?.id;
+        // Get user data
+        const user = tg?.initDataUnsafe?.user;
+        const userId = user?.id || 'demo';
+        console.log('User ID:', userId);
+
+        // API base URL
         const API_URL = 'https://felix-black.vercel.app/api';
 
+        // Tab switching
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                showTab(tabName);
+            });
+        });
+
         function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            // Update tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
-            event.target.classList.add('active');
+            // Update content
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             
+            // Load data
             if (tabName === 'history') loadHistory();
             if (tabName === 'stats') loadStats();
         }
 
+        // Load history
         async function loadHistory() {
             const container = document.getElementById('historyContent');
-            container.innerHTML = '<div class="loading">Загрузка истории</div>';
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка истории...</p>
+                </div>
+            `;
             
             try {
                 const response = await fetch(`${API_URL}/history?userId=${userId}`);
                 const data = await response.json();
                 
-                if (data.messages && data.messages.length > 0) {
-                    container.innerHTML = data.messages.map(msg => `
-                        <div class="message ${msg.role}">
-                            <div class="message-content">${escapeHtml(msg.content)}</div>
-                            <div class="message-time">${new Date(msg.created_at).toLocaleString('ru-RU', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}</div>
+                console.log('History data:', data);
+                
+                if (data.ok && data.messages && data.messages.length > 0) {
+                    container.innerHTML = `
+                        <div class="messages-container">
+                            ${data.messages.map(msg => `
+                                <div class="message ${msg.role}">
+                                    <div class="message-content">${escapeHtml(msg.content)}</div>
+                                    <div class="message-time">${formatDate(msg.created_at)}</div>
+                                </div>
+                            `).join('')}
                         </div>
-                    `).join('');
+                    `;
                 } else {
                     container.innerHTML = `
                         <div class="empty">
                             <div class="empty-icon">💬</div>
                             <p>История диалогов пуста</p>
-                            <p style="opacity: 0.7; margin-top: 8px; font-size: 14px;">Начните общение с ботом</p>
+                            <p style="margin-top: 8px; font-size: 14px;">Начните общение с ботом</p>
+                            <button class="btn btn-primary" onclick="openBot()" style="margin-top: 20px; max-width: 200px; margin-left: auto; margin-right: auto;">
+                                Открыть бота
+                            </button>
                         </div>
                     `;
                 }
             } catch (error) {
+                console.error('History load error:', error);
                 container.innerHTML = `
                     <div class="empty">
                         <div class="empty-icon">⚠️</div>
-                        <p>Ошибка загрузки</p>
+                        <p>Ошибка загрузки истории</p>
+                        <p style="margin-top: 8px; font-size: 14px;">${error.message}</p>
+                        <button class="btn btn-secondary" onclick="loadHistory()" style="margin-top: 20px; max-width: 200px; margin-left: auto; margin-right: auto;">
+                            Повторить
+                        </button>
                     </div>
                 `;
             }
         }
 
+        // Load stats
         async function loadStats() {
             const container = document.getElementById('statsContent');
-            container.innerHTML = '<div class="loading">Загрузка статистики</div>';
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Загрузка статистики...</p>
+                </div>
+            `;
             
             try {
                 const response = await fetch(`${API_URL}/stats?userId=${userId}`);
                 const data = await response.json();
                 
+                console.log('Stats data:', data);
+                
                 container.innerHTML = `
-                    <div class="stat-grid">
+                    <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value">${data.total_messages || 0}</div>
                             <div class="stat-label">Всего сообщений</div>
@@ -474,94 +660,131 @@
                     <div class="info-card">
                         <div class="info-row">
                             <span class="info-label">Первое сообщение</span>
-                            <span class="info-value">${data.first_message_at ? new Date(data.first_message_at).toLocaleDateString('ru-RU') : 'Нет данных'}</span>
+                            <span class="info-value">${data.first_message_at ? formatDate(data.first_message_at) : 'Нет данных'}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Последнее сообщение</span>
-                            <span class="info-value">${data.last_message_at ? new Date(data.last_message_at).toLocaleDateString('ru-RU') : 'Нет данных'}</span>
+                            <span class="info-value">${data.last_message_at ? formatDate(data.last_message_at) : 'Нет данных'}</span>
                         </div>
                     </div>
                 `;
             } catch (error) {
+                console.error('Stats load error:', error);
                 container.innerHTML = `
                     <div class="empty">
                         <div class="empty-icon">⚠️</div>
-                        <p>Ошибка загрузки</p>
+                        <p>Ошибка загрузки статистики</p>
+                        <p style="margin-top: 8px; font-size: 14px;">${error.message}</p>
+                        <button class="btn btn-secondary" onclick="loadStats()" style="margin-top: 20px; max-width: 200px; margin-left: auto; margin-right: auto;">
+                            Повторить
+                        </button>
                     </div>
                 `;
             }
         }
 
+        // Helper functions
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        function toggleTheme() {
-            document.getElementById('themeToggle').classList.toggle('active');
-        }
-
-        function toggleNotifications() {
-            document.getElementById('notifToggle').classList.toggle('active');
-        }
-
-        function toggleHistory() {
-            document.getElementById('historyToggle').classList.toggle('active');
-        }
-
-        async function exportData() {
-            tg.showPopup({
-                title: 'Экспорт данных',
-                message: 'Выберите формат экспорта',
-                buttons: [
-                    {id: 'txt', type: 'default', text: 'TXT'},
-                    {id: 'json', type: 'default', text: 'JSON'},
-                    {type: 'cancel'}
-                ]
-            }, async (buttonId) => {
-                if (buttonId && buttonId !== 'cancel') {
-                    tg.showAlert('Экспорт будет доступен в следующей версии');
-                }
+        function formatDate(dateString) {
+            if (!dateString) return 'Нет данных';
+            const date = new Date(dateString);
+            return date.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
-        function clearHistory() {
-            tg.showConfirm('Вы уверены что хотите очистить всю историю?', async (confirmed) => {
-                if (confirmed) {
-                    try {
-                        await fetch(`${API_URL}/clear?userId=${userId}`, { method: 'POST' });
-                        tg.showAlert('История очищена');
-                        loadHistory();
-                        loadStats();
-                    } catch (error) {
-                        tg.showAlert('Ошибка при очистке');
-                    }
-                }
-            });
-        }
-
-        function sendFeedback() {
-            tg.showPopup({
-                title: 'Обратная связь',
-                message: 'Оцените работу бота',
-                buttons: [
-                    {id: '5', type: 'default', text: '⭐⭐⭐⭐⭐'},
-                    {id: '4', type: 'default', text: '⭐⭐⭐⭐'},
-                    {id: '3', type: 'default', text: '⭐⭐⭐'},
-                    {type: 'cancel'}
-                ]
-            }, (buttonId) => {
-                if (buttonId && buttonId !== 'cancel') {
-                    tg.showAlert('Спасибо за отзыв! ❤️');
-                }
-            });
+        function toggleSetting(element) {
+            element.classList.toggle('active');
         }
 
         function openBot() {
-            tg.close();
+            if (tg) {
+                tg.close();
+            } else {
+                window.open('https://t.me/fel12x_bot', '_blank');
+            }
         }
 
+        async function exportData() {
+            if (tg && tg.showPopup) {
+                tg.showPopup({
+                    title: 'Экспорт данных',
+                    message: 'Выберите формат экспорта',
+                    buttons: [
+                        {id: 'txt', type: 'default', text: 'TXT'},
+                        {id: 'json', type: 'default', text: 'JSON'},
+                        {type: 'cancel'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId && buttonId !== 'cancel') {
+                        tg.showAlert('Экспорт будет доступен в следующей версии');
+                    }
+                });
+            } else {
+                alert('Экспорт будет доступен в следующей версии');
+            }
+        }
+
+        async function clearHistory() {
+            const confirmed = tg && tg.showConfirm 
+                ? await new Promise(resolve => {
+                    tg.showConfirm('Вы уверены что хотите очистить всю историю?', resolve);
+                })
+                : confirm('Вы уверены что хотите очистить всю историю?');
+            
+            if (confirmed) {
+                try {
+                    await fetch(`${API_URL}/clear?userId=${userId}`, { method: 'POST' });
+                    if (tg && tg.showAlert) {
+                        tg.showAlert('История очищена');
+                    } else {
+                        alert('История очищена');
+                    }
+                    loadHistory();
+                    loadStats();
+                } catch (error) {
+                    console.error('Clear error:', error);
+                    if (tg && tg.showAlert) {
+                        tg.showAlert('Ошибка при очистке');
+                    } else {
+                        alert('Ошибка при очистке');
+                    }
+                }
+            }
+        }
+
+        function sendFeedback() {
+            if (tg && tg.showPopup) {
+                tg.showPopup({
+                    title: 'Обратная связь',
+                    message: 'Оцените работу бота',
+                    buttons: [
+                        {id: '5', type: 'default', text: '⭐⭐⭐⭐⭐'},
+                        {id: '4', type: 'default', text: '⭐⭐⭐⭐'},
+                        {id: '3', type: 'default', text: '⭐⭐⭐'},
+                        {type: 'cancel'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId && buttonId !== 'cancel') {
+                        tg.showAlert('Спасибо за отзыв! ❤️');
+                    }
+                });
+            } else {
+                alert('Спасибо за интерес! Оцените бота в Telegram.');
+            }
+        }
+
+        // Load initial data
+        console.log('Loading initial data...');
         loadHistory();
     </script>
 </body>
