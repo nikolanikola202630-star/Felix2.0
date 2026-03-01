@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Felix Bot v6.0 - Voice & Learning</title>
+    <title>Felix Bot v6.0 - Elite Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module">
         import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@1/dist/index.mjs';
@@ -16,9 +16,18 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #ffd700, #ff6b6b);
+            --success-gradient: linear-gradient(135deg, #4caf50, #8bc34a);
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             color: #fff;
             min-height: 100vh;
             padding: 0;
@@ -44,6 +53,81 @@
         @keyframes backgroundMove {
             0%, 100% { transform: translate(0, 0); }
             50% { transform: translate(20px, -20px); }
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #loadingScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            font-size: 80px;
+            animation: logoFloat 2s ease-in-out infinite;
+            filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.5));
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(-5deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .loading-text {
+            margin-top: 30px;
+            font-size: 24px;
+            font-weight: 700;
+            animation: textPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: var(--secondary-gradient);
+            border-radius: 10px;
+            animation: loadingProgress 2s ease-in-out infinite;
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; transform: translateX(0); }
+            50% { width: 70%; }
+            100% { width: 100%; transform: translateX(0); }
+        }
+
+        .loading-version {
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.7;
         }
 
         .container {
@@ -1186,6 +1270,16 @@
 </head>
 
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-logo">🤖</div>
+        <div class="loading-text">Felix Bot</div>
+        <div class="loading-bar">
+            <div class="loading-bar-fill"></div>
+        </div>
+        <div class="loading-version">v6.0 Elite Edition</div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🤖 Felix Bot <span class="version">v6.0</span></h1>
@@ -1694,6 +1788,16 @@
         // Get user data
         const user = tg.initDataUnsafe?.user || {};
         const API_URL = 'https://felix-black.vercel.app/api/miniapp';
+        const COURSES_API = 'https://felix-black.vercel.app/api/courses';
+        const COMMUNITY_API = 'https://felix-black.vercel.app/api/community';
+        const LEARNING_API = 'https://felix-black.vercel.app/api/learning';
+        
+        // Hide loading screen after initialization
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1500);
+        });
         
         // Update profile
         if (user.id) {
@@ -1767,12 +1871,15 @@
 
         async function loadCourses() {
             try {
-                const response = await fetch('https://felix-black.vercel.app/api/admin?action=getCourses');
+                // Try new Courses API first
+                const response = await fetch(`${COURSES_API}?action=getCourses&userId=${user.id || 'demo'}`);
                 const data = await response.json();
                 
-                if (data.success && data.courses.length > 0) {
-                    const coursesHtml = `<div class="courses-grid">` + data.courses.map(course => `
-                        <div class="course-card ${course.active ? 'active' : ''}" onclick="openCourse('${course.id}')">
+                if (data.success && data.courses && data.courses.length > 0) {
+                    const coursesHtml = `<div class="courses-grid">` + data.courses.map(course => {
+                        const progress = course.userProgress || { progress: 0, started: false };
+                        return `
+                        <div class="course-card ${progress.started ? 'active' : ''}" onclick="openCourseDetail('${course.id}')">
                             <div class="course-icon">${course.icon}</div>
                             <div class="course-header">
                                 <div class="course-title">${course.title}</div>
@@ -1780,9 +1887,9 @@
                             </div>
                             <div class="course-progress-wrapper">
                                 <div class="course-progress-bar">
-                                    <div class="course-progress-fill" style="width: ${course.progress || 0}%"></div>
+                                    <div class="course-progress-fill" style="width: ${progress.progress || 0}%"></div>
                                 </div>
-                                <div class="course-progress-text">${course.progress || 0}%</div>
+                                <div class="course-progress-text">${progress.progress || 0}%</div>
                             </div>
                             <div class="course-meta">
                                 <div class="course-level level-${course.level}">${course.level}</div>
@@ -1792,39 +1899,44 @@
                                 </div>
                             </div>
                         </div>
-                    `).join('') + `</div>`;
+                    `}).join('') + `</div>`;
                     
                     document.getElementById('coursesList').innerHTML = coursesHtml;
-                } else {
-                    // Fallback to academy.json
-                    const response2 = await fetch('/miniapp/academy.json');
-                    const data2 = await response2.json();
-                    
-                    const coursesHtml = `<div class="courses-grid">` + data2.courses.map(course => `
-                        <div class="course-card" onclick="openCourse('${course.id}')">
-                            <div class="course-icon">${course.icon}</div>
-                            <div class="course-header">
-                                <div class="course-title">${course.title}</div>
-                                <div class="course-desc">${course.description}</div>
-                            </div>
-                            <div class="course-progress-wrapper">
-                                <div class="course-progress-bar">
-                                    <div class="course-progress-fill" style="width: 0%"></div>
-                                </div>
-                                <div class="course-progress-text">0%</div>
-                            </div>
-                            <div class="course-meta">
-                                <div class="course-level level-${course.level}">${course.level}</div>
-                                <div class="course-info">
-                                    <div class="course-info-item">⏱️ ${course.duration}</div>
-                                    <div class="course-info-item">📚 ${course.lessons.length}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('') + `</div>`;
-                    
-                    document.getElementById('coursesList').innerHTML = coursesHtml;
+                    return;
                 }
+            } catch (error) {
+                console.error('Failed to load from Courses API:', error);
+            }
+            
+            // Fallback to courses-full.json
+            try {
+                const response = await fetch('/miniapp/courses-full.json');
+                const data = await response.json();
+                
+                const coursesHtml = `<div class="courses-grid">` + data.courses.map(course => `
+                    <div class="course-card" onclick="openCourseDetail('${course.id}')">
+                        <div class="course-icon">${course.icon}</div>
+                        <div class="course-header">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-desc">${course.description}</div>
+                        </div>
+                        <div class="course-progress-wrapper">
+                            <div class="course-progress-bar">
+                                <div class="course-progress-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="course-progress-text">0%</div>
+                        </div>
+                        <div class="course-meta">
+                            <div class="course-level level-${course.level}">${course.level}</div>
+                            <div class="course-info">
+                                <div class="course-info-item">⏱️ ${course.duration}</div>
+                                <div class="course-info-item">📚 ${course.lessons.length}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') + `</div>`;
+                
+                document.getElementById('coursesList').innerHTML = coursesHtml;
             } catch (error) {
                 console.error('Failed to load courses:', error);
                 document.getElementById('coursesList').innerHTML = 
@@ -1833,6 +1945,37 @@
         }
 
         async function loadPartners() {
+            try {
+                // Try partners-full.json first
+                const response = await fetch('/miniapp/partners-full.json');
+                const data = await response.json();
+                
+                if (data.partners && data.partners.length > 0) {
+                    const partnersHtml = data.partners.map(partner => `
+                        <div class="partner-card" onclick="openPartnerDetail('${partner.id}')">
+                            <div class="partner-header">
+                                <div class="partner-logo">${partner.logo}</div>
+                                <div class="partner-info">
+                                    <div class="partner-name">
+                                        ${partner.name}
+                                        ${partner.verified ? '<span class="badge">✓ Verified</span>' : ''}
+                                        ${partner.featured ? '<span class="badge featured">TOP</span>' : ''}
+                                    </div>
+                                    <div class="partner-desc">${partner.description}</div>
+                                    ${partner.rating ? `<div style="font-size: 12px; margin-top: 4px;">⭐ ${partner.rating}/5.0 • ${partner.clients}+ клиентов</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('partnersList').innerHTML = partnersHtml;
+                    return;
+                }
+            } catch (error) {
+                console.error('Failed to load from partners-full.json:', error);
+            }
+            
+            // Fallback to admin API
             try {
                 const response = await fetch('https://felix-black.vercel.app/api/admin?action=getPartners');
                 const data = await response.json();
@@ -1854,32 +1997,61 @@
                     `).join('');
                     
                     document.getElementById('partnersList').innerHTML = partnersHtml;
-                } else {
-                    // Fallback to partners.json
-                    const response2 = await fetch('/miniapp/partners.json');
-                    const data2 = await response2.json();
-                    
-                    const partnersHtml = data2.partners.map(partner => `
-                        <div class="partner-card" onclick="openPartner('${partner.url}')">
-                            <div class="partner-header">
-                                <div class="partner-logo">${partner.logo}</div>
-                                <div class="partner-info">
-                                    <div class="partner-name">
-                                        ${partner.name}
-                                        ${partner.featured ? '<span class="badge featured">TOP</span>' : ''}
-                                    </div>
-                                    <div class="partner-desc">${partner.description}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('partnersList').innerHTML = partnersHtml;
                 }
             } catch (error) {
                 console.error('Failed to load partners:', error);
                 document.getElementById('partnersList').innerHTML = 
                     '<p style="text-align: center; opacity: 0.7;">Ошибка загрузки партнеров</p>';
+            }
+        }
+
+        async function openPartnerDetail(partnerId) {
+            try {
+                const response = await fetch('/miniapp/partners-full.json');
+                const data = await response.json();
+                const partner = data.partners.find(p => p.id === partnerId);
+                
+                if (!partner) {
+                    tg.showAlert('Партнер не найден');
+                    return;
+                }
+                
+                let message = `${partner.logo} ${partner.name}\n\n`;
+                message += `${partner.description}\n\n`;
+                
+                if (partner.services && partner.services.length > 0) {
+                    message += `📋 Услуги:\n${partner.services.map(s => `• ${s}`).join('\n')}\n\n`;
+                }
+                
+                if (partner.benefits && partner.benefits.length > 0) {
+                    message += `✨ Преимущества:\n${partner.benefits.map(b => `• ${b}`).join('\n')}\n\n`;
+                }
+                
+                if (partner.rating) {
+                    message += `⭐ Рейтинг: ${partner.rating}/5.0\n`;
+                    message += `👥 Клиентов: ${partner.clients}+\n\n`;
+                }
+                
+                if (partner.contact) {
+                    message += `📞 Контакты:\n`;
+                    if (partner.contact.telegram) message += `Telegram: @${partner.contact.telegram}\n`;
+                    if (partner.contact.website) message += `Сайт: ${partner.contact.website}\n`;
+                }
+                
+                tg.showAlert(message);
+                
+                if (partner.contact && partner.contact.website) {
+                    setTimeout(() => {
+                        if (confirm('Открыть сайт партнера?')) {
+                            tg.openLink(partner.contact.website);
+                        }
+                    }, 500);
+                }
+                
+                tg.HapticFeedback.impactOccurred('medium');
+            } catch (error) {
+                console.error('Failed to load partner details:', error);
+                tg.showAlert('Ошибка загрузки информации о партнере');
             }
         }
 
@@ -1907,50 +2079,164 @@
         }
 
         function openCourse(courseId) {
-            // Загрузка данных курса
-            fetch(`https://felix-black.vercel.app/api/admin?action=getCourses`)
-                .then(res => res.json())
-                .then(data => {
-                    const course = data.courses.find(c => c.id === courseId);
-                    if (!course) {
-                        tg.showAlert('Курс не найден');
-                        return;
-                    }
-                    
-                    document.getElementById('courseModalTitle').innerHTML = `${course.icon} ${course.title}`;
-                    
-                    const lessonsHtml = course.lessons.map((lesson, index) => `
-                        <div class="lesson-item" onclick="openLesson('${courseId}', ${index})">
-                            <span class="lesson-number">${index + 1}</span>
-                            <span>${lesson.title}</span>
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('courseModalBody').innerHTML = `
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">${course.description}</div>
-                            <div style="display: flex; gap: 12px; font-size: 12px; opacity: 0.8;">
-                                <span>⏱️ ${course.duration}</span>
-                                <span>📚 ${course.lessons.length} уроков</span>
-                                <span class="course-level level-${course.level}">${course.level}</span>
+            openCourseDetail(courseId);
+        }
+
+        async function openCourseDetail(courseId) {
+            try {
+                // Load course from new API
+                const response = await fetch(`${COURSES_API}?action=getCourse&userId=${user.id || 'demo'}&courseId=${courseId}`);
+                const data = await response.json();
+                
+                if (!data.success || !data.course) {
+                    tg.showAlert('Курс не найден');
+                    return;
+                }
+                
+                const course = data.course;
+                const progress = data.progress || { started: false, lessonsCompleted: [] };
+                
+                document.getElementById('courseModalTitle').innerHTML = `${course.icon} ${course.title}`;
+                
+                const lessonsHtml = course.lessons.map((lesson, index) => {
+                    const completed = progress.lessonsCompleted.includes(lesson.id);
+                    return `
+                    <div class="lesson-item ${completed ? 'completed' : ''}" onclick="openLessonDetail('${courseId}', '${lesson.id}')">
+                        <span class="lesson-number">${completed ? '✓' : index + 1}</span>
+                        <div style="flex: 1;">
+                            <div>${lesson.title}</div>
+                            <div style="font-size: 11px; opacity: 0.7; margin-top: 2px;">
+                                ${lesson.type === 'video' ? '🎥 Видео' : 
+                                  lesson.type === 'interactive' ? '🎮 Интерактив' :
+                                  lesson.type === 'quiz' ? '📝 Квиз' : '📖 Текст'} • ${lesson.duration}
                             </div>
                         </div>
-                        <div style="margin-top: 20px;">
-                            <div style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">📖 Уроки</div>
-                            ${lessonsHtml}
+                    </div>
+                `}).join('');
+                
+                document.getElementById('courseModalBody').innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">${course.description}</div>
+                        <div style="display: flex; gap: 12px; font-size: 12px; opacity: 0.8; flex-wrap: wrap;">
+                            <span>⏱️ ${course.duration}</span>
+                            <span>📚 ${course.lessons.length} уроков</span>
+                            <span class="course-level level-${course.level}">${course.level}</span>
+                            ${progress.started ? `<span style="color: #4caf50;">✓ Начат</span>` : ''}
                         </div>
-                        <button class="btn btn-primary" onclick="startCourse('${courseId}')" style="margin-top: 16px;">
-                            🚀 Начать курс
-                        </button>
-                    `;
-                    
-                    document.getElementById('courseModal').classList.add('active');
-                    tg.HapticFeedback.impactOccurred('medium');
-                })
-                .catch(error => {
-                    console.error('Failed to load course:', error);
-                    tg.showAlert('Ошибка загрузки курса');
+                        ${progress.started ? `
+                        <div style="margin-top: 12px;">
+                            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 4px;">Прогресс: ${progress.progress}%</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.progress}%"></div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">📖 Уроки</div>
+                        ${lessonsHtml}
+                    </div>
+                    ${!progress.started ? `
+                    <button class="btn btn-primary" onclick="startCourseNew('${courseId}')" style="margin-top: 16px;">
+                        🚀 Начать курс
+                    </button>
+                    ` : ''}
+                `;
+                
+                document.getElementById('courseModal').classList.add('active');
+                tg.HapticFeedback.impactOccurred('medium');
+            } catch (error) {
+                console.error('Failed to load course:', error);
+                tg.showAlert('Ошибка загрузки курса');
+            }
+        }
+
+        async function startCourseNew(courseId) {
+            try {
+                const response = await fetch(COURSES_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'startCourse',
+                        userId: user.id || 'demo',
+                        courseId
+                    })
                 });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    tg.showAlert('🚀 Курс начат!\n\nВы можете проходить уроки в любом порядке. Прогресс сохраняется автоматически.');
+                    closeCourseModal();
+                    loadCourses(); // Reload courses to show progress
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    tg.showAlert('Ошибка: ' + (data.error || 'Не удалось начать курс'));
+                }
+            } catch (error) {
+                console.error('Failed to start course:', error);
+                tg.showAlert('Ошибка начала курса');
+            }
+        }
+
+        async function openLessonDetail(courseId, lessonId) {
+            try {
+                const response = await fetch(`${COURSES_API}?action=getCourse&userId=${user.id || 'demo'}&courseId=${courseId}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    tg.showAlert('Ошибка загрузки урока');
+                    return;
+                }
+                
+                const lesson = data.course.lessons.find(l => l.id === lessonId);
+                if (!lesson) {
+                    tg.showAlert('Урок не найден');
+                    return;
+                }
+                
+                let content = `📖 ${lesson.title}\n\n`;
+                content += `${lesson.content}\n\n`;
+                content += `⏱️ ${lesson.duration}`;
+                
+                if (lesson.type === 'quiz' && lesson.quiz) {
+                    content += `\n\n📝 Квиз: ${lesson.quiz.questions.length} вопросов`;
+                }
+                
+                tg.showAlert(content);
+                
+                // Mark as completed
+                await completeLessonNew(courseId, lessonId);
+                
+                tg.HapticFeedback.impactOccurred('medium');
+            } catch (error) {
+                console.error('Failed to load lesson:', error);
+                tg.showAlert('Ошибка загрузки урока');
+            }
+        }
+
+        async function completeLessonNew(courseId, lessonId) {
+            try {
+                const response = await fetch(COURSES_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'completeLesson',
+                        userId: user.id || 'demo',
+                        courseId,
+                        lessonId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Reload course detail to show updated progress
+                    setTimeout(() => openCourseDetail(courseId), 500);
+                }
+            } catch (error) {
+                console.error('Failed to complete lesson:', error);
+            }
         }
 
         function closeCourseModal() {

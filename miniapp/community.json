@@ -1,0 +1,246 @@
+{
+  "community": {
+    "title": "Felix Community",
+    "description": "Присоединяйтесь к сообществу пользователей Felix Bot",
+    "members": 15000,
+    "activeToday": 3500,
+    "channels": [
+      {
+        "id": "main_channel",
+        "name": "Felix News",
+        "description": "Официальный канал с новостями и обновлениями",
+        "icon": "📢",
+        "url": "https://t.me/felix_news",
+        "members": 12000,
+        "type": "channel",
+        "verified": true,
+        "content": [
+          "Новые функции",
+          "Обновления",
+          "Советы и трюки",
+          "Кейсы пользователей"
+        ]
+      },
+      {
+        "id": "main_chat",
+        "name": "Felix Chat",
+        "description": "Общий чат пользователей Felix",
+        "icon": "💬",
+        "url": "https://t.me/felix_chat",
+        "members": 8500,
+        "type": "group",
+        "verified": true,
+        "rules": [
+          "Будьте вежливы",
+          "Не спамьте",
+          "Помогайте новичкам",
+          "Делитесь опытом"
+        ]
+      },
+      {
+        "id": "ai_chat",
+        "name": "AI Enthusiasts",
+        "description": "Обсуждение AI и нейросетей",
+        "icon": "🧠",
+        "url": "https://t.me/felix_ai",
+        "members": 5200,
+        "type": "group",
+        "verified": true,
+        "topics": [
+          "ChatGPT",
+          "Midjourney",
+          "Stable Diffusion",
+          "AI новости"
+        ]
+      },
+      {
+        "id": "dev_chat",
+        "name": "Felix Developers",
+        "description": "Для разработчиков ботов",
+        "icon": "💻",
+        "url": "https://t.me/felix_dev",
+        "members": 2100,
+        "type": "group",
+        "verified": true,
+        "topics": [
+          "API интеграции",
+          "Разработка ботов",
+          "Технические вопросы",
+          "Open source"
+        ]
+      },
+      {
+        "id": "business_chat",
+        "name": "Felix for Business",
+        "description": "Использование Felix в бизнесе",
+        "icon": "💼",
+        "url": "https://t.me/felix_business",
+        "members": 1800,
+        "type": "group",
+        "verified": true,
+        "topics": [
+          "Автоматизация",
+          "Продуктивность",
+          "Кейсы",
+          "Лучшие практики"
+        ]
+      }
+    ],
+    "events": [
+      {
+        "id": "event_webinar_1",
+        "title": "Мастер-класс: AI для бизнеса",
+        "description": "Узнайте как использовать AI для автоматизации бизнес-процессов",
+        "date": "2026-03-15T18:00:00Z",
+        "duration": "2 часа",
+        "speaker": {
+          "name": "Иван Петров",
+          "title": "AI эксперт",
+          "photo": "https://example.com/speaker1.jpg"
+        },
+        "type": "webinar",
+        "free": true,
+        "registrationUrl": "https://example.com/register",
+        "topics": [
+          "Автоматизация с AI",
+          "Кейсы внедрения",
+          "Q&A сессия"
+        ]
+      },
+      {
+        "id": "event_contest_1",
+        "title": "Конкурс: Лучший кейс использования Felix",
+        "description": "Поделитесь своим опытом и выиграйте призы",
+        "startDate": "2026-03-10",
+        "endDate": "2026-03-31",
+        "prizes": [
+          "1 место: Годовая подписка Pro",
+          "2 место: 6 месяцев Pro",
+          "3 место: 3 месяца Pro"
+        ],
+        "type": "contest",
+        "participationUrl": "https://example.com/contest"
+      },
+      {
+        "id": "event_meetup_1",
+        "title": "Felix Meetup Moscow",
+        "description": "Офлайн встреча пользователей Felix в Москве",
+        "date": "2026-04-20T15:00:00Z",
+        "location": "Москва, ул. Примерная, 1",
+        "attendees": 50,
+        "maxAttendees": 100,
+        "type": "meetup",
+        "free": true,
+        "registrationUrl": "https://example.com/meetup",
+        "program": [
+          "15:00 - Регистрация и welcome coffee",
+          "15:30 - Презентация новых функций",
+          "16:30 - Нетворкинг",
+          "17:30 - Q&A с командой Felix"
+        ]
+      }
+    ],
+    "leaderboard": {
+      "title": "Топ пользователей",
+      "description": "Самые активные участники сообщества",
+      "period": "month",
+      "users": [
+        {
+          "rank": 1,
+          "userId": "user_1",
+          "name": "Александр",
+          "avatar": "👨‍💻",
+          "xp": 15000,
+          "level": 8,
+          "achievements": 10,
+          "badge": "🏆"
+        },
+        {
+          "rank": 2,
+          "userId": "user_2",
+          "name": "Мария",
+          "avatar": "👩‍💼",
+          "xp": 12500,
+          "level": 7,
+          "achievements": 9,
+          "badge": "🥈"
+        },
+        {
+          "rank": 3,
+          "userId": "user_3",
+          "name": "Дмитрий",
+          "avatar": "👨‍🎓",
+          "xp": 10200,
+          "level": 7,
+          "achievements": 8,
+          "badge": "🥉"
+        }
+      ]
+    },
+    "resources": [
+      {
+        "id": "resource_guide",
+        "title": "Полное руководство по Felix",
+        "description": "Подробная документация со всеми функциями",
+        "icon": "📚",
+        "url": "https://docs.felix-bot.com",
+        "type": "documentation"
+      },
+      {
+        "id": "resource_video",
+        "title": "Видео-уроки",
+        "description": "Обучающие видео на YouTube",
+        "icon": "🎥",
+        "url": "https://youtube.com/felix-tutorials",
+        "type": "video"
+      },
+      {
+        "id": "resource_blog",
+        "title": "Блог Felix",
+        "description": "Статьи, кейсы и новости",
+        "icon": "✍️",
+        "url": "https://blog.felix-bot.com",
+        "type": "blog"
+      },
+      {
+        "id": "resource_github",
+        "title": "GitHub",
+        "description": "Open source проекты и примеры",
+        "icon": "💻",
+        "url": "https://github.com/felix-bot",
+        "type": "code"
+      }
+    ],
+    "support": {
+      "title": "Поддержка",
+      "channels": [
+        {
+          "name": "Telegram Support",
+          "icon": "💬",
+          "url": "https://t.me/felix_support",
+          "responseTime": "< 2 часов"
+        },
+        {
+          "name": "Email Support",
+          "icon": "📧",
+          "email": "support@felix-bot.com",
+          "responseTime": "< 24 часов"
+        },
+        {
+          "name": "FAQ",
+          "icon": "❓",
+          "url": "/faq",
+          "description": "Ответы на частые вопросы"
+        }
+      ]
+    },
+    "stats": {
+      "totalUsers": 15000,
+      "activeToday": 3500,
+      "messagesTotal": 1500000,
+      "commandsUsed": 500000,
+      "coursesCompleted": 8500,
+      "achievementsUnlocked": 45000
+    }
+  }
+}

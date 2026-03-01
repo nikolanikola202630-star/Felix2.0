@@ -1,0 +1,299 @@
+{
+  "partners": [
+    {
+      "id": "partner_ai_academy",
+      "name": "AI Academy",
+      "description": "Профессиональное обучение работе с искусственным интеллектом",
+      "logo": "🎓",
+      "url": "https://ai-academy.example.com",
+      "category": "education",
+      "featured": true,
+      "verified": true,
+      "rating": 4.9,
+      "students": 5000,
+      "benefits": [
+        "Скидка 20% для пользователей Felix",
+        "Бесплатный пробный период 7 дней",
+        "Сертификат после обучения",
+        "Доступ к закрытому комьюнити"
+      ],
+      "courses": [
+        "Основы Machine Learning",
+        "Prompt Engineering",
+        "AI для бизнеса",
+        "ChatGPT мастер-класс"
+      ],
+      "contact": {
+        "telegram": "@ai_academy_support",
+        "email": "support@ai-academy.com",
+        "website": "https://ai-academy.example.com"
+      }
+    },
+    {
+      "id": "partner_tech_support",
+      "name": "Tech Support Pro",
+      "description": "Техническая поддержка 24/7 для вашего бизнеса",
+      "logo": "🛠️",
+      "url": "https://techsupport.example.com",
+      "category": "support",
+      "featured": true,
+      "verified": true,
+      "rating": 4.8,
+      "clients": 1200,
+      "benefits": [
+        "Первая консультация бесплатно",
+        "Ответ в течение 15 минут",
+        "Русскоязычная поддержка",
+        "Гарантия решения проблемы"
+      ],
+      "services": [
+        "Настройка серверов",
+        "Разработка ботов",
+        "Интеграции API",
+        "Консультации по DevOps"
+      ],
+      "contact": {
+        "telegram": "@techsupport_pro",
+        "email": "help@techsupport.com",
+        "phone": "+7 (999) 123-45-67"
+      }
+    },
+    {
+      "id": "partner_design_studio",
+      "name": "Creative Design Studio",
+      "description": "Профессиональный дизайн для вашего проекта",
+      "logo": "🎨",
+      "url": "https://design-studio.example.com",
+      "category": "services",
+      "featured": false,
+      "verified": true,
+      "rating": 4.7,
+      "projects": 800,
+      "benefits": [
+        "Скидка 15% по промокоду FELIX",
+        "Бесплатная концепция дизайна",
+        "Неограниченные правки",
+        "Исходники в подарок"
+      ],
+      "services": [
+        "Дизайн логотипов",
+        "UI/UX дизайн",
+        "Брендинг",
+        "Иллюстрации"
+      ],
+      "portfolio": [
+        "https://example.com/portfolio1.jpg",
+        "https://example.com/portfolio2.jpg",
+        "https://example.com/portfolio3.jpg"
+      ],
+      "contact": {
+        "telegram": "@creative_design",
+        "email": "hello@design-studio.com",
+        "instagram": "@creative_design_studio"
+      }
+    },
+    {
+      "id": "partner_marketing",
+      "name": "Digital Marketing Hub",
+      "description": "Комплексный digital-маркетинг для роста вашего бизнеса",
+      "logo": "📈",
+      "url": "https://marketing-hub.example.com",
+      "category": "marketing",
+      "featured": true,
+      "verified": true,
+      "rating": 4.9,
+      "clients": 350,
+      "benefits": [
+        "Бесплатный аудит вашего проекта",
+        "Гарантия результата",
+        "Прозрачная отчетность",
+        "Персональный менеджер"
+      ],
+      "services": [
+        "SMM продвижение",
+        "Контекстная реклама",
+        "SEO оптимизация",
+        "Email-маркетинг"
+      ],
+      "cases": [
+        {
+          "client": "E-commerce проект",
+          "result": "+300% продаж за 3 месяца"
+        },
+        {
+          "client": "SaaS стартап",
+          "result": "10,000 новых пользователей"
+        }
+      ],
+      "contact": {
+        "telegram": "@marketing_hub",
+        "email": "info@marketing-hub.com",
+        "website": "https://marketing-hub.example.com"
+      }
+    },
+    {
+      "id": "partner_dev_team",
+      "name": "Dev Team Solutions",
+      "description": "Разработка веб и мобильных приложений под ключ",
+      "logo": "💻",
+      "url": "https://devteam.example.com",
+      "category": "development",
+      "featured": false,
+      "verified": true,
+      "rating": 4.8,
+      "projects": 250,
+      "benefits": [
+        "Бесплатная оценка проекта",
+        "Гибкие условия оплаты",
+        "Поддержка после запуска",
+        "Гарантия качества"
+      ],
+      "technologies": [
+        "React / Next.js",
+        "Node.js / Python",
+        "React Native",
+        "PostgreSQL / MongoDB"
+      ],
+      "services": [
+        "Веб-приложения",
+        "Мобильные приложения",
+        "Telegram боты",
+        "API интеграции"
+      ],
+      "contact": {
+        "telegram": "@devteam_solutions",
+        "email": "contact@devteam.com",
+        "github": "github.com/devteam"
+      }
+    },
+    {
+      "id": "partner_content",
+      "name": "Content Creators Hub",
+      "description": "Создание качественного контента для ваших каналов",
+      "logo": "✍️",
+      "url": "https://content-hub.example.com",
+      "category": "content",
+      "featured": false,
+      "verified": true,
+      "rating": 4.7,
+      "clients": 600,
+      "benefits": [
+        "Первые 3 поста бесплатно",
+        "Уникальность 100%",
+        "SEO-оптимизация",
+        "Быстрая доставка"
+      ],
+      "services": [
+        "Статьи для блога",
+        "Посты для соцсетей",
+        "Email-рассылки",
+        "Сценарии для видео"
+      ],
+      "languages": ["Русский", "Английский", "Украинский"],
+      "contact": {
+        "telegram": "@content_creators",
+        "email": "hello@content-hub.com"
+      }
+    }
+  ],
+  "categories": [
+    {
+      "id": "education",
+      "name": "Образование",
+      "icon": "🎓",
+      "description": "Курсы и обучение"
+    },
+    {
+      "id": "support",
+      "name": "Поддержка",
+      "icon": "🛠️",
+      "description": "Техническая помощь"
+    },
+    {
+      "id": "services",
+      "name": "Услуги",
+      "icon": "🎨",
+      "description": "Дизайн и креатив"
+    },
+    {
+      "id": "marketing",
+      "name": "Маркетинг",
+      "icon": "📈",
+      "description": "Продвижение"
+    },
+    {
+      "id": "development",
+      "name": "Разработка",
+      "icon": "💻",
+      "description": "Веб и мобильные приложения"
+    },
+    {
+      "id": "content",
+      "name": "Контент",
+      "icon": "✍️",
+      "description": "Создание контента"
+    }
+  ],
+  "applicationForm": {
+    "title": "Стать партнером Felix Bot",
+    "description": "Заполните форму и мы свяжемся с вами в течение 24 часов",
+    "fields": [
+      {
+        "id": "company_name",
+        "label": "Название компании",
+        "type": "text",
+        "required": true,
+        "placeholder": "AI Academy"
+      },
+      {
+        "id": "description",
+        "label": "Описание услуг",
+        "type": "textarea",
+        "required": true,
+        "placeholder": "Расскажите о вашей компании и услугах"
+      },
+      {
+        "id": "category",
+        "label": "Категория",
+        "type": "select",
+        "required": true,
+        "options": ["education", "support", "services", "marketing", "development", "content"]
+      },
+      {
+        "id": "website",
+        "label": "Веб-сайт",
+        "type": "url",
+        "required": true,
+        "placeholder": "https://example.com"
+      },
+      {
+        "id": "contact_name",
+        "label": "Контактное лицо",
+        "type": "text",
+        "required": true,
+        "placeholder": "Иван Иванов"
+      },
+      {
+        "id": "telegram",
+        "label": "Telegram",
+        "type": "text",
+        "required": true,
+        "placeholder": "@username"
+      },
+      {
+        "id": "email",
+        "label": "Email",
+        "type": "email",
+        "required": false,
+        "placeholder": "contact@example.com"
+      },
+      {
+        "id": "benefits",
+        "label": "Преимущества для пользователей Felix",
+        "type": "textarea",
+        "required": true,
+        "placeholder": "Скидки, бонусы, специальные условия"
+      }
+    ]
+  }
+}
