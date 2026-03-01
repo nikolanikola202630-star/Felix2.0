@@ -1,50 +1,226 @@
-# Felix - Telegram Smart Assistant Bot
+# 🤖 Felix Bot v3.0 - AI Ассистент
 
-Умный ассистент для Telegram с поддержкой голосовых заметок и AI-диалогов.
+Умный Telegram бот с голосовым вводом, организацией текста и красивым Mini App интерфейсом.
 
-## Возможности
+## ✨ Возможности
 
-- 🎤 Транскрибация голосовых сообщений (Groq Whisper)
-- 📝 Умные саммари и анализ текста
-- 💬 AI-диалоги с контекстом (Groq LLaMA 3.3)
-- 📄 Экспорт в PDF, DOCX, Google Docs, Google Sheets
-- 🔄 Автономные обновления без перезапуска
+### 🎤 Голосовой ввод
+- Распознавание голосовых сообщений через Groq Whisper Large v3
+- Поддержка русского языка
+- Автоматическая обработка и ответ AI
 
-## Технологии
+### 💬 AI Диалоги
+- Ответы на вопросы через LLaMA 3.3 70B
+- Контекстная память (последние 10 сообщений)
+- Естественное общение на русском языке
 
-- **Backend**: Python + Vercel Serverless
-- **Database**: PostgreSQL (Supabase) + Prisma
-- **AI**: Groq API (Whisper + LLaMA 3.3)
-- **Cache**: Redis (Upstash)
-- **Frontend**: Telegram Mini App (React)
+### 📝 Организация текста
+- Команда `/organize` для структурирования текста
+- Автоматическое создание списков и категорий
+- Выделение ключевых моментов
 
-## Деплой
+### 📱 Mini App
+- Красивый интерфейс с градиентным дизайном
+- История всех диалогов
+- Статистика использования
+- Экспорт данных (в разработке)
+- Настройки и управление
 
-Проект автоматически деплоится на Vercel при push в main ветку.
+## 🚀 Быстрый старт
 
-### Переменные окружения
-
-```env
-TELEGRAM_BOT_TOKEN=your_token
-DATABASE_URL=postgresql://...
-GROQ_API_KEY=your_key
-REDIS_URL=redis://...
+### 1. Настройка базы данных
+```sql
+-- Выполните в Supabase SQL Editor
+-- Файл: database/quick-setup.sql
 ```
 
-## Разработка
+### 2. Переменные окружения
+```env
+TELEGRAM_BOT_TOKEN=your_bot_token
+GROQ_API_KEY=your_groq_api_key
+DATABASE_URL=your_postgresql_url
+```
 
+### 3. Деплой
+```bash
+git add .
+git commit -m "Deploy Felix Bot v3.0"
+git push origin main
+```
+
+Подробная инструкция: [DEPLOY-V3.md](DEPLOY-V3.md)
+
+## 📋 Команды бота
+
+| Команда | Описание |
+|---------|----------|
+| `/start` | Главное меню с кнопкой Mini App |
+| `/organize <текст>` | Структурировать и организовать текст |
+| `/clear` | Очистить историю диалогов |
+| Голосовое | Отправьте голосовое - оно будет распознано |
+| Текст | Любое сообщение - получите AI ответ |
+
+## 🏗️ Архитектура
+
+```
+Telegram Bot (@fel12x_bot)
+    ↓
+Vercel Serverless Functions
+    ├── api/webhook.js (основной обработчик)
+    ├── api/history.js (история сообщений)
+    ├── api/stats.js (статистика)
+    ├── api/clear.js (очистка истории)
+    └── miniapp/index.html (Mini App)
+    ↓
+External Services
+    ├── Groq API (LLaMA 3.3 70B + Whisper v3)
+    └── Supabase PostgreSQL (база данных)
+```
+
+## 🛠️ Технологии
+
+- **Backend**: Node.js (Vercel Serverless)
+- **AI**: Groq API
+  - LLaMA 3.3 70B Versatile (текстовая генерация)
+  - Whisper Large v3 (распознавание речи)
+- **Database**: PostgreSQL (Supabase)
+- **Hosting**: Vercel
+- **Bot API**: Telegram Bot API
+- **Frontend**: Vanilla JS + Telegram WebApp API
+
+## 📊 База данных
+
+### Таблицы
+- `users` - информация о пользователях
+- `messages` - история сообщений
+- `voice_messages` - голосовые сообщения
+
+### Схема
+```sql
+users (id, username, first_name, last_name, created_at, updated_at)
+messages (id, user_id, role, content, created_at)
+voice_messages (id, user_id, file_id, transcription, duration, created_at)
+```
+
+## 🎨 Mini App
+
+### Вкладки
+1. **📜 История** - все диалоги с ботом
+2. **📊 Статистика** - количество сообщений, голосовых
+3. **📝 Организация** - инструкции по использованию
+4. **⚙️ Настройки** - управление и экспорт
+
+### Функции
+- Просмотр истории диалогов
+- Статистика использования
+- Очистка истории
+- Экспорт данных (TXT, JSON)
+- Обратная связь
+
+## 📝 Примеры использования
+
+### Текстовый диалог
+```
+Пользователь: Привет! Как создать список дел?
+Felix: Привет! Для создания списка дел можно:
+1. Использовать команду /organize
+2. Просто перечислить задачи
+3. Я структурирую их для вас
+```
+
+### Организация текста
+```
+Пользователь: /organize Купить молоко яйца хлеб позвонить врачу записаться на стрижку
+Felix: 📝 Организованный текст:
+
+🛒 Покупки:
+• Молоко
+• Яйца
+• Хлеб
+
+📞 Звонки:
+• Позвонить врачу
+
+✂️ Записи:
+• Записаться на стрижку
+```
+
+### Голосовое сообщение
+```
+Пользователь: [Голосовое: "Напомни мне купить продукты"]
+Felix: 🎤 Распознано: Напомни мне купить продукты
+
+💬 Ответ:
+Хорошо! Вот что нужно купить:
+• Создайте список в Mini App
+• Используйте /organize для структурирования
+• Я сохраню это в истории
+```
+
+## 🔧 Разработка
+
+### Локальная разработка
 ```bash
 # Установка зависимостей
-pip install -r requirements.txt
+npm install
 
-# Запуск локально
+# Запуск локально (требует Vercel CLI)
 vercel dev
 ```
 
-## Документация
+### Структура проекта
+```
+felix-bot/
+├── api/
+│   ├── webhook.js      # Основной обработчик
+│   ├── history.js      # API истории
+│   ├── stats.js        # API статистики
+│   └── clear.js        # API очистки
+├── miniapp/
+│   └── index.html      # Mini App интерфейс
+├── database/
+│   └── quick-setup.sql # Схема БД
+├── vercel.json         # Конфигурация Vercel
+├── package.json        # Зависимости
+└── README.md           # Этот файл
+```
 
-Полная документация находится в `.kiro/specs/telegram-smart-assistant-bot/`
+## 📈 Статус проекта
 
-## Бот
+- ✅ Базовый AI диалог
+- ✅ Голосовые сообщения
+- ✅ Организация текста
+- ✅ Mini App интерфейс
+- ✅ База данных
+- ✅ История и статистика
+- 🚧 Экспорт в PDF/DOCX
+- 🚧 Расширенная аналитика
+- 🚧 Мультиязычность
 
-Telegram: [@fel12x_bot](https://t.me/fel12x_bot)
+## 🤝 Вклад
+
+Проект открыт для улучшений! Если у вас есть идеи:
+1. Создайте Issue с описанием
+2. Сделайте Fork проекта
+3. Создайте Pull Request
+
+## 📄 Лицензия
+
+MIT License - используйте свободно!
+
+## 🔗 Ссылки
+
+- **Бот**: [@fel12x_bot](https://t.me/fel12x_bot)
+- **Vercel**: [felix-black.vercel.app](https://felix-black.vercel.app)
+- **GitHub**: [egoistsuport-coder/Felix-](https://github.com/egoistsuport-coder/Felix-)
+
+## 💡 Поддержка
+
+Если возникли проблемы:
+1. Проверьте [DEPLOY-V3.md](DEPLOY-V3.md)
+2. Посмотрите логи в Vercel
+3. Создайте Issue на GitHub
+
+---
+
+Сделано с ❤️ для удобного общения с AI

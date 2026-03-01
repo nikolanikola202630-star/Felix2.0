@@ -1,4 +1,9 @@
-import { db } from '../lib/db.js';
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -12,15 +17,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'userId required' });
     }
 
-    const messages = await db.getHistory(parseInt(userId), 50);
+    const result = await pool.query(
+      `SELECT role, content, created_at
+       FROM messages
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [parseInt(userId)]
+    );
 
     return res.status(200).json({
       ok: true,
-      messages: messages.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-        created_at: msg.created_at
-      }))
+      messages: result.rows.reverse()
     });
   } catch (error) {
     console.error('History API error:', error);

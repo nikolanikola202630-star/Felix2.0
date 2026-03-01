@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Felix Bot</title>
+    <title>Felix - AI Ассистент</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -13,192 +13,254 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             padding: 0;
             margin: 0;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .container {
             max-width: 100%;
-            padding: 16px;
+            padding: 20px;
+            padding-bottom: 80px;
         }
 
         .header {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 20px 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 24px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .header p {
-            opacity: 0.7;
-            font-size: 14px;
+            opacity: 0.9;
+            font-size: 15px;
         }
 
         .tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 20px;
             overflow-x: auto;
-            padding-bottom: 8px;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab {
-            padding: 10px 20px;
-            border-radius: 20px;
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
             white-space: nowrap;
-            font-size: 14px;
-            transition: opacity 0.2s;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
 
         .tab:active {
-            opacity: 0.7;
+            transform: scale(0.95);
         }
 
         .tab.active {
-            background: var(--tg-theme-button-color, #3390ec);
-            opacity: 1;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border-color: rgba(255, 255, 255, 0.95);
         }
 
         .content {
             display: none;
+            animation: fadeIn 0.3s;
         }
 
         .content.active {
             display: block;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .card {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .message {
             margin-bottom: 16px;
-            padding: 12px;
-            border-radius: 12px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 16px;
+            border-radius: 16px;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .message.user {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            margin-left: 20%;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            margin-left: 15%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .message.assistant {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            margin-right: 20%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            margin-right: 15%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message-content {
+            line-height: 1.5;
+            word-wrap: break-word;
         }
 
         .message-time {
-            font-size: 11px;
-            opacity: 0.6;
-            margin-top: 4px;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 8px;
         }
 
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 16px;
         }
 
         .stat-card {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 16px;
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 4px;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
         .stat-label {
-            font-size: 12px;
-            opacity: 0.7;
+            font-size: 13px;
+            opacity: 0.9;
         }
 
         .button {
             width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
             border: none;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             margin-bottom: 12px;
-            transition: opacity 0.2s;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .button:active {
-            opacity: 0.7;
+            transform: scale(0.98);
         }
 
         .button.secondary {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
-            opacity: 0.6;
+            padding: 60px 20px;
+            opacity: 0.8;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
 
         .empty {
             text-align: center;
-            padding: 40px;
-            opacity: 0.6;
+            padding: 60px 20px;
+            opacity: 0.8;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         .setting-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 12px;
-            margin-bottom: 8px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .setting-label {
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .toggle {
-            width: 50px;
-            height: 28px;
-            background: #ccc;
-            border-radius: 14px;
+            width: 56px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
             position: relative;
             cursor: pointer;
             transition: background 0.3s;
         }
 
         .toggle.active {
-            background: var(--tg-theme-button-color, #3390ec);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .toggle::after {
             content: '';
             position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
+            width: 28px;
+            height: 28px;
+            background: #667eea;
             border-radius: 50%;
             top: 2px;
             left: 2px;
@@ -206,88 +268,146 @@
         }
 
         .toggle.active::after {
-            left: 24px;
+            left: 26px;
+            background: #764ba2;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 Felix Bot</h1>
-            <p>Умный ассистент с AI</p>
+            <h1>🤖 Felix AI</h1>
+            <p>Умный ассистент с голосовым вводом</p>
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="showTab('history')">История</button>
-            <button class="tab" onclick="showTab('stats')">Статистика</button>
-            <button class="tab" onclick="showTab('settings')">Настройки</button>
+            <button class="tab active" onclick="showTab('history')">📜 История</button>
+            <button class="tab" onclick="showTab('stats')">📊 Статистика</button>
+            <button class="tab" onclick="showTab('organize')">📝 Организация</button>
+            <button class="tab" onclick="showTab('settings')">⚙️ Настройки</button>
         </div>
 
         <!-- History Tab -->
         <div id="history" class="content active">
-            <div id="historyContent" class="loading">Загрузка...</div>
+            <div id="historyContent" class="loading">Загрузка истории</div>
         </div>
 
         <!-- Stats Tab -->
         <div id="stats" class="content">
-            <div id="statsContent" class="loading">Загрузка...</div>
+            <div id="statsContent" class="loading">Загрузка статистики</div>
+        </div>
+
+        <!-- Organize Tab -->
+        <div id="organize" class="content">
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">📝 Организация текста</h3>
+                <p style="opacity: 0.9; margin-bottom: 16px; line-height: 1.5;">
+                    Отправьте боту команду <code style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">/organize</code> с текстом, и AI структурирует его для вас.
+                </p>
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                    <strong>Пример:</strong><br>
+                    <code style="font-size: 13px;">/organize Купить молоко яйца хлеб позвонить врачу записаться на стрижку</code>
+                </div>
+                <button class="button" onclick="openBot()">Открыть бота</button>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">🎤 Голосовые сообщения</h3>
+                <p style="opacity: 0.9; line-height: 1.5;">
+                    Отправьте голосовое сообщение боту - оно будет автоматически распознано и обработано AI.
+                </p>
+            </div>
         </div>
 
         <!-- Settings Tab -->
         <div id="settings" class="content">
             <div class="setting-item">
-                <span>Темная тема</span>
-                <div class="toggle" id="themeToggle" onclick="toggleTheme()"></div>
+                <span class="setting-label">🌙 Темная тема</span>
+                <div class="toggle active" id="themeToggle" onclick="toggleTheme()"></div>
             </div>
             <div class="setting-item">
-                <span>Уведомления</span>
+                <span class="setting-label">🔔 Уведомления</span>
                 <div class="toggle active" id="notifToggle" onclick="toggleNotifications()"></div>
             </div>
             <div class="setting-item">
-                <span>Сохранять историю</span>
+                <span class="setting-label">💾 Сохранять историю</span>
                 <div class="toggle active" id="historyToggle" onclick="toggleHistory()"></div>
             </div>
             
             <button class="button" onclick="exportData()">📥 Экспорт данных</button>
             <button class="button secondary" onclick="clearHistory()">🗑 Очистить историю</button>
             <button class="button secondary" onclick="sendFeedback()">💬 Обратная связь</button>
+            
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Версия</span>
+                    <span class="info-value">3.0.0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">AI Модель</span>
+                    <span class="info-value">LLaMA 3.3 70B</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Голосовой ввод</span>
+                    <span class="info-value">Whisper Large v3</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Initialize Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // Get user data
         const user = tg.initDataUnsafe?.user;
         const userId = user?.id;
-
-        // API base URL
         const API_URL = 'https://felix-black.vercel.app/api';
 
-        // Show tab
         function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.content').forEach(content => {
-                content.classList.remove('active');
-            });
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
             
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
             
-            // Load data for tab
             if (tabName === 'history') loadHistory();
             if (tabName === 'stats') loadStats();
         }
 
-        // Load history
         async function loadHistory() {
             const container = document.getElementById('historyContent');
-            container.innerHTML = '<div class="loading">Загрузка...</div>';
+            container.innerHTML = '<div class="loading">Загрузка истории</div>';
             
             try {
                 const response = await fetch(`${API_URL}/history?userId=${userId}`);
@@ -296,22 +416,37 @@
                 if (data.messages && data.messages.length > 0) {
                     container.innerHTML = data.messages.map(msg => `
                         <div class="message ${msg.role}">
-                            <div>${msg.content}</div>
-                            <div class="message-time">${new Date(msg.created_at).toLocaleString('ru')}</div>
+                            <div class="message-content">${escapeHtml(msg.content)}</div>
+                            <div class="message-time">${new Date(msg.created_at).toLocaleString('ru-RU', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</div>
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = '<div class="empty">История пуста</div>';
+                    container.innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">💬</div>
+                            <p>История диалогов пуста</p>
+                            <p style="opacity: 0.7; margin-top: 8px; font-size: 14px;">Начните общение с ботом</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
-                container.innerHTML = '<div class="empty">Ошибка загрузки</div>';
+                container.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">⚠️</div>
+                        <p>Ошибка загрузки</p>
+                    </div>
+                `;
             }
         }
 
-        // Load stats
         async function loadStats() {
             const container = document.getElementById('statsContent');
-            container.innerHTML = '<div class="loading">Загрузка...</div>';
+            container.innerHTML = '<div class="loading">Загрузка статистики</div>';
             
             try {
                 const response = await fetch(`${API_URL}/stats?userId=${userId}`);
@@ -336,52 +471,61 @@
                             <div class="stat-label">Голосовых</div>
                         </div>
                     </div>
-                    <div class="card" style="margin-top: 16px;">
-                        <p><strong>Первое сообщение:</strong> ${data.first_message_at ? new Date(data.first_message_at).toLocaleDateString('ru') : 'Нет данных'}</p>
-                        <p style="margin-top: 8px;"><strong>Последнее:</strong> ${data.last_message_at ? new Date(data.last_message_at).toLocaleDateString('ru') : 'Нет данных'}</p>
+                    <div class="info-card">
+                        <div class="info-row">
+                            <span class="info-label">Первое сообщение</span>
+                            <span class="info-value">${data.first_message_at ? new Date(data.first_message_at).toLocaleDateString('ru-RU') : 'Нет данных'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Последнее сообщение</span>
+                            <span class="info-value">${data.last_message_at ? new Date(data.last_message_at).toLocaleDateString('ru-RU') : 'Нет данных'}</span>
+                        </div>
                     </div>
                 `;
             } catch (error) {
-                container.innerHTML = '<div class="empty">Ошибка загрузки</div>';
+                container.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">⚠️</div>
+                        <p>Ошибка загрузки</p>
+                    </div>
+                `;
             }
         }
 
-        // Toggle functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function toggleTheme() {
-            const toggle = document.getElementById('themeToggle');
-            toggle.classList.toggle('active');
-            tg.showAlert('Тема будет изменена в следующей версии');
+            document.getElementById('themeToggle').classList.toggle('active');
         }
 
         function toggleNotifications() {
-            const toggle = document.getElementById('notifToggle');
-            toggle.classList.toggle('active');
+            document.getElementById('notifToggle').classList.toggle('active');
         }
 
         function toggleHistory() {
-            const toggle = document.getElementById('historyToggle');
-            toggle.classList.toggle('active');
+            document.getElementById('historyToggle').classList.toggle('active');
         }
 
-        // Export data
         async function exportData() {
             tg.showPopup({
                 title: 'Экспорт данных',
                 message: 'Выберите формат экспорта',
                 buttons: [
-                    {id: 'pdf', type: 'default', text: 'PDF'},
-                    {id: 'docx', type: 'default', text: 'DOCX'},
+                    {id: 'txt', type: 'default', text: 'TXT'},
                     {id: 'json', type: 'default', text: 'JSON'},
                     {type: 'cancel'}
                 ]
             }, async (buttonId) => {
                 if (buttonId && buttonId !== 'cancel') {
-                    tg.showAlert(`Экспорт в ${buttonId.toUpperCase()} будет добавлен в следующей версии`);
+                    tg.showAlert('Экспорт будет доступен в следующей версии');
                 }
             });
         }
 
-        // Clear history
         function clearHistory() {
             tg.showConfirm('Вы уверены что хотите очистить всю историю?', async (confirmed) => {
                 if (confirmed) {
@@ -389,6 +533,7 @@
                         await fetch(`${API_URL}/clear?userId=${userId}`, { method: 'POST' });
                         tg.showAlert('История очищена');
                         loadHistory();
+                        loadStats();
                     } catch (error) {
                         tg.showAlert('Ошибка при очистке');
                     }
@@ -396,7 +541,6 @@
             });
         }
 
-        // Send feedback
         function sendFeedback() {
             tg.showPopup({
                 title: 'Обратная связь',
@@ -409,12 +553,15 @@
                 ]
             }, (buttonId) => {
                 if (buttonId && buttonId !== 'cancel') {
-                    tg.showAlert('Спасибо за отзыв!');
+                    tg.showAlert('Спасибо за отзыв! ❤️');
                 }
             });
         }
 
-        // Load initial data
+        function openBot() {
+            tg.close();
+        }
+
         loadHistory();
     </script>
 </body>

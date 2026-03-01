@@ -1,4 +1,9 @@
-import { db } from '../lib/db.js';
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -12,7 +17,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'userId required' });
     }
 
-    await db.clearHistory(parseInt(userId));
+    await pool.query('DELETE FROM messages WHERE user_id = $1', [parseInt(userId)]);
 
     return res.status(200).json({
       ok: true,
