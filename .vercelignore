@@ -1,68 +1,10 @@
-# Dependencies
 node_modules
-npm-debug.log
-yarn-error.log
-
-# Tests
+.git
+.env.local
+.kiro
 tests
-*.test.js
-coverage
-.nyc_output
-
-# Documentation
+scripts
+improvements
+examples
 *.md
 !README.md
-docs
-
-# Git
-.git
-.gitignore
-.github
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Local env files
-.env.local
-.env.*.local
-
-# Scripts
-scripts/auto-commit.js
-scripts/deploy-hooks.js
-scripts/setup-vercel.js
-cleanup.ps1
-setup-vercel.ps1
-push-with-token.ps1
-open-github-desktop.ps1
-vercel-quick-setup.ps1
-fix-git-user.ps1
-
-# Kiro
-.kiro
-
-# Temporary files
-*.tmp
-*.log
-
-# Unused API files (keep only essential)
-api/webhook-v7-full.js
-api/webhook-v7.1.js
-api/export.js
-api/voice.js
-api/analytics.js
-api/stats.js
-api/search.js
-
-# Examples
-examples
-improvements
-migrations
-database/*.md
