@@ -1,6 +1,9 @@
 // Felix Bot v8.6 - Fixed & Optimized
 const db = require('../lib/db').db;
 const ai = require('../lib/ai').ai;
+const commands = require('../lib/bot/commands');
+const aiHandlers = require('../lib/bot/ai-handlers');
+const keyboards = require('../lib/bot/keyboards');
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -12,30 +15,43 @@ let selfLearning = null;
 
 function getPersonalization() {
   if (!personalization) {
-    personalization = require('../lib/ml/personalization');
+    try {
+      personalization = require('../lib/ml/personalization');
+    } catch (e) {
+      console.log('Personalization not available');
+    }
   }
   return personalization;
 }
 
 function getSelfLearning() {
   if (!selfLearning) {
-    selfLearning = require('../lib/automation/self-learning-safe');
+    try {
+      selfLearning = require('../lib/automation/self-learning-safe');
+    } catch (e) {
+      console.log('Self-learning not available');
+    }
   }
   return selfLearning;
 }
 
 // Send message with error handling
-async function send(chatId, text, keyboard = null) {
+async function sendMessage(chatId, text, keyboard = null, isTyping = false) {
   try {
+    // Send typing action if requested
+    if (isTyping) {
+      await fetch(`${TELEGRAM_API}/sendChatAction`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, action: 'typing' })
+      });
+    }
+
     const body = {
       chat_id: chatId,
       text: text.substring(0, 4096), // Telegram limit
       parse_mode: 'HTML',
-      reply_markup: keyboard || {
-        inline_keyboard: [[
-          { text: '📱 Открыть Felix App', web_app: { url: MINIAPP_URL } }
-        ]]
-      }
+      reply_markup: keyboard || keyboards.mainMenu
     };
 
     const res = await fetch(`${TELEGRAM_API}/sendMessage`, {
@@ -53,6 +69,36 @@ async function send(chatId, text, keyboard = null) {
     return await res.json();
   } catch (error) {
     console.error('Send message error:', error);
+    return null;
+  }
+}
+
+// Edit message
+async function editMessage(chatId, messageId, text, keyboard = null) {
+  try {
+    const body = {
+      chat_id: chatId,
+      message_id: messageId,
+      text: text.substring(0, 4096),
+      parse_mode: 'HTML',
+      reply_markup: keyboard || keyboards.mainMenu
+    };
+
+    const res = await fetch(`${TELEGRAM_API}/editMessageText`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      console.error('Telegram API error:', error);
+      return null;
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Edit message error:', error);
     return null;
   }
 }
@@ -97,7 +143,8 @@ module.exports = async function handler(req, res) {
 
     // Handle callback
     if (callback_query) {
-      await handleCallback(callback_query);
+      const { data, message, from } = callback_query;
+      await handleCallback(data, message.chat.id, message.message_id, from.id);
       return res.json({ ok: true });
     }
 
@@ -161,200 +208,80 @@ async function handleCommand(chatId, userId, userName, text) {
   const [cmd, ...args] = text.slice(1).split(' ');
   const arg = args.join(' ');
 
-  const commands = {
-    start: () => send(chatId, `
-🌟 <b>Felix v8.6 - AI Ассистент</b>
-
-Привет, ${userName}! 👋
-
-Я умный AI-ассистент с персонализацией:
-
-🧠 <b>AI команды</b> - 8 типов запросов
-📊 <b>Аналитика</b> - твоя статистика
-🎯 <b>Персонализация</b> - адаптируюсь под тебя
-📝 <b>Конспекты</b> - из голоса в текст
-📚 <b>Академия</b> - обучение и курсы
-
-Просто пиши мне или используй команды! 🚀
-
-Команды: /help
-    `.trim()),
-
-    help: () => send(chatId, `
-📖 <b>Команды Felix</b>
-
-<b>AI Команды:</b>
-/ask - Задать вопрос
-/summary - Резюме текста
-/analyze - Анализ
-/generate - Генерация
-/translate - Перевод
-/improve - Улучшение
-/brainstorm - Идеи
-/explain - Объяснение
-
-<b>Функции:</b>
-/profile - Твой профиль
-/stats - Статистика
-/settings - Настройки
-
-<b>Или просто пиши мне!</b>
-    `.trim()),
-
-    profile: async () => {
-      try {
-        const stats = await db.getUserStats(userId);
-        
-        let profileText = `
-👤 <b>Твой профиль</b>
-
-<b>Статистика:</b>
-📊 Сообщений: ${stats.total_messages || 0}
-🤖 AI запросов: ${stats.by_command?.organize || 0}
-🎤 Голосовых: ${stats.by_type?.voice || 0}
-        `.trim();
-
-        // Try to get personalization data
-        try {
-          const profile = await getPersonalization().analyzeUserBehavior(userId);
-          if (profile) {
-            profileText += `
-
-<b>Персонализация:</b>
-💬 Стиль: ${profile.communicationStyle || 'casual'}
-🎓 Уровень: ${profile.skillLevel || 'intermediate'}
-📚 Обучение: ${profile.learningStyle || 'mixed'}
-            `.trim();
-          }
-        } catch (e) {
-          // Ignore if personalization not available
-        }
-
-        await send(chatId, profileText);
-      } catch (error) {
-        console.error('Profile error:', error);
-        await send(chatId, '❌ Ошибка загрузки профиля');
-      }
-    },
-
-    stats: async () => {
-      try {
-        const stats = await db.getUserStats(userId);
-
-        await send(chatId, `
-📊 <b>Статистика</b>
-
-<b>Твоя активность:</b>
-💬 Сообщений: ${stats.total_messages || 0}
-🎤 Голосовых: ${stats.by_type?.voice || 0}
-📄 Документов: ${stats.by_type?.document || 0}
-
-<b>AI использование:</b>
-📝 Резюме: ${stats.by_command?.summary || 0}
-🔍 Анализ: ${stats.by_command?.analyze || 0}
-✨ Генерация: ${stats.by_command?.generate || 0}
-        `.trim());
-      } catch (error) {
-        console.error('Stats error:', error);
-        await send(chatId, '❌ Ошибка загрузки статистики');
-      }
-    },
-
-    settings: () => send(chatId, `
-⚙️ <b>Настройки</b>
-
-Все настройки доступны в Mini App:
-
-🎨 Персонализация
-🤖 AI параметры
-🌐 Язык интерфейса
-🔔 Уведомления
-
-Открой Mini App для настройки! 📱
-    `.trim()),
+  try {
+    // Basic commands
+    if (cmd === 'start') {
+      await commands.handleStart(chatId, userName, sendMessage);
+      return;
+    }
+    
+    if (cmd === 'help') {
+      await commands.handleHelp(chatId, sendMessage);
+      return;
+    }
+    
+    if (cmd === 'menu') {
+      await commands.handleMenu(chatId, sendMessage);
+      return;
+    }
+    
+    if (cmd === 'profile') {
+      await commands.handleProfile(chatId, userId, sendMessage, db);
+      return;
+    }
+    
+    if (cmd === 'settings') {
+      await commands.handleSettings(chatId, userId, sendMessage, db);
+      return;
+    }
+    
+    if (cmd === 'stats') {
+      await commands.handleStats(chatId, userId, sendMessage, db);
+      return;
+    }
+    
+    if (cmd === 'academy') {
+      await commands.handleAcademy(chatId, sendMessage);
+      return;
+    }
+    
+    if (cmd === 'courses') {
+      await commands.handleCourses(chatId, sendMessage, db);
+      return;
+    }
 
     // AI commands
-    ask: () => handleAICommand('ask', userId, arg, chatId),
-    summary: () => handleAICommand('summary', userId, arg, chatId),
-    analyze: () => handleAICommand('analyze', userId, arg, chatId),
-    generate: () => handleAICommand('generate', userId, arg, chatId),
-    translate: () => handleAICommand('translate', userId, arg, chatId),
-    improve: () => handleAICommand('improve', userId, arg, chatId),
-    brainstorm: () => handleAICommand('brainstorm', userId, arg, chatId),
-    explain: () => handleAICommand('explain', userId, arg, chatId)
-  };
-
-  const handler = commands[cmd];
-  if (handler) {
-    try {
-      await handler();
-    } catch (error) {
-      console.error(`Command ${cmd} error:`, error);
-      await send(chatId, '❌ Ошибка выполнения команды');
+    const aiCommands = ['ask', 'summary', 'analyze', 'generate', 'translate', 'improve', 'brainstorm', 'explain'];
+    if (aiCommands.includes(cmd)) {
+      await aiHandlers.handleAICommand(cmd, chatId, userId, arg, sendMessage, ai, db);
+      return;
     }
-  } else {
-    await send(chatId, '❓ Неизвестная команда. Используй /help');
-  }
-}
 
-// Handle AI command
-async function handleAICommand(command, userId, text, chatId) {
-  if (!text) {
-    await send(chatId, `Используй: /${command} [твой текст]`);
-    return;
-  }
-
-  try {
-    // Get base prompt
-    const basePrompt = getCommandPrompt(command, text);
+    // Unknown command
+    await sendMessage(chatId, '❓ Неизвестная команда. Используй /help', keyboards.mainMenu);
     
-    // Try to personalize if available
-    let finalPrompt = basePrompt;
-    try {
-      if (personalization) {
-        finalPrompt = await getPersonalization().getPersonalizedPrompt(userId, basePrompt);
-      }
-    } catch (e) {
-      // Use base prompt if personalization fails
-    }
-
-    // Get AI response
-    const response = await ai.getChatResponse(finalPrompt, [], {
-      temperature: 0.7,
-      max_tokens: 2000
-    });
-
-    // Save interaction
-    try {
-      await db.saveMessage(userId, 'user', text, 'text', { command });
-      await db.saveMessage(userId, 'assistant', response.content, 'text', { 
-        command,
-        tokens: response.tokens,
-        latency: response.latency
-      });
-    } catch (saveError) {
-      console.error('Save message error:', saveError);
-      // Continue anyway
-    }
-
-    await send(chatId, response.content);
   } catch (error) {
-    console.error('AI command error:', error);
-    await send(chatId, '❌ Ошибка обработки. Попробуй позже.');
+    console.error(`Command ${cmd} error:`, error);
+    await sendMessage(chatId, '❌ Ошибка выполнения команды', keyboards.mainMenu);
   }
 }
+
+// This function is now handled by aiHandlers module
 
 // Handle regular AI message
 async function handleAIMessage(chatId, userId, text) {
   try {
+    await sendMessage(chatId, '⏳ Обрабатываю...', null, true);
+    
     // Get base prompt
-    const basePrompt = `Ответь на сообщение пользователя: ${text}`;
+    const basePrompt = `Ответь на сообщение пользователя дружелюбно и полезно: ${text}`;
     
     // Try to personalize
     let finalPrompt = basePrompt;
     try {
-      if (personalization) {
-        finalPrompt = await getPersonalization().getPersonalizedPrompt(userId, basePrompt);
+      const p = getPersonalization();
+      if (p && p.getPersonalizedPrompt) {
+        finalPrompt = await p.getPersonalizedPrompt(userId, basePrompt);
       }
     } catch (e) {
       // Use base prompt
@@ -377,31 +304,44 @@ async function handleAIMessage(chatId, userId, text) {
       console.error('Save message error:', saveError);
     }
 
-    await send(chatId, response.content);
+    await sendMessage(chatId, response.content, keyboards.mainMenu);
   } catch (error) {
     console.error('AI message error:', error);
-    await send(chatId, '❌ Ошибка. Попробуй еще раз.');
+    await sendMessage(chatId, '❌ Ошибка. Попробуй еще раз.', keyboards.mainMenu);
   }
 }
 
-// Get command prompt
-function getCommandPrompt(command, text) {
-  const prompts = {
-    ask: `Ответь на вопрос: ${text}`,
-    summary: `Создай краткое резюме: ${text}`,
-    analyze: `Проанализируй текст: ${text}`,
-    generate: `Сгенерируй контент: ${text}`,
-    translate: `Переведи текст: ${text}`,
-    improve: `Улучши текст: ${text}`,
-    brainstorm: `Сгенерируй идеи: ${text}`,
-    explain: `Объясни концепцию: ${text}`
-  };
-
-  return prompts[command] || text;
-}
-
 // Handle callback
-async function handleCallback(callback) {
-  console.log('Callback:', callback.data);
-  // TODO: Implement callback handling
+async function handleCallback(data, chatId, messageId, userId) {
+  try {
+    const [action, param] = data.split('_');
+
+    // Menu navigation
+    if (action === 'menu') {
+      if (param === 'main') {
+        await editMessage(chatId, messageId, '🎯 Главное меню', keyboards.mainMenu);
+      } else if (param === 'ai') {
+        await aiHandlers.showAIMenu(chatId, messageId, editMessage);
+      } else if (param === 'academy') {
+        await editMessage(chatId, messageId, '📚 Академия Felix', keyboards.academyMenu);
+      } else if (param === 'profile') {
+        await editMessage(chatId, messageId, '👤 Профиль', keyboards.profileMenu);
+      } else if (param === 'settings') {
+        await editMessage(chatId, messageId, '⚙️ Настройки', keyboards.settingsMenu);
+      }
+      return;
+    }
+
+    // AI command callbacks
+    if (action === 'ai') {
+      await aiHandlers.handleAICallback(param, chatId, messageId, sendMessage, editMessage);
+      return;
+    }
+
+    // Other callbacks
+    console.log('Unhandled callback:', data);
+    
+  } catch (error) {
+    console.error('Callback error:', error);
+  }
 }
