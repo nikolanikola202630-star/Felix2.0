@@ -1,5 +1,5 @@
 // Unified API Router - All endpoints in one (v8.6 Fixed)
-const webhookHandler = require('./webhook-v8-fixed');
+const webhookHandler = require('./webhook-simple-test');
 const appHandler = require('./app/index');
 const voiceHandler = require('./voice/index');
 
