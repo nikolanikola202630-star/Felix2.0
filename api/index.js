@@ -1,5 +1,5 @@
 // Unified API Router - v8.6 Working
-const webhookHandler = require('./webhook-v8-fixed');
+const webhookHandler = require('./webhook-test-simple');
 const miniappDataHandler = require('./miniapp-data');
 
 module.exports = async function handler(req, res) {
@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
   // Default health check
   return res.json({
     status: 'ok',
-    version: '8.6-fixed',
+    version: '8.6-test',
     endpoints: ['/api/webhook', '/api/miniapp-data'],
     pathname,
     timestamp: new Date().toISOString()
