@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Академия - Единая экосистема</title>
+  <title>Felix Academy - Флагман</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
@@ -12,11 +12,24 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: var(--tg-theme-bg-color, #ffffff);
+      --text: var(--tg-theme-text-color, #000000);
+      --hint: var(--tg-theme-hint-color, #999999);
+      --card-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--tg-theme-bg-color, #ffffff);
-      color: var(--tg-theme-text-color, #000000);
+      background: var(--bg);
+      color: var(--text);
       padding-bottom: 70px;
+      overflow-x: hidden;
     }
 
     .container {
@@ -26,31 +39,138 @@
     }
 
     /* Приветствие */
-    .welcome {
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px;
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 20px;
+      padding: 24px;
       color: white;
       margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .welcome h1 {
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .hero-text h1 {
       font-size: 24px;
-      margin-bottom: 8px;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
 
-    .welcome p {
+    .hero-text p {
       opacity: 0.9;
       font-size: 14px;
     }
 
-    .welcome-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.2);
-      padding: 4px 12px;
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .hero-stat {
+      flex: 1;
+      background: rgba(255,255,255,0.15);
       border-radius: 12px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-stat-value {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .hero-stat-label {
       font-size: 12px;
-      margin-top: 8px;
+      opacity: 0.9;
+    }
+
+    /* Быстрые действия */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-btn {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .action-btn:active {
+      transform: scale(0.95);
+    }
+
+    .action-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .action-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .action-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .action-badge {
+      display: inline-block;
+      background: var(--danger);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-top: 4px;
     }
 
     /* Секции */
@@ -71,9 +191,10 @@
     }
 
     .see-all {
-      color: var(--tg-theme-link-color, #3390ec);
+      color: var(--primary);
       font-size: 14px;
       text-decoration: none;
+      font-weight: 500;
     }
 
     /* Карусель */
@@ -84,23 +205,18 @@
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       padding-bottom: 8px;
+      scrollbar-width: none;
     }
 
     .carousel::-webkit-scrollbar {
-      height: 4px;
+      display: none;
     }
 
-    .carousel::-webkit-scrollbar-thumb {
-      background: var(--tg-theme-hint-color, #999);
-      border-radius: 2px;
-    }
-
-    /* Карточки курсов */
     .card {
       flex: 0 0 280px;
       scroll-snap-align: start;
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 12px;
+      background: var(--card-bg);
+      border-radius: 16px;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.2s;
@@ -114,7 +230,7 @@
       width: 100%;
       height: 160px;
       object-fit: cover;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     }
 
     .card-content {
@@ -124,7 +240,7 @@
     .card-title {
       font-size: 16px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -135,79 +251,96 @@
       justify-content: space-between;
       align-items: center;
       font-size: 14px;
-      color: var(--tg-theme-hint-color, #999);
+      color: var(--hint);
     }
 
     .card-price {
       font-weight: 600;
-      color: var(--tg-theme-text-color, #000);
+      color: var(--text);
     }
 
     .card-price.free {
-      color: #10b981;
+      color: var(--success);
     }
 
-    /* Быстрые действия */
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+    /* AI Рекомендации */
+    .ai-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
       margin-bottom: 24px;
     }
 
-    .action-card {
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .ai-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .ai-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .ai-text {
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    /* Активность */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .activity-item {
+      background: var(--card-bg);
       border-radius: 12px;
       padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .action-card:active {
-      transform: scale(0.98);
-    }
-
-    .action-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    .action-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .action-desc {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #999);
-    }
-
-    /* Статистика */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
       gap: 12px;
-      margin-bottom: 24px;
+      align-items: center;
     }
 
-    .stat-card {
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .stat-value {
+    .activity-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
       font-weight: 600;
       margin-bottom: 4px;
     }
 
-    .stat-label {
+    .activity-time {
       font-size: 12px;
-      color: var(--tg-theme-hint-color, #999);
+      color: var(--hint);
     }
 
     /* Нижняя навигация */
@@ -216,12 +349,13 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--tg-theme-bg-color, #ffffff);
-      border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+      background: var(--bg);
+      border-top: 1px solid var(--hint);
       display: flex;
       justify-content: space-around;
       padding: 8px 0;
       z-index: 1000;
+      backdrop-filter: blur(10px);
     }
 
     .nav-item {
@@ -230,81 +364,156 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: var(--tg-theme-hint-color, #999);
-      font-size: 12px;
+      color: var(--hint);
+      font-size: 11px;
       padding: 4px 12px;
       transition: color 0.2s;
+      position: relative;
     }
 
     .nav-item.active {
-      color: var(--tg-theme-link-color, #3390ec);
+      color: var(--primary);
     }
 
     .nav-icon {
       font-size: 24px;
     }
 
+    .nav-badge {
+      position: absolute;
+      top: 0;
+      right: 8px;
+      background: var(--danger);
+      color: white;
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    /* Loading */
     .loading {
       text-align: center;
       padding: 40px;
-      color: var(--tg-theme-hint-color, #999);
+      color: var(--hint);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--card-bg);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Приветствие -->
-    <div class="welcome">
-      <h1>Привет, <span id="userName">Пользователь</span>! 👋</h1>
-      <p>Добро пожаловать в единую экосистему обучения</p>
-      <div id="referralBadge" style="display:none" class="welcome-badge"></div>
-    </div>
-
-    <!-- Статистика пользователя -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="coursesCount">0</div>
-        <div class="stat-label">Курсов</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="bonusBalance">0</div>
-        <div class="stat-label">Бонусов</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="referralsCount">0</div>
-        <div class="stat-label">Рефералов</div>
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-header">
+          <div class="avatar" id="avatar">👤</div>
+          <div class="hero-text">
+            <h1>Привет, <span id="userName">Пользователь</span>! 👋</h1>
+            <p>Продолжай обучение и развивайся каждый день</p>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="coursesCount">0</div>
+            <div class="hero-stat-label">Курсов</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="hoursLearned">0ч</div>
+            <div class="hero-stat-label">Обучения</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="bonusBalance">0₽</div>
+            <div class="hero-stat-label">Бонусов</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Быстрые действия -->
     <div class="quick-actions">
-      <div class="action-card" onclick="openCatalog()">
-        <div class="action-icon">📚</div>
-        <div class="action-title">Каталог</div>
-        <div class="action-desc">Все курсы</div>
+      <div class="action-btn" onclick="openSection('academy')">
+        <span class="action-icon">🎓</span>
+        <div class="action-title">Академия</div>
       </div>
-      <div class="action-card" onclick="openMyCourses()">
-        <div class="action-icon">📖</div>
-        <div class="action-title">Мои курсы</div>
-        <div class="action-desc">Продолжить</div>
+      <div class="action-btn" onclick="openSection('ai')">
+        <span class="action-icon">🤖</span>
+        <div class="action-title">AI-Ассистент</div>
+        <span class="action-badge">NEW</span>
       </div>
-      <div class="action-card" onclick="openProfile()">
-        <div class="action-icon">👤</div>
-        <div class="action-title">Профиль</div>
-        <div class="action-desc">Настройки</div>
+      <div class="action-btn" onclick="openSection('voice')">
+        <span class="action-icon">🎙️</span>
+        <div class="action-title">Голос</div>
       </div>
-      <div class="action-card" onclick="openPartner()">
-        <div class="action-icon">💼</div>
+      <div class="action-btn" onclick="openSection('partner')">
+        <span class="action-icon">💼</span>
         <div class="action-title">Партнерка</div>
-        <div class="action-desc">Заработок</div>
+      </div>
+      <div class="action-btn" onclick="openSection('community')">
+        <span class="action-icon">👥</span>
+        <div class="action-title">Сообщество</div>
+      </div>
+      <div class="action-btn" onclick="openSection('analytics')">
+        <span class="action-icon">📊</span>
+        <div class="action-title">Аналитика</div>
+      </div>
+      <div class="action-btn" onclick="openSection('achievements')">
+        <span class="action-icon">🎯</span>
+        <div class="action-title">Достижения</div>
+      </div>
+      <div class="action-btn" onclick="openSection('profile')">
+        <span class="action-icon">👤</span>
+        <div class="action-title">Профиль</div>
+      </div>
+      <div class="action-btn" onclick="openSection('settings')">
+        <span class="action-icon">⚙️</span>
+        <div class="action-title">Настройки</div>
       </div>
     </div>
 
-    <!-- Бесплатные материалы -->
+    <!-- AI Рекомендация -->
+    <div class="ai-card">
+      <div class="ai-header">
+        <div class="ai-icon">🤖</div>
+        <div class="ai-title">Рекомендация AI</div>
+      </div>
+      <div class="ai-text" id="aiRecommendation">
+        Загрузка персональных рекомендаций...
+      </div>
+    </div>
+
+    <!-- Продолжить обучение -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">📖 Продолжить обучение</h2>
+        <a href="#" onclick="openSection('my-courses'); return false;" class="see-all">Все →</a>
+      </div>
+      <div id="continueCourses" class="carousel">
+        <div class="loading">
+          <div class="spinner"></div>
+          Загрузка курсов...
+        </div>
+      </div>
+    </section>
+
+    <!-- Бесплатные уроки -->
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">🎁 Бесплатные уроки</h2>
-        <a href="#" onclick="openCatalog('free'); return false;" class="see-all">Все →</a>
+        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Все →</a>
       </div>
       <div id="freeLessons" class="carousel">
         <div class="loading">Загрузка...</div>
@@ -315,20 +524,20 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">🔥 Популярные курсы</h2>
-        <a href="#" onclick="openCatalog(); return false;" class="see-all">Все →</a>
+        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Все →</a>
       </div>
       <div id="popularCourses" class="carousel">
         <div class="loading">Загрузка...</div>
       </div>
     </section>
 
-    <!-- Рекомендации партнера -->
-    <section id="partnerSection" class="section" style="display:none">
+    <!-- Последняя активность -->
+    <section class="section">
       <div class="section-header">
-        <h2 class="section-title">⭐ Рекомендовано партнером</h2>
+        <h2 class="section-title">⚡ Последняя активность</h2>
       </div>
-      <div id="partnerCourses" class="carousel">
-        <div class="loading">Загрузка...</div>
+      <div id="activityList" class="activity-list">
+        <div class="loading">Загрузка активности...</div>
       </div>
     </section>
   </div>
@@ -339,181 +548,25 @@
       <div class="nav-icon">🏠</div>
       <div>Главная</div>
     </a>
-    <a href="#" onclick="openCatalog(); return false;" class="nav-item">
-      <div class="nav-icon">📚</div>
-      <div>Каталог</div>
+    <a href="#" onclick="openSection('academy'); return false;" class="nav-item">
+      <div class="nav-icon">🎓</div>
+      <div>Академия</div>
     </a>
-    <a href="#" onclick="openMyCourses(); return false;" class="nav-item">
-      <div class="nav-icon">📖</div>
-      <div>Мои курсы</div>
+    <a href="#" onclick="openSection('ai'); return false;" class="nav-item">
+      <div class="nav-icon">🤖</div>
+      <div>AI</div>
+      <span class="nav-badge">3</span>
     </a>
-    <a href="#" onclick="openProfile(); return false;" class="nav-item">
+    <a href="#" onclick="openSection('community'); return false;" class="nav-item">
+      <div class="nav-icon">👥</div>
+      <div>Сообщество</div>
+    </a>
+    <a href="#" onclick="openSection('profile'); return false;" class="nav-item">
       <div class="nav-icon">👤</div>
       <div>Профиль</div>
     </a>
   </nav>
 
-  <script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.enableClosingConfirmation();
-
-    // Получение данных пользователя
-    const user = tg.initDataUnsafe.user || { first_name: 'Пользователь', id: 0 };
-    const startParam = tg.initDataUnsafe.start_param || ''; // Реферальный код
-    const API_URL = 'https://felix2-0.vercel.app/api';
-
-    // Глобальное состояние
-    window.appState = {
-      user: user,
-      referralCode: startParam,
-      currentPage: 'home',
-      userStats: {
-        courses: 0,
-        bonus: 0,
-        referrals: 0
-      }
-    };
-
-    // Показать имя пользователя
-    document.getElementById('userName').textContent = user.first_name;
-
-    // Обработка реферального кода
-    if (startParam) {
-      console.log('Referral code:', startParam);
-      const badge = document.getElementById('referralBadge');
-      
-      if (startParam.startsWith('ref_partner')) {
-        badge.textContent = '✨ Партнерская ссылка';
-        badge.style.display = 'inline-block';
-      } else if (startParam.startsWith('ref_user')) {
-        badge.textContent = '🎁 Реферальная ссылка';
-        badge.style.display = 'inline-block';
-      }
-
-      // TODO: Сохранить реферал в БД
-      // await saveReferral(user.id, startParam);
-    }
-
-    // Тестовые данные
-    const testCourses = [
-      {
-        id: 1,
-        title: 'Основы трейдинга',
-        price: 2990,
-        rating: 4.8,
-        image: 'https://via.placeholder.com/280x160?text=Trading',
-        category: 'trading'
-      },
-      {
-        id: 2,
-        title: 'Python для начинающих',
-        price: 0,
-        rating: 4.9,
-        image: 'https://via.placeholder.com/280x160?text=Python',
-        category: 'it'
-      },
-      {
-        id: 3,
-        title: 'Психология успеха',
-        price: 1990,
-        rating: 4.7,
-        image: 'https://via.placeholder.com/280x160?text=Psychology',
-        category: 'psychology'
-      }
-    ];
-
-    // Рендер карусели
-    function renderCarousel(containerId, items) {
-      const container = document.getElementById(containerId);
-      
-      if (items.length === 0) {
-        container.innerHTML = '<div class="loading">Пока нет курсов</div>';
-        return;
-      }
-
-      container.innerHTML = items.map(item => `
-        <div class="card" onclick="openCourse(${item.id})">
-          <img src="${item.image}" alt="${item.title}" class="card-image">
-          <div class="card-content">
-            <div class="card-title">${item.title}</div>
-            <div class="card-meta">
-              <span class="card-price ${item.price === 0 ? 'free' : ''}">
-                ${item.price > 0 ? item.price + ' ₽' : 'Бесплатно'}
-              </span>
-              <span>⭐ ${item.rating}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Навигация
-    function goHome() {
-      window.location.reload();
-    }
-
-    function openCatalog(filter = null) {
-      window.location.href = filter ? `catalog.html?filter=${filter}` : 'catalog.html';
-    }
-
-    function openCourse(courseId) {
-      window.location.href = `course.html?id=${courseId}`;
-    }
-
-    function openMyCourses() {
-      window.location.href = 'my-courses.html';
-    }
-
-    function openProfile() {
-      window.location.href = 'profile.html';
-    }
-
-    function openPartner() {
-      window.location.href = 'partner.html';
-    }
-
-    // Загрузка данных
-    async function loadData() {
-      try {
-        // TODO: Загрузить с API
-        // const stats = await fetch(`${API_URL}/user/stats?user_id=${user.id}`).then(r => r.json());
-        // const courses = await fetch(`${API_URL}/courses`).then(r => r.json());
-
-        // Пока используем тестовые данные
-        document.getElementById('coursesCount').textContent = '0';
-        document.getElementById('bonusBalance').textContent = '0 ₽';
-        document.getElementById('referralsCount').textContent = '0';
-
-        const freeCourses = testCourses.filter(c => c.price === 0);
-        const popularCourses = testCourses;
-
-        renderCarousel('freeLessons', freeCourses);
-        renderCarousel('popularCourses', popularCourses);
-
-        // Проверить реферала партнера
-        if (startParam && startParam.startsWith('ref_partner')) {
-          document.getElementById('partnerSection').style.display = 'block';
-          renderCarousel('partnerCourses', testCourses);
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
-        tg.showAlert('Ошибка загрузки данных');
-      }
-    }
-
-    // Запуск
-    loadData();
-
-    // Обработка кнопки "Назад"
-    tg.BackButton.onClick(() => {
-      tg.close();
-    });
-
-    console.log('🎓 Академия - Единая экосистема загружена');
-    console.log('User:', user);
-    console.log('Referral code:', startParam);
-  </script>
+  <script src="js/app.js"></script>
 </body>
 </html>
