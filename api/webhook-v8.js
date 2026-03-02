@@ -1,6 +1,6 @@
 // Felix Bot v8.0 - Autonomous AI with ML & Self-Learning
-const { db } = require('../lib/db');
-const { ai } = require('../lib/ai');
+const db = require('../lib/db').db;
+const ai = require('../lib/ai').ai;
 const personalization = require('../lib/ml/personalization');
 const selfLearning = require('../lib/automation/self-learning');
 
