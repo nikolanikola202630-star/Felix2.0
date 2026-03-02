@@ -1,6 +1,6 @@
 // Unified API router for Vercel routes
 const routeHandlers = {
-  '/api/webhook': require('./webhook/index.js'),
+  '/api/webhook': require('./webhook-test.js'),
   '/api/app': require('./app/index.js'),
   '/api/voice': require('./voice/index.js'),
   '/api/admin': require('./admin-api.js'),
