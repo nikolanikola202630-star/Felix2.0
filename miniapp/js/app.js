@@ -1,10 +1,18 @@
-// Felix Elite Mini App - Full Functional
+// Felix Elite Mini App - Full Functional with Animations & Sync
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
 const API_URL = '/api/app';
 const user = tg.initDataUnsafe?.user || { id: 123456, first_name: 'Demo User' };
+
+// Animation helper
+function animateElement(element, animationClass = 'animate-fade-in-up') {
+    element.classList.add(animationClass);
+    element.addEventListener('animationend', () => {
+        element.classList.remove(animationClass);
+    }, { once: true });
+}
 
 // Mock data for demo
 const MOCK_DATA = {
@@ -134,23 +142,42 @@ function updateStats(stats = {}) {
 
 // Show tab
 function showTab(tabName) {
-    // Update nav tabs
+    // Update nav tabs with animation
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
     });
     event.target.classList.add('active');
     
-    // Hide all tabs
+    // Hide all tabs with fade out
     document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
+        if (!content.classList.contains('hidden')) {
+            content.style.animation = 'fadeOut 0.2s ease-out';
+            setTimeout(() => {
+                content.classList.add('hidden');
+                content.style.animation = '';
+            }, 200);
+        }
     });
     
-    // Show selected tab
-    const tabId = tabName + 'Tab';
-    document.getElementById(tabId).classList.remove('hidden');
-    
-    // Load tab data
-    loadTabData(tabName);
+    // Show selected tab with fade in
+    setTimeout(() => {
+        const tabId = tabName + 'Tab';
+        const selectedTab = document.getElementById(tabId);
+        selectedTab.classList.remove('hidden');
+        
+        // Animate all cards in the tab
+        const cards = selectedTab.querySelectorAll('.card, .stat-card, .course-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.style.opacity = '1';
+                animateElement(card, 'animate-fade-in-up');
+            }, index * 50);
+        });
+        
+        // Load tab data
+        loadTabData(tabName);
+    }, 200);
     
     tg.HapticFeedback.impactOccurred('light');
 }

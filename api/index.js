@@ -2,6 +2,7 @@
 const webhookHandler = require('./webhook-simple-v8'); // Используем простой webhook
 const appHandler = require('./app/index');
 const voiceHandler = require('./voice/index');
+const syncHandler = require('./sync');
 
 module.exports = async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -22,11 +23,15 @@ module.exports = async function handler(req, res) {
     return voiceHandler(req, res);
   }
   
+  if (pathname === '/api/sync' || pathname.includes('/sync')) {
+    return syncHandler(req, res);
+  }
+  
   // Default health check
   return res.json({
     status: 'ok',
-    version: '8.0',
-    endpoints: ['/api/webhook', '/api/app', '/api/voice'],
+    version: '8.1',
+    endpoints: ['/api/webhook', '/api/app', '/api/voice', '/api/sync'],
     pathname
   });
 };
