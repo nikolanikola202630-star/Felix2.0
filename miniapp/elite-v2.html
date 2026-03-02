@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Felix Elite - AI Assistant</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Loading */
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            background: var(--gradient-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        #loadingScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--surface);
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            min-width: min-content;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        /* Container */
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: var(--gradient-primary);
+            border-radius: 24px;
+            padding: 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-status {
+            text-align: center;
+            opacity: 0.9;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Button */
+        .btn {
+            padding: 16px 32px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            background: var(--bg);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .stagger-fade-in > * {
+            animation: fadeIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .stagger-fade-in > *:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-fade-in > *:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-fade-in > *:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Felix Elite</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <div class="logo-text">Felix Elite</div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleTheme()">🌙</button>
+                <button class="icon-btn" onclick="showSettings()">⚙️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('home')">🏠 Главная</button>
+            <button class="nav-tab" onclick="showTab('academy')">📚 Академия</button>
+            <button class="nav-tab" onclick="showTab('profile')">👤 Профиль</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        <!-- Home Tab -->
+        <div id="homeTab" class="tab-content">
+            <div class="profile-card fade-in">
+                <div class="profile-avatar">
+                    🤖
+                </div>
+                <div class="profile-name">Добро пожаловать!</div>
+                <div class="profile-status">Твой AI-ассистент готов к работе</div>
+            </div>
+
+            <div class="stats-grid stagger-fade-in">
+                <div class="stat-card">
+                    <span class="stat-icon">📊</span>
+                    <div class="stat-value" id="statLevel">5</div>
+                    <div class="stat-label">Уровень</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⚡</span>
+                    <div class="stat-value" id="statXP">2450</div>
+                    <div class="stat-label">Опыт</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📚</span>
+                    <div class="stat-value" id="statCourses">3</div>
+                    <div class="stat-label">Курсов</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🏆</span>
+                    <div class="stat-value" id="statAchievements">12</div>
+                    <div class="stat-label">Достижений</div>
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-title">🚀 Быстрые действия</div>
+                <button class="btn btn-primary" onclick="openBot()">
+                    <span>🤖</span>
+                    <span>Открыть бота</span>
+                </button>
+                <button class="btn btn-secondary" onclick="showTab('academy')">
+                    <span>📚</span>
+                    <span>Начать обучение</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Academy Tab -->
+        <div id="academyTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title">📚 Курсы скоро появятся</div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Администратор добавит курсы в ближайшее время
+                </p>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profileTab" class="tab-content hidden">
+            <div class="profile-card fade-in">
+                <div class="profile-avatar">
+                    👤
+                </div>
+                <div class="profile-name" id="userName">Пользователь</div>
+                <div class="profile-status">
+                    <span style="background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+                        Уровень 5 • 2450 XP
+                    </span>
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-title">📊 Статистика</div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg); border-radius: 12px;">
+                        <span>📨 Сообщений</span>
+                        <span style="font-weight: 700;">127</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg); border-radius: 12px;">
+                        <span>🤖 AI запросов</span>
+                        <span style="font-weight: 700;">45</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg); border-radius: 12px;">
+                        <span>🔥 Дней подряд</span>
+                        <span style="font-weight: 700;">7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const user = tg.initDataUnsafe?.user || { id: 123456, first_name: 'Demo User' };
+
+        // Initialize
+        setTimeout(() => {
+            document.getElementById('loadingScreen').classList.add('hidden');
+            if (user.first_name) {
+                document.getElementById('userName').textContent = user.first_name;
+            }
+        }, 1000);
+
+        // Show tab
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Show settings
+        function showSettings() {
+            tg.showAlert('Настройки доступны в боте через команду /settings');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Open bot
+        function openBot() {
+            tg.openTelegramLink('https://t.me/fel12x_bot');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        // Apply theme
+        const theme = localStorage.getItem('theme') || 'auto';
+        if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+</body>
+</html>
