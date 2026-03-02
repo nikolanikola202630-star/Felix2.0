@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Tests
+tests
+*.test.js
+coverage
+.nyc_output
+
+# Documentation
+*.md
+!README.md
+docs
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env files
+.env.local
+.env.*.local
+
+# Scripts
+scripts/auto-commit.js
+scripts/deploy-hooks.js
+cleanup.ps1
+setup-vercel.ps1
+push-with-token.ps1
+open-github-desktop.ps1
+
+# Kiro
+.kiro
+
+# Temporary files
+*.tmp
+*.log
