@@ -1793,10 +1793,10 @@
 
         // Get user data
         const user = tg.initDataUnsafe?.user || {};
-        const API_URL = 'https://felix-black.vercel.app/api/miniapp';
-        const COURSES_API = 'https://felix-black.vercel.app/api/courses';
-        const COMMUNITY_API = 'https://felix-black.vercel.app/api/community';
-        const LEARNING_API = 'https://felix-black.vercel.app/api/learning';
+        const API_URL = '/api/app';
+        const COURSES_API = '/api/app';
+        const COMMUNITY_API = '/api/app';
+        const LEARNING_API = '/api/app';
         
         // Hide loading screen after initialization
         window.addEventListener('load', () => {
@@ -1983,7 +1983,7 @@
             
             // Fallback to admin API
             try {
-                const response = await fetch('https://felix-black.vercel.app/api/admin?action=getPartners');
+                const response = await fetch('/api/app?endpoint=admin&action=getPartners');
                 const data = await response.json();
                 
                 if (data.success && data.partners.length > 0) {
@@ -2251,7 +2251,7 @@
         }
 
         function openLesson(courseId, lessonIndex) {
-            fetch(`https://felix-black.vercel.app/api/admin?action=getCourses`)
+            fetch('/api/app?action=getCourses')
                 .then(res => res.json())
                 .then(data => {
                     const course = data.courses.find(c => c.id === courseId);
@@ -2301,7 +2301,7 @@
             };
             
             try {
-                const response = await fetch('https://felix-black.vercel.app/api/admin', {
+                const response = await fetch('/api/app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2343,7 +2343,7 @@
         // Загрузка настроек при старте
         async function loadUserSettings() {
             try {
-                const response = await fetch(`https://felix-black.vercel.app/api/admin?action=getUserSettings&userId=${user.id}`);
+                const response = await fetch(`/api/app?endpoint=admin&action=getUserSettings&userId=${user.id}`);
                 const data = await response.json();
                 
                 if (data.success && data.settings) {
@@ -2464,7 +2464,7 @@
         // Сохранение настроек
         async function savePersonalization() {
             try {
-                const response = await fetch('https://felix-black.vercel.app/api/admin', {
+                const response = await fetch('/api/app', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2522,7 +2522,7 @@
             if (!user.id) return;
             
             try {
-                const response = await fetch(`https://felix-black.vercel.app/api/learning?action=getUserProgress&userId=${user.id}`);
+                const response = await fetch(`/api/app?endpoint=learning&action=getUserProgress&userId=${user.id}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2557,7 +2557,7 @@
             if (!user.id) return;
             
             try {
-                const response = await fetch(`https://felix-black.vercel.app/api/learning?action=getDailyTasks&userId=${user.id}`);
+                const response = await fetch(`/api/app?endpoint=learning&action=getDailyTasks&userId=${user.id}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2598,7 +2598,7 @@
             if (!user.id) return;
             
             try {
-                const response = await fetch(`https://felix-black.vercel.app/api/learning?action=getAchievements&userId=${user.id}`);
+                const response = await fetch(`/api/app?endpoint=learning&action=getAchievements&userId=${user.id}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2633,7 +2633,7 @@
             if (!user.id) return;
             
             try {
-                const response = await fetch(`https://felix-black.vercel.app/api/learning?action=getAnalytics&userId=${user.id}`);
+                const response = await fetch(`/api/app?endpoint=learning&action=getAnalytics&userId=${user.id}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2700,7 +2700,7 @@
 
         async function loadLeaderboard() {
             try {
-                const response = await fetch('https://felix-black.vercel.app/api/learning?action=getLeaderboard');
+                const response = await fetch('/api/app?endpoint=learning&action=getLeaderboard');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -2838,7 +2838,7 @@
             try {
                 document.getElementById('voiceText').textContent = 'Обработка...';
                 
-                const response = await fetch('https://felix-black.vercel.app/api/voice', {
+                const response = await fetch('/api/app?endpoint=voice', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
