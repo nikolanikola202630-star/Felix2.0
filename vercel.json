@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/api/webhook",
+      "dest": "/api/webhook.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },

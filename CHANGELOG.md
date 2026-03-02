@@ -1,74 +1,54 @@
 # Changelog
 
-## [4.2.0] - 2026-03-01
+## [7.0.0] - 2026-03-02
 
-### Добавлено
-- ✨ Команда `/translate` - перевод текста на 12+ языков
-- ✨ Команда `/improve` - улучшение текста
-- 💡 Команда `/brainstorm` - генерация креативных идей
-- 📚 Команда `/explain` - простое объяснение сложных вещей
-- 📊 Команда `/stats` - статистика использования команд
-- 🗂️ In-memory хранилище статистики пользователей
-- 🌍 Поддержка 12 языков для перевода
+### Added
+- Full PostgreSQL database integration (Supabase)
+- Message history with context-aware AI responses
+- Full-text search across messages
+- Automatic tagging and categorization
+- Detailed user statistics
+- Personal AI settings (model, temperature)
+- Voice message support with metadata
+- Image and document handling
+- Export functionality (TXT, JSON, PDF)
 
-### Изменено
-- 🔧 Полная переработка структуры проекта
-- 📝 Обновлен README с актуальной информацией
-- 🎨 Улучшен Mini App интерфейс
+### Changed
+- Migrated from in-memory to database storage
+- Improved AI responses with conversation context
+- Enhanced Mini App with database sync
+- Optimized performance with indexes
 
-### Удалено
-- 🗑️ Удалена вся устаревшая документация
-- 🗑️ Удалены поврежденные файлы
-- 🗑️ Очищена структура проекта от мусора
+### Technical
+- 9 database tables with optimized schema
+- 15+ indexes for fast queries
+- Full-text search (Russian language)
+- Trigram indexes for fuzzy search
+- 5 utility functions
+- 2 automatic triggers
+- Materialized views for statistics
 
-## [4.0.1] - 2026-02-28
+## [6.0.0] - 2025-12-15
 
-### Добавлено
-- 🚀 Speed Insights интеграция
-- 📱 Обновленный Mini App с красивым дизайном
+### Added
+- Learning system with achievements
+- Enhanced Mini App interface
+- Group moderation features
+- User personalization
+- Admin panel
 
-### Изменено
-- 🎨 Улучшен дизайн Mini App
-- 📝 Обновлена документация
+## [5.0.0] - 2025-10-01
 
-## [4.0.0] - 2026-02-27
+### Added
+- Basic AI commands
+- Mini App integration
+- User profiles
+- Statistics tracking
 
-### Добавлено
-- 🎤 Голосовые сообщения (Whisper Large v3)
-- 💬 AI диалоги с контекстом (LLaMA 3.3 70B)
-- 📝 Команда `/organize` - структурирование текста
-- 🧹 Команда `/clear` - очистка истории
-- 📱 Mini App интерфейс
-- 🗂️ In-memory storage для диалогов
+## [4.0.0] - 2025-08-01
 
-### Изменено
-- 🔧 Упрощенная архитектура без БД
-- 📝 Полностью переработанная документация
-
-## [3.1.0] - 2026-02-26
-
-### Добавлено
-- 🎨 Темная тема для Mini App
-- 🔧 Улучшенная обработка ошибок
-
-### Изменено
-- 📝 Обновлена документация
-- 🐛 Исправлены мелкие баги
-
-## [3.0.0] - 2026-02-25
-
-### Добавлено
-- 🎤 Базовое распознавание голоса
-- 💬 Простые AI ответы
-- 📱 Первая версия Mini App
-
-### Изменено
-- 🔧 Переход на Vercel Serverless
-- 📝 Новая документация
-
-## [1.0.0] - 2026-02-20
-
-### Добавлено
-- 🤖 Первая версия бота
-- 💬 Базовые команды
-- 📝 Начальная документация
+### Added
+- Initial release
+- Telegram bot integration
+- Groq AI integration
+- Basic commands

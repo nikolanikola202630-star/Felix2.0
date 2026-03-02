@@ -1,6 +1,7 @@
 {
   "name": "felix-bot",
-  "version": "6.0.0",
+  "version": "7.0.0",
+  "description": "Felix Bot - AI Assistant with full database integration",
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

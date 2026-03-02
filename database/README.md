@@ -1,320 +1,116 @@
-# 🗄️ База данных Felix Bot
+# Database Schema
 
-## О папке database/
+Felix Bot использует PostgreSQL (Supabase) для хранения данных.
 
-Эта папка содержит схемы базы данных для **будущих версий** Felix Bot.
+## Файлы
 
-**Текущая версия v4.2** использует in-memory storage и **НЕ требует** базу данных.
+- `complete-schema.sql` - **Полная актуальная схема** (рекомендуется для новых проектов)
+- `v4-schema.sql` - Оригинальная схема v4
+- `add-message-type-column.sql` - Миграция для добавления message_type
+- `APPLY-SCHEMA.md` - Подробная инструкция по применению
+- `SETUP-SUPABASE.md` - Инструкция по настройке Supabase
 
-## 📁 Содержимое
+## Быстрый старт
 
-- **v4-schema.sql** - Полная схема PostgreSQL с таблицами
-- **SETUP-SUPABASE.md** - Инструкции по настройке Supabase
-- **README.md** - Этот файл
+### Для новой базы данных:
 
-## 🎯 Когда нужна база данных
+1. Создайте проект на https://supabase.com
+2. Откройте SQL Editor в Dashboard
+3. Скопируйте содержимое `complete-schema.sql`
+4. Выполните запрос (Run или Ctrl+Enter)
+5. Добавьте в `.env.local`:
+   ```env
+   DATABASE_URL=postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres
+   ```
 
-База данных понадобится когда вы хотите:
+### Для существующей базы данных:
 
-### Постоянное хранение
-- ✅ Сохранять историю сообщений между перезапусками
-- ✅ Хранить настройки пользователей
-- ✅ Сохранять статистику использования
+Если у вас уже есть данные и нужно добавить только message_type:
 
-### Расширенные функции
-- ✅ Поиск по истории сообщений
-- ✅ Экспорт данных в PDF/DOCX
-- ✅ Теги и категории
-- ✅ Расширенная аналитика
+1. Откройте SQL Editor
+2. Выполните `add-message-type-column.sql`
+3. Проверьте результат
 
-### Масштабирование
-- ✅ Поддержка тысяч пользователей
-- ✅ Резервное копирование данных
-- ✅ Миграции и версионирование
+Подробнее: см. `APPLY-SCHEMA.md`
 
-## 📊 Схема базы данных
+## Структура базы данных
 
-### Таблицы
+### Основные таблицы:
 
-#### users
-Информация о пользователях
+- `users` - Пользователи Telegram
+- `messages` - Все сообщения (text, voice, image, document)
+- `tags` - Теги для категоризации
+- `message_tags` - Связь сообщений и тегов
+- `user_settings` - Настройки пользователей
+
+### Метаданные:
+
+- `voice_messages` - Метаданные голосовых сообщений
+- `image_messages` - Метаданные изображений
+- `document_messages` - Метаданные документов
+- `export_history` - История экспортов
+
+### Представления:
+
+- `user_stats` - Материализованное представление со статистикой
+
+## Возможности
+
+✅ Full-text поиск на русском языке
+✅ Trigram индексы для нечеткого поиска
+✅ Автоматическая категоризация тегами
+✅ История сообщений с фильтрами
+✅ Статистика пользователей
+✅ Экспорт в TXT, JSON, PDF
+✅ Поддержка всех типов сообщений (текст, голос, изображения, документы)
+✅ Оптимизированные индексы для быстрых запросов
+
+## Функции
+
+- `refresh_user_stats()` - Обновление статистики
+- `cleanup_expired_exports()` - Очистка старых экспортов
+- `get_user_message_count(user_id)` - Подсчет сообщений
+- `search_messages_ranked(user_id, query, limit)` - Поиск с ранжированием
+
+## Проверка
+
+После применения схемы выполните:
+
 ```sql
-- id (bigint) - Telegram user ID
-- username (text) - Telegram username
-- first_name (text) - Имя
-- language_code (text) - Язык (ru/en)
-- created_at (timestamp) - Дата регистрации
-- last_active (timestamp) - Последняя активность
+-- Проверить таблицы
+SELECT table_name FROM information_schema.tables 
+WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+
+-- Проверить message_type
+SELECT column_name, data_type FROM information_schema.columns
+WHERE table_name = 'messages' AND column_name = 'message_type';
+
+-- Тестовый запрос
+INSERT INTO users (id, first_name) VALUES (123456789, 'Test') 
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO messages (user_id, role, content, message_type)
+VALUES (123456789, 'user', 'Привет!', 'text') RETURNING *;
 ```
 
-#### messages
-История сообщений
+## Обслуживание
+
+Рекомендуется запускать периодически:
+
 ```sql
-- id (uuid) - Уникальный ID
-- user_id (bigint) - ID пользователя
-- role (text) - user/assistant
-- content (text) - Текст сообщения
-- created_at (timestamp) - Дата создания
+-- Обновить статистику (раз в час)
+SELECT refresh_user_stats();
+
+-- Очистить старые экспорты (раз в день)
+SELECT cleanup_expired_exports();
+
+-- Оптимизация (раз в неделю)
+VACUUM ANALYZE;
 ```
 
-#### voice_messages
-Голосовые сообщения
-```sql
-- id (uuid) - Уникальный ID
-- user_id (bigint) - ID пользователя
-- file_id (text) - Telegram file ID
-- transcription (text) - Распознанный текст
-- duration (integer) - Длительность в секундах
-- created_at (timestamp) - Дата создания
-```
+## Поддержка
 
-#### tags
-Теги для организации
-```sql
-- id (uuid) - Уникальный ID
-- user_id (bigint) - ID пользователя
-- name (text) - Название тега
-- color (text) - Цвет тега
-- created_at (timestamp) - Дата создания
-```
-
-#### user_settings
-Настройки пользователей
-```sql
-- user_id (bigint) - ID пользователя
-- language (text) - Язык интерфейса
-- notifications (boolean) - Уведомления
-- theme (text) - Тема (light/dark)
-- updated_at (timestamp) - Дата обновления
-```
-
-## 🚀 Быстрый старт с Supabase
-
-### Шаг 1: Создайте проект
-1. Зайдите на [supabase.com](https://supabase.com)
-2. Создайте новый проект
-3. Дождитесь инициализации (~2 минуты)
-
-### Шаг 2: Создайте таблицы
-1. Откройте SQL Editor в Supabase
-2. Скопируйте содержимое `v4-schema.sql`
-3. Выполните SQL запрос
-4. Проверьте что все таблицы созданы
-
-### Шаг 3: Получите credentials
-1. Settings → API
-2. Скопируйте:
-   - Project URL
-   - anon/public key
-   - service_role key
-
-### Шаг 4: Добавьте в Vercel
-```env
-DATABASE_URL=postgresql://postgres:[password]@[host]:5432/postgres
-SUPABASE_URL=https://[project-id].supabase.co
-SUPABASE_ANON_KEY=eyJhbGc...
-SUPABASE_SERVICE_KEY=eyJhbGc...
-```
-
-### Шаг 5: Обновите код
-```javascript
-// В api/webhook.js
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
-
-// Сохранение сообщения
-await supabase.from('messages').insert({
-    user_id: userId,
-    role: 'user',
-    content: text
-});
-
-// Получение истории
-const { data } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(20);
-```
-
-## 📖 Подробная инструкция
-
-Полная инструкция по настройке: **SETUP-SUPABASE.md**
-
-## 🔄 Миграция с in-memory на БД
-
-### Было (v4.2):
-```javascript
-// In-memory storage
-const conversations = new Map();
-const userStats = new Map();
-
-// Сохранение
-conversations.set(userId, messages);
-userStats.set(userId, stats);
-
-// Получение
-const history = conversations.get(userId);
-const stats = userStats.get(userId);
-```
-
-### Стало (v4.4+):
-```javascript
-// Database storage
-import { saveMessage, getHistory } from '../lib/db.js';
-
-// Сохранение
-await saveMessage(userId, message);
-await updateStats(userId, command);
-
-// Получение
-const history = await getHistory(userId);
-const stats = await getUserStats(userId);
-```
-
-## 💰 Стоимость
-
-### Supabase Free Tier
-- ✅ 500MB база данных
-- ✅ 1GB файлового хранилища
-- ✅ 2GB bandwidth
-- ✅ 50,000 monthly active users
-- ✅ Достаточно для 1000+ пользователей
-
-### Когда нужен платный план
-- Более 500MB данных
-- Более 50,000 активных пользователей
-- Нужны дополнительные функции (Point-in-time recovery)
-
-## 🔒 Безопасность
-
-### Row Level Security (RLS)
-Схема включает RLS политики:
-```sql
--- Пользователи видят только свои данные
-CREATE POLICY "Users can view own data"
-ON messages FOR SELECT
-USING (auth.uid()::bigint = user_id);
-```
-
-### API Keys
-- **anon key** - для клиентских запросов (безопасно)
-- **service_role key** - для серверных запросов (секретно!)
-
-### Best Practices
-- ✅ Используйте service_role key только на сервере
-- ✅ Никогда не коммитьте ключи в Git
-- ✅ Храните ключи в переменных окружения
-- ✅ Регулярно ротируйте ключи
-
-## 📊 Производительность
-
-### Индексы
-Схема включает оптимальные индексы:
-```sql
-CREATE INDEX idx_messages_user_id ON messages(user_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
-```
-
-### Оптимизация запросов
-```javascript
-// ❌ Плохо - загружает все сообщения
-const { data } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('user_id', userId);
-
-// ✅ Хорошо - только последние 20
-const { data } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(20);
-```
-
-## 🔧 Обслуживание
-
-### Резервное копирование
-Supabase автоматически создает бэкапы:
-- Daily backups (7 дней)
-- Point-in-time recovery (платный план)
-
-### Мониторинг
-Dashboard → Database → Statistics:
-- Размер базы данных
-- Количество запросов
-- Производительность
-
-### Очистка старых данных
-```sql
--- Удалить сообщения старше 90 дней
-DELETE FROM messages 
-WHERE created_at < NOW() - INTERVAL '90 days';
-```
-
-## 🎯 Roadmap
-
-### v4.4 - Базовая БД
-- ✅ Подключение Supabase
-- ✅ Сохранение сообщений
-- ✅ История диалогов
-
-### v4.5 - Расширенные функции
-- ✅ Поиск по истории
-- ✅ Теги и категории
-- ✅ Настройки пользователей
-
-### v5.0 - Полный функционал
-- ✅ Экспорт данных
-- ✅ Расширенная аналитика
-- ✅ Резервное копирование
-
-## 🔗 Полезные ссылки
-
-- **Supabase Docs**: https://supabase.com/docs
-- **PostgreSQL Docs**: https://www.postgresql.org/docs/
-- **Supabase JS Client**: https://supabase.com/docs/reference/javascript
-
-## 💡 Примеры использования
-
-### Пример 1: Сохранение сообщения
-```javascript
-const { data, error } = await supabase
-    .from('messages')
-    .insert({
-        user_id: userId,
-        role: 'user',
-        content: text
-    });
-```
-
-### Пример 2: Получение истории
-```javascript
-const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(20);
-```
-
-### Пример 3: Поиск по тексту
-```javascript
-const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('user_id', userId)
-    .textSearch('content', query);
-```
-
----
-
-**База данных готова к использованию, когда вы будете готовы!**
-
-Подробная инструкция: **SETUP-SUPABASE.md**
+Если возникли проблемы, см. `APPLY-SCHEMA.md` или проверьте:
+- Логи в Supabase Dashboard → Logs
+- Правильность DATABASE_URL
+- Права доступа к базе данных

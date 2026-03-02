@@ -1,294 +1,138 @@
-# 🤖 Felix Bot v6.0 - AI Assistant with Learning System
+# Felix Bot - AI Assistant with Database Integration
 
-Умный Telegram бот с системой прогресса обучения, самообучением, администрированием групп и полноценным Mini App.
+Modern Telegram bot with AI capabilities, database integration, and Mini App interface.
 
----
+## Features
 
-## 🎯 Что нового в v6.0
+- 🤖 AI-powered responses using Groq (Llama 3.3 70B)
+- 💾 PostgreSQL database integration (Supabase)
+- 📱 Telegram Mini App interface
+- 🎓 Learning system with achievements
+- 👥 Group moderation
+- 📊 User statistics and analytics
+- 🔍 Message search and history
+- 🏷️ Automatic tagging
+- 🎨 Personalization
 
-### 🎓 Система прогресса обучения
-- **8 уровней**: От Новичка до Легенды
-- **Начисление XP**: За сообщения, команды, уроки
-- **10 достижений**: С уникальными наградами
-- **Ежедневные задания**: 3 задания каждый день
-- **Рейтинг**: Топ-10 пользователей
-- **Команды**: /level, /achievements, /tasks, /leaderboard
+## Quick Start
 
-### 🔒 Улучшения безопасности
-- Все секреты в environment variables
-- Нет hardcoded API ключей
-- Конфигурируемые URL
+### 1. Setup Database
 
-### ⚡ Оптимизация
-- Улучшенная обработка ошибок
-- Оптимизированные API вызовы
-- Vercel.json конфигурация
-
----
-
-## 🎯 Что было в v5.0
-
-### 🧠 Самообучение под пользователя
-- **Анализ стиля общения**: Определяет формальность (formal/casual/mixed)
-- **Отслеживание интересов**: Автоматически находит темы, которые вас интересуют
-- **Персонализация ответов**: Адаптирует тон, длину и стиль под вас
-- **Прогресс обучения**: 0-100% в зависимости от количества общения
-- **Команда `/profile`**: Посмотреть свой профиль обучения
-
-### 🛡️ Администратор группы
-- **Автомодерация**: Спам, CAPS, повторяющиеся символы
-- **Система предупреждений**: 3 варна = автобан на 24 часа
-- **Автоудаление**: Нарушения удаляются автоматически
-- **Приветствие новых**: Автоматическое приветствие с правилами
-- **Статистика группы**: Сообщения, активные пользователи, топ участников
-- **Команда `/groupstats`**: Статистика группы (только для админов)
-
-### 📱 Mini App v5.0
-- **4 вкладки**: Профиль, Команды, Группа, Настройки
-- **Реальные данные**: Интеграция с API для получения статистики
-- **Управление**: Настройка модерации, приветствия, FAQ
-- **Быстрый доступ**: Тап на команду = отправка в бота
-- **Красивый дизайн**: Градиенты, анимации, адаптивность
-
----
-
-## ✨ Все возможности
-
-### 🤖 AI Команды
-- `/ask [вопрос]` - Задать вопрос AI с персонализацией
-- `/summary [текст]` - Краткое содержание текста
-- `/analyze [текст]` - Анализ текста и тональности
-- `/generate [тема]` - Генерация контента
-- `/translate [текст]` - Перевод текста
-- `/improve [текст]` - Улучшение текста
-- `/brainstorm [тема]` - Генерация идей
-- `/explain [концепция]` - Объяснение концепций
-
-### 👤 Профиль и статистика
-- `/profile` - Ваш профиль обучения
-- `/stats` - Ваша статистика использования
-- `/level` - Ваш уровень и XP
-- `/achievements` - Ваши достижения
-- `/tasks` - Ежедневные задания
-- `/leaderboard` - Топ-10 пользователей
-- `/help` - Список всех команд
-
-### 👥 Группа (только для админов)
-- `/groupstats` - Статистика группы
-- `/setwelcome [текст]` - Настроить приветствие (скоро)
-- `/addfaq [вопрос] | [ответ]` - Добавить FAQ (скоро)
-- `/faq [вопрос]` - Поиск в FAQ (скоро)
-
----
-
-## 🚀 Быстрый старт
-
-### 1. Открыть бота
-Найти в Telegram: [@fel12x_bot](https://t.me/fel12x_bot)
-
-### 2. Начать общение
-```
-/start - Начать работу
-/help - Список команд
+```bash
+# Create Supabase project at https://supabase.com
+# Run database/complete-schema.sql in SQL Editor
+# Copy DATABASE_URL from Settings → Database
 ```
 
-### 3. Попробовать AI
-```
-/ask что такое JavaScript?
-/translate Hello, how are you?
-/brainstorm идеи для стартапа
-```
+### 2. Environment Variables
 
-### 4. Открыть Mini App
-Нажать кнопку меню → "Открыть панель"
+Create `.env.local`:
 
----
-
-## 📱 Mini App
-
-### Доступ
-- **URL**: https://felix-black.vercel.app/miniapp/
-- **В боте**: Кнопка меню → "Открыть панель"
-
-### Возможности
-- **Профиль**: Прогресс обучения, статистика, интересы
-- **Команды**: Все AI команды с быстрым запуском
-- **Группа**: Модерация, приветствие, FAQ, статистика
-- **Настройки**: Самообучение, уведомления, информация
-
-### API
-```javascript
-// Получить профиль
-GET /api/miniapp?action=getProfile&userId=123456789
-
-// Получить статистику группы
-GET /api/miniapp?action=getGroupStats&groupId=-1001234567890
-
-// Обновить настройки
-POST /api/miniapp
-{
-  "action": "updateSettings",
-  "userId": 123456789,
-  "settings": { ... }
-}
+```env
+TELEGRAM_BOT_TOKEN=your_bot_token
+GROQ_API_KEY=your_groq_key
+DATABASE_URL=postgresql://...
+ADMIN_ID=your_telegram_id
+MINIAPP_URL=https://your-project.vercel.app/miniapp/
 ```
 
----
+### 3. Deploy to Vercel
 
-## 🛡️ Использование в группах
+```bash
+# Push to GitHub
+git add .
+git commit -m "Initial commit"
+git push
 
-### Шаг 1: Добавить бота
-1. Открыть группу
-2. Добавить @fel12x_bot
-3. Дать права администратора
-
-### Шаг 2: Автоматические функции
-- ✅ Приветствие новых участников
-- ✅ Модерация спама и нарушений
-- ✅ Система предупреждений
-- ✅ Сбор статистики
-
-### Шаг 3: Команды для админов
-```
-/groupstats - Статистика группы
-/setwelcome - Настроить приветствие (скоро)
-/addfaq - Добавить FAQ (скоро)
+# Vercel will auto-deploy
+# Add environment variables in Vercel Dashboard
 ```
 
----
+### 4. Set Webhook
 
-## 🧠 Как работает самообучение
+```bash
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -d "url=https://your-project.vercel.app/api/webhook"
+```
 
-### Анализ стиля
-1. **Формальность**: Определяет formal/casual/mixed по словам
-2. **Эмодзи**: Считает среднее количество на сообщение
-3. **Длина**: Анализирует среднюю длину сообщений
+## Commands
 
-### Извлечение интересов
-1. Находит ключевые слова в сообщениях
-2. Отслеживает частоту обсуждения тем
-3. Строит профиль интересов
+### Basic
+- `/start` - Welcome message
+- `/help` - Show help
+- `/profile` - User profile
+- `/stats` - Statistics
+- `/history` - Message history
+- `/search [query]` - Search messages
 
-### Персонализация
-1. Адаптирует тон под пользователя
-2. Использует эмодзи если пользователь их использует
-3. Делает ответы короткими или подробными
-4. Учитывает интересы в ответах
+### AI Commands
+- `/ask [question]` - Ask AI
+- `/summary [text]` - Summarize
+- `/analyze [text]` - Analyze
+- `/generate [topic]` - Generate content
+- `/translate [text]` - Translate
+- `/improve [text]` - Improve text
+- `/brainstorm [topic]` - Generate ideas
+- `/explain [topic]` - Explain
 
-### Прогресс
-- 0-100% в зависимости от количества сообщений
-- 100 сообщений = 100% обучения
-- Чем больше общения, тем точнее адаптация
+### Admin
+- `/admin` - Admin panel (admin only)
 
----
+## Project Structure
 
-## 🔧 Технологии
+```
+├── api/              # API endpoints
+│   ├── webhook.js    # Main bot webhook
+│   ├── admin.js      # Admin API
+│   ├── learning.js   # Learning system
+│   └── ...
+├── lib/              # Libraries
+│   ├── db.js         # Database module
+│   └── ai.js         # AI module
+├── database/         # Database schemas
+│   └── complete-schema.sql
+├── miniapp/          # Mini App files
+│   ├── index.html    # Main app
+│   └── admin.html    # Admin panel
+└── package.json
+```
 
-### AI
-- **LLaMA 3.3 70B** - Основная модель для диалогов
-- **Whisper Large v3** - Распознавание голоса
-- **Groq API** - Быстрая обработка запросов
+## Tech Stack
 
-### Backend
-- **Node.js** - Серверная часть
-- **Vercel** - Хостинг и деплой
-- **Telegram Bot API** - Интеграция с Telegram
+- **Backend:** Node.js, Vercel Serverless
+- **Database:** PostgreSQL (Supabase)
+- **AI:** Groq (Llama 3.3 70B)
+- **Bot:** Telegram Bot API
+- **Frontend:** HTML/CSS/JS (Mini App)
 
-### Frontend
-- **Telegram Mini App** - Веб-интерфейс
-- **Vanilla JS** - Без фреймворков
-- **CSS3** - Градиенты и анимации
+## Database Schema
 
-### Хранилище
-- **In-Memory** - Текущая версия (Map)
-- **Supabase** - Планируется для v5.1
+- `users` - User profiles
+- `messages` - Message history
+- `tags` - Message tags
+- `user_settings` - User preferences
+- `voice_messages` - Voice metadata
+- `image_messages` - Image metadata
+- `document_messages` - Document metadata
+- `export_history` - Export tracking
 
----
+## Development
 
-## 📊 Статистика
+```bash
+# Install dependencies
+npm install
 
-### Команды
-- 8 AI команд
-- 3 информационные команды
-- 3+ админ команды (в разработке)
+# Run locally (requires ngrok for webhook)
+npm run dev
 
-### Функции
-- Самообучение под пользователя
-- Модерация групп
-- Приветствие новых
-- Статистика и аналитика
-- Mini App интерфейс
+# Deploy
+git push origin main
+```
 
----
+## License
 
-## 🗺️ Roadmap
+MIT
 
-### v6.1 (следующая версия)
-- [ ] База данных Supabase (персистентное хранилище)
-- [ ] Голосовое управление в Mini App
-- [ ] Новые вкладки (Обучение, Аналитика, Рейтинг)
-- [ ] Интерактивные уроки с квизами
+## Support
 
-### v6.2
-- [ ] Команды для админов (/setwelcome, /addfaq, /moderate)
-- [ ] FAQ система
-- [ ] Расширенная модерация (ссылки, упоминания)
-- [ ] Система напоминаний
-
-### v6.3
-- [ ] Мультиязычность
-- [ ] Опросы и голосования
-- [ ] Расписание событий
-- [ ] Внутренняя экономика
-
----
-
-## 📚 Документация
-
-- **FELIX-V5-COMPLETE.md** - Полное описание v5.0
-- **FELIX-V5-ROADMAP.md** - План развития
-- **V5-IMPLEMENTATION.md** - Детали реализации
-- **MINIAPP-V5.md** - Документация Mini App
-- **QUICKSTART.md** - Быстрый старт
-
----
-
-## 🤝 Поддержка
-
-### Проблемы
-Если бот не работает:
-1. Проверить `/start` - бот должен ответить
-2. Попробовать `/help` - должен показать команды
-3. Проверить права админа (для групп)
-
-### Контакты
-- **Telegram**: @fel12x_bot
-- **GitHub**: github.com/egoistsuport-coder/Felix-
-- **Vercel**: https://felix-black.vercel.app
-
----
-
-## 📄 Лицензия
-
-MIT License - свободное использование
-
----
-
-## 🎉 Благодарности
-
-- **Groq** - За быстрый AI API
-- **Telegram** - За Bot API и Mini Apps
-- **Vercel** - За бесплатный хостинг
-- **LLaMA** - За мощную AI модель
-
----
-
-**Версия**: 6.0.0  
-**Дата**: 02.03.2026  
-**Статус**: ✅ ГОТОВ К ИСПОЛЬЗОВАНИЮ!
-
-## 🚀 Деплой
-
-См. `DEPLOY-V6-COMPLETE.md` для полных инструкций по деплою.
-
-**Создано с ❤️ для Telegram сообщества**
+For issues and questions, please open an issue on GitHub.
