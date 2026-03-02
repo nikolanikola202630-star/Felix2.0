@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Партнерский кабинет - Академия</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      padding-bottom: 70px;
+    }
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+    .header { margin-bottom: 24px; }
+    .header h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+    .header p { color: var(--tg-theme-hint-color, #999); }
+    
+    .balance-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 24px;
+      color: white;
+      margin-bottom: 24px;
+    }
+    .balance-label { opacity: 0.9; font-size: 14px; margin-bottom: 8px; }
+    .balance-amount { font-size: 36px; font-weight: 600; margin-bottom: 16px; }
+    .withdraw-button {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stat-value { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .stat-label { font-size: 12px; color: var(--tg-theme-hint-color, #999); }
+    
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+    
+    .referral-card {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .referral-link {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .referral-input {
+      flex: 1;
+      padding: 12px;
+      background: var(--tg-theme-bg-color, #ffffff);
+      border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      width: 100%;
+    }
+    
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--tg-theme-bg-color, #ffffff);
+      border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--tg-theme-hint-color, #999);
+      font-size: 12px;
+      padding: 4px 12px;
+    }
+    .nav-item.active { color: var(--tg-theme-link-color, #3390ec); }
+    .nav-icon { font-size: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💼 Партнерский кабинет</h1>
+      <p>Зарабатывайте 20% с покупок ваших рефералов</p>
+    </div>
+
+    <div class="balance-card">
+      <div class="balance-label">Доступно для вывода</div>
+      <div class="balance-amount" id="balance">0 ₽</div>
+      <button class="withdraw-button" onclick="requestPayout()">
+        💰 Вывести средства
+      </button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalClicks">0</div>
+        <div class="stat-label">Переходов</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="registrations">0</div>
+        <div class="stat-label">Регистраций</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="purchases">0</div>
+        <div class="stat-label">Покупок</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalEarned">0 ₽</div>
+        <div class="stat-label">Всего заработано</div>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2 class="section-title">🔗 Ваша партнерская ссылка</h2>
+      <div class="referral-card">
+        <p style="margin-bottom: 12px; color: var(--tg-theme-hint-color, #999);">
+          Делитесь этой ссылкой и получайте 20% с каждой покупки
+        </p>
+        <div class="referral-link">
+          <input type="text" id="referralLink" class="referral-input" readonly>
+          <button class="btn btn-primary" onclick="copyLink()" style="width: auto;">📋</button>
+        </div>
+        <button class="btn btn-primary" onclick="shareLink()">
+          📤 Поделиться ссылкой
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div>Главная</div>
+    </a>
+    <a href="catalog.html" class="nav-item">
+      <div class="nav-icon">📚</div>
+      <div>Каталог</div>
+    </a>
+    <a href="my-courses.html" class="nav-item">
+      <div class="nav-icon">📖</div>
+      <div>Мои курсы</div>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div>Профиль</div>
+    </a>
+  </nav>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.location.href = 'profile.html');
+
+    const user = tg.initDataUnsafe.user || { id: 0 };
+    const API_URL = 'https://felix2-0.vercel.app/api';
+
+    async function loadStats() {
+      try {
+        // TODO: Загрузить с API
+        // const stats = await fetch(`${API_URL}/partner/stats?user_id=${user.id}`).then(r => r.json());
+        
+        // Тестовые данные
+        const stats = {
+          balance: 0,
+          total_clicks: 0,
+          registrations: 0,
+          purchases: 0,
+          total_earned: 0,
+          referral_link: `https://t.me/AcademyBot?start=ref_partner${user.id}`
+        };
+
+        document.getElementById('balance').textContent = stats.balance + ' ₽';
+        document.getElementById('totalClicks').textContent = stats.total_clicks;
+        document.getElementById('registrations').textContent = stats.registrations;
+        document.getElementById('purchases').textContent = stats.purchases;
+        document.getElementById('totalEarned').textContent = stats.total_earned + ' ₽';
+        document.getElementById('referralLink').value = stats.referral_link;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        tg.showAlert('Ошибка загрузки статистики');
+      }
+    }
+
+    function requestPayout() {
+      const balance = parseFloat(document.getElementById('balance').textContent);
+      
+      if (balance < 1000) {
+        tg.showAlert('Минимальная сумма вывода: 1000 ₽');
+        return;
+      }
+
+      tg.showConfirm(`Вывести ${balance} ₽?`, async (confirmed) => {
+        if (confirmed) {
+          tg.showAlert('Функция вывода будет доступна в следующей версии');
+        }
+      });
+    }
+
+    function copyLink() {
+      const input = document.getElementById('referralLink');
+      input.select();
+      document.execCommand('copy');
+      tg.showAlert('✅ Ссылка скопирована!');
+    }
+
+    function shareLink() {
+      const link = document.getElementById('referralLink').value;
+      tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Присоединяйся к Академии и начни зарабатывать!')}`);
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>

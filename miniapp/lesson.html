@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Урок - Академия</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--tg-theme-bg-color, #000000);
+      color: var(--tg-theme-text-color, #ffffff);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000;
+    }
+
+    .video-player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .lesson-content {
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      padding: 20px;
+    }
+
+    .lesson-header {
+      margin-bottom: 20px;
+    }
+
+    .lesson-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .lesson-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--tg-theme-hint-color, #999);
+    }
+
+    .lesson-description {
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--tg-theme-link-color, #3390ec);
+      transition: width 0.3s;
+    }
+
+    .navigation {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn:active {
+      opacity: 0.8;
+    }
+
+    .btn-secondary {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+    }
+
+    .btn-primary {
+      background: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .complete-button {
+      width: 100%;
+      padding: 16px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 24px;
+    }
+
+    .complete-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe 
+      id="videoPlayer"
+      class="video-player"
+      src=""
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="lesson-content">
+    <div class="lesson-header">
+      <h1 id="lessonTitle" class="lesson-title">Загрузка...</h1>
+      <div class="lesson-meta">
+        <span id="lessonDuration">0 мин</span>
+        <span id="lessonProgress">0% пройдено</span>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+    </div>
+
+    <div id="lessonDescription" class="lesson-description">
+      Загрузка описания...
+    </div>
+
+    <button id="completeButton" class="complete-button" onclick="completeLesson()" disabled>
+      ✓ Отметить как пройденный
+    </button>
+
+    <div class="navigation">
+      <button class="btn btn-secondary" onclick="previousLesson()">
+        ← Предыдущий
+      </button>
+      <button class="btn btn-primary" onclick="nextLesson()">
+        Следующий →
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.history.back());
+
+    const user = tg.initDataUnsafe.user || { id: 0 };
+    const API_URL = 'https://felix2-0.vercel.app/api';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const lessonId = urlParams.get('id');
+
+    let lessonData = null;
+    let watchTime = 0;
+    let watchInterval = null;
+
+    async function loadLesson() {
+      try {
+        // TODO: Загрузить с API
+        // const response = await fetch(`${API_URL}/lessons/${lessonId}?user_id=${user.id}`);
+        // lessonData = await response.json();
+
+        // Тестовые данные
+        lessonData = {
+          id: lessonId,
+          title: 'Введение в трейдинг',
+          description: 'В этом уроке вы узнаете основы трейдинга, что такое биржа, как работают рынки и какие инструменты используют трейдеры.',
+          duration: 15,
+          video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+          completed: false,
+          watch_time: 0,
+          course_id: 1
+        };
+
+        renderLesson();
+        startWatchTracking();
+      } catch (error) {
+        console.error('Error loading lesson:', error);
+        tg.showAlert('Ошибка загрузки урока');
+      }
+    }
+
+    function renderLesson() {
+      document.getElementById('lessonTitle').textContent = lessonData.title;
+      document.getElementById('lessonDescription').textContent = lessonData.description;
+      document.getElementById('lessonDuration').textContent = lessonData.duration + ' мин';
+      document.getElementById('videoPlayer').src = lessonData.video_url;
+
+      updateProgress();
+    }
+
+    function startWatchTracking() {
+      watchInterval = setInterval(() => {
+        watchTime += 1;
+        
+        // Обновить прогресс каждые 10 секунд
+        if (watchTime % 10 === 0) {
+          updateProgress();
+          saveProgress();
+        }
+
+        // Разрешить завершение после 80% просмотра
+        const watchPercent = (watchTime / (lessonData.duration * 60)) * 100;
+        if (watchPercent >= 80) {
+          document.getElementById('completeButton').disabled = false;
+        }
+      }, 1000);
+    }
+
+    function updateProgress() {
+      const watchPercent = Math.min((watchTime / (lessonData.duration * 60)) * 100, 100);
+      document.getElementById('progressFill').style.width = watchPercent + '%';
+      document.getElementById('lessonProgress').textContent = Math.floor(watchPercent) + '% пройдено';
+    }
+
+    async function saveProgress() {
+      try {
+        // TODO: Сохранить прогресс
+        // await fetch(`${API_URL}/lessons/${lessonId}/progress`, {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     user_id: user.id,
+        //     watch_time: watchTime
+        //   })
+        // });
+        console.log('Progress saved:', watchTime);
+      } catch (error) {
+        console.error('Error saving progress:', error);
+      }
+    }
+
+    async function completeLesson() {
+      try {
+        // TODO: Отметить как завершенный
+        // await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ user_id: user.id })
+        // });
+
+        tg.showAlert('✓ Урок завершен!', () => {
+          nextLesson();
+        });
+      } catch (error) {
+        console.error('Error completing lesson:', error);
+        tg.showAlert('Ошибка сохранения');
+      }
+    }
+
+    function previousLesson() {
+      // TODO: Загрузить предыдущий урок
+      tg.showAlert('Предыдущий урок');
+    }
+
+    function nextLesson() {
+      // TODO: Загрузить следующий урок
+      tg.showAlert('Следующий урок');
+    }
+
+    // Сохранить прогресс при выходе
+    window.addEventListener('beforeunload', () => {
+      if (watchInterval) {
+        clearInterval(watchInterval);
+        saveProgress();
+      }
+    });
+
+    loadLesson();
+  </script>
+</body>
+</html>

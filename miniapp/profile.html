@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Профиль - Академия</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      padding-bottom: 70px;
+    }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+    .profile-header {
+      text-align: center;
+      padding: 32px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 16px;
+    }
+
+    .profile-name { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .profile-id { opacity: 0.8; font-size: 14px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .stat-label { font-size: 12px; color: var(--tg-theme-hint-color, #999); }
+
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+
+    .referral-card {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .referral-link {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .referral-input {
+      flex: 1;
+      padding: 12px;
+      background: var(--tg-theme-bg-color, #ffffff);
+      border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+    }
+
+    .btn-secondary {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      color: var(--tg-theme-text-color, #000);
+    }
+
+    .menu-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .menu-item {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .menu-item:active { transform: scale(0.98); }
+
+    .menu-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--tg-theme-button-color, #3390ec);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .menu-title { font-weight: 600; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--tg-theme-bg-color, #ffffff);
+      border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--tg-theme-hint-color, #999);
+      font-size: 12px;
+      padding: 4px 12px;
+    }
+
+    .nav-item.active { color: var(--tg-theme-link-color, #3390ec); }
+    .nav-icon { font-size: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-header">
+      <div class="avatar" id="avatar">👤</div>
+      <div class="profile-name" id="userName">Загрузка...</div>
+      <div class="profile-id" id="userId">ID: 0</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="coursesCount">0</div>
+        <div class="stat-label">Курсов</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="bonusBalance">0 ₽</div>
+        <div class="stat-label">Бонусов</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="referralsCount">0</div>
+        <div class="stat-label">Рефералов</div>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2 class="section-title">🎁 Реферальная программа</h2>
+      <div class="referral-card">
+        <p style="margin-bottom: 12px; color: var(--tg-theme-hint-color, #999);">
+          Приглашай друзей и получай 10% бонусов с их покупок
+        </p>
+        <div class="referral-link">
+          <input type="text" id="referralLink" class="referral-input" readonly>
+          <button class="btn btn-primary" onclick="copyLink()">📋</button>
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="shareLink()">
+          📤 Поделиться ссылкой
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">⚙️ Настройки</h2>
+      <div class="menu-list">
+        <div class="menu-item" onclick="openPartner()">
+          <div class="menu-item-left">
+            <div class="menu-icon">💼</div>
+            <div class="menu-title">Партнерский кабинет</div>
+          </div>
+          <div>→</div>
+        </div>
+        <div class="menu-item" onclick="openSupport()">
+          <div class="menu-item-left">
+            <div class="menu-icon">💬</div>
+            <div class="menu-title">Поддержка</div>
+          </div>
+          <div>→</div>
+        </div>
+        <div class="menu-item" onclick="openAbout()">
+          <div class="menu-item-left">
+            <div class="menu-icon">ℹ️</div>
+            <div class="menu-title">О приложении</div>
+          </div>
+          <div>→</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div>Главная</div>
+    </a>
+    <a href="catalog.html" class="nav-item">
+      <div class="nav-icon">📚</div>
+      <div>Каталог</div>
+    </a>
+    <a href="my-courses.html" class="nav-item">
+      <div class="nav-icon">📖</div>
+      <div>Мои курсы</div>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <div class="nav-icon">👤</div>
+      <div>Профиль</div>
+    </a>
+  </nav>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.location.href = 'index.html');
+
+    const user = tg.initDataUnsafe.user || { first_name: 'Пользователь', id: 0 };
+    const API_URL = 'https://felix2-0.vercel.app/api';
+
+    async function loadProfile() {
+      document.getElementById('userName').textContent = user.first_name;
+      document.getElementById('userId').textContent = `ID: ${user.id}`;
+      document.getElementById('avatar').textContent = user.first_name[0].toUpperCase();
+
+      // TODO: Загрузить с API
+      document.getElementById('coursesCount').textContent = '0';
+      document.getElementById('bonusBalance').textContent = '0 ₽';
+      document.getElementById('referralsCount').textContent = '0';
+      document.getElementById('referralLink').value = `https://t.me/AcademyBot?start=ref_user${user.id}`;
+    }
+
+    function copyLink() {
+      const input = document.getElementById('referralLink');
+      input.select();
+      document.execCommand('copy');
+      tg.showAlert('✅ Ссылка скопирована!');
+    }
+
+    function shareLink() {
+      const link = document.getElementById('referralLink').value;
+      tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Присоединяйся к Академии!')}`);
+    }
+
+    function openPartner() {
+      window.location.href = 'partner.html';
+    }
+
+    function openSupport() {
+      tg.showAlert('Напишите нам: @support');
+    }
+
+    function openAbout() {
+      tg.showAlert('Академия v1.0\n\nОбразовательная платформа в Telegram');
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

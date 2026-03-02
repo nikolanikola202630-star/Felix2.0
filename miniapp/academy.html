@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Академия - Единая экосистема</title>
+  <title>Академия - Главная</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
@@ -25,7 +25,6 @@
       padding: 16px;
     }
 
-    /* Приветствие */
     .welcome {
       padding: 20px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -44,16 +43,6 @@
       font-size: 14px;
     }
 
-    .welcome-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.2);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    /* Секции */
     .section {
       margin-bottom: 32px;
     }
@@ -76,7 +65,6 @@
       text-decoration: none;
     }
 
-    /* Карусель */
     .carousel {
       display: flex;
       gap: 16px;
@@ -95,7 +83,6 @@
       border-radius: 2px;
     }
 
-    /* Карточки курсов */
     .card {
       flex: 0 0 280px;
       scroll-snap-align: start;
@@ -147,70 +134,12 @@
       color: #10b981;
     }
 
-    /* Быстрые действия */
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .action-card {
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .action-card:active {
-      transform: scale(0.98);
-    }
-
-    .action-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    .action-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .action-desc {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #999);
-    }
-
-    /* Статистика */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color, #999);
-    }
-
-    /* Нижняя навигация */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -249,6 +178,12 @@
       padding: 40px;
       color: var(--tg-theme-hint-color, #999);
     }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--tg-theme-hint-color, #999);
+    }
   </style>
 </head>
 <body>
@@ -256,55 +191,14 @@
     <!-- Приветствие -->
     <div class="welcome">
       <h1>Привет, <span id="userName">Пользователь</span>! 👋</h1>
-      <p>Добро пожаловать в единую экосистему обучения</p>
-      <div id="referralBadge" style="display:none" class="welcome-badge"></div>
-    </div>
-
-    <!-- Статистика пользователя -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="coursesCount">0</div>
-        <div class="stat-label">Курсов</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="bonusBalance">0</div>
-        <div class="stat-label">Бонусов</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="referralsCount">0</div>
-        <div class="stat-label">Рефералов</div>
-      </div>
-    </div>
-
-    <!-- Быстрые действия -->
-    <div class="quick-actions">
-      <div class="action-card" onclick="openCatalog()">
-        <div class="action-icon">📚</div>
-        <div class="action-title">Каталог</div>
-        <div class="action-desc">Все курсы</div>
-      </div>
-      <div class="action-card" onclick="openMyCourses()">
-        <div class="action-icon">📖</div>
-        <div class="action-title">Мои курсы</div>
-        <div class="action-desc">Продолжить</div>
-      </div>
-      <div class="action-card" onclick="openProfile()">
-        <div class="action-icon">👤</div>
-        <div class="action-title">Профиль</div>
-        <div class="action-desc">Настройки</div>
-      </div>
-      <div class="action-card" onclick="openPartner()">
-        <div class="action-icon">💼</div>
-        <div class="action-title">Партнерка</div>
-        <div class="action-desc">Заработок</div>
-      </div>
+      <p>Продолжай обучение или выбери новый курс</p>
     </div>
 
     <!-- Бесплатные материалы -->
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">🎁 Бесплатные уроки</h2>
-        <a href="#" onclick="openCatalog('free'); return false;" class="see-all">Все →</a>
+        <a href="catalog.html?filter=free" class="see-all">Все →</a>
       </div>
       <div id="freeLessons" class="carousel">
         <div class="loading">Загрузка...</div>
@@ -315,7 +209,7 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">🔥 Популярные курсы</h2>
-        <a href="#" onclick="openCatalog(); return false;" class="see-all">Все →</a>
+        <a href="catalog.html" class="see-all">Все →</a>
       </div>
       <div id="popularCourses" class="carousel">
         <div class="loading">Загрузка...</div>
@@ -335,19 +229,19 @@
 
   <!-- Нижняя навигация -->
   <nav class="bottom-nav">
-    <a href="#" onclick="goHome(); return false;" class="nav-item active">
+    <a href="academy.html" class="nav-item active">
       <div class="nav-icon">🏠</div>
       <div>Главная</div>
     </a>
-    <a href="#" onclick="openCatalog(); return false;" class="nav-item">
+    <a href="catalog.html" class="nav-item">
       <div class="nav-icon">📚</div>
       <div>Каталог</div>
     </a>
-    <a href="#" onclick="openMyCourses(); return false;" class="nav-item">
+    <a href="my-courses.html" class="nav-item">
       <div class="nav-icon">📖</div>
       <div>Мои курсы</div>
     </a>
-    <a href="#" onclick="openProfile(); return false;" class="nav-item">
+    <a href="profile.html" class="nav-item">
       <div class="nav-icon">👤</div>
       <div>Профиль</div>
     </a>
@@ -361,42 +255,12 @@
 
     // Получение данных пользователя
     const user = tg.initDataUnsafe.user || { first_name: 'Пользователь', id: 0 };
-    const startParam = tg.initDataUnsafe.start_param || ''; // Реферальный код
     const API_URL = 'https://felix2-0.vercel.app/api';
-
-    // Глобальное состояние
-    window.appState = {
-      user: user,
-      referralCode: startParam,
-      currentPage: 'home',
-      userStats: {
-        courses: 0,
-        bonus: 0,
-        referrals: 0
-      }
-    };
 
     // Показать имя пользователя
     document.getElementById('userName').textContent = user.first_name;
 
-    // Обработка реферального кода
-    if (startParam) {
-      console.log('Referral code:', startParam);
-      const badge = document.getElementById('referralBadge');
-      
-      if (startParam.startsWith('ref_partner')) {
-        badge.textContent = '✨ Партнерская ссылка';
-        badge.style.display = 'inline-block';
-      } else if (startParam.startsWith('ref_user')) {
-        badge.textContent = '🎁 Реферальная ссылка';
-        badge.style.display = 'inline-block';
-      }
-
-      // TODO: Сохранить реферал в БД
-      // await saveReferral(user.id, startParam);
-    }
-
-    // Тестовые данные
+    // Тестовые данные (пока нет API)
     const testCourses = [
       {
         id: 1,
@@ -429,7 +293,7 @@
       const container = document.getElementById(containerId);
       
       if (items.length === 0) {
-        container.innerHTML = '<div class="loading">Пока нет курсов</div>';
+        container.innerHTML = '<div class="empty">Пока нет курсов</div>';
         return;
       }
 
@@ -442,61 +306,37 @@
               <span class="card-price ${item.price === 0 ? 'free' : ''}">
                 ${item.price > 0 ? item.price + ' ₽' : 'Бесплатно'}
               </span>
-              <span>⭐ ${item.rating}</span>
+              <span class="rating">⭐ ${item.rating}</span>
             </div>
           </div>
         </div>
       `).join('');
     }
 
-    // Навигация
-    function goHome() {
-      window.location.reload();
-    }
-
-    function openCatalog(filter = null) {
-      window.location.href = filter ? `catalog.html?filter=${filter}` : 'catalog.html';
-    }
-
+    // Открыть курс
     function openCourse(courseId) {
       window.location.href = `course.html?id=${courseId}`;
-    }
-
-    function openMyCourses() {
-      window.location.href = 'my-courses.html';
-    }
-
-    function openProfile() {
-      window.location.href = 'profile.html';
-    }
-
-    function openPartner() {
-      window.location.href = 'partner.html';
     }
 
     // Загрузка данных
     async function loadData() {
       try {
-        // TODO: Загрузить с API
-        // const stats = await fetch(`${API_URL}/user/stats?user_id=${user.id}`).then(r => r.json());
-        // const courses = await fetch(`${API_URL}/courses`).then(r => r.json());
-
         // Пока используем тестовые данные
-        document.getElementById('coursesCount').textContent = '0';
-        document.getElementById('bonusBalance').textContent = '0 ₽';
-        document.getElementById('referralsCount').textContent = '0';
-
         const freeCourses = testCourses.filter(c => c.price === 0);
         const popularCourses = testCourses;
 
         renderCarousel('freeLessons', freeCourses);
         renderCarousel('popularCourses', popularCourses);
 
-        // Проверить реферала партнера
-        if (startParam && startParam.startsWith('ref_partner')) {
-          document.getElementById('partnerSection').style.display = 'block';
-          renderCarousel('partnerCourses', testCourses);
-        }
+        // TODO: Проверить реферала и показать рекомендации партнера
+        // const referrer = await fetch(`${API_URL}/user/referrer`, {
+        //   headers: { 'X-Telegram-Init-Data': tg.initData }
+        // }).then(r => r.json());
+        
+        // if (referrer.partner_id) {
+        //   document.getElementById('partnerSection').style.display = 'block';
+        //   renderCarousel('partnerCourses', partnerCourses);
+        // }
       } catch (error) {
         console.error('Error loading data:', error);
         tg.showAlert('Ошибка загрузки данных');
@@ -510,10 +350,6 @@
     tg.BackButton.onClick(() => {
       tg.close();
     });
-
-    console.log('🎓 Академия - Единая экосистема загружена');
-    console.log('User:', user);
-    console.log('Referral code:', startParam);
   </script>
 </body>
 </html>

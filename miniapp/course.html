@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Курс - Академия</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .course-header {
+      position: relative;
+      height: 250px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .course-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .course-content {
+      padding: 20px;
+    }
+
+    .course-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .course-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--tg-theme-hint-color, #999);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .course-price {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--tg-theme-link-color, #3390ec);
+      margin-bottom: 16px;
+    }
+
+    .course-price.free {
+      color: #10b981;
+    }
+
+    .course-description {
+      line-height: 1.6;
+      margin-bottom: 24px;
+      color: var(--tg-theme-text-color, #000);
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .lessons-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lesson-item {
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .lesson-item:active {
+      transform: scale(0.98);
+    }
+
+    .lesson-item.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .lesson-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--tg-theme-link-color, #3390ec);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .lesson-icon.completed {
+      background: #10b981;
+    }
+
+    .lesson-info {
+      flex: 1;
+    }
+
+    .lesson-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .lesson-meta {
+      font-size: 12px;
+      color: var(--tg-theme-hint-color, #999);
+    }
+
+    .buy-button {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      background: var(--tg-theme-bg-color, #ffffff);
+      border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--tg-theme-button-color, #3390ec);
+      color: var(--tg-theme-button-text-color, #ffffff);
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:active {
+      opacity: 0.8;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--tg-theme-hint-color, #999);
+    }
+  </style>
+</head>
+<body>
+  <div class="course-header">
+    <img id="courseImage" class="course-image" alt="Course">
+    <div class="back-button" onclick="goBack()">←</div>
+  </div>
+
+  <div class="container">
+    <div class="course-content">
+      <h1 id="courseTitle" class="course-title">Загрузка...</h1>
+      
+      <div class="course-meta">
+        <div class="meta-item">
+          <span>⭐</span>
+          <span id="courseRating">0</span>
+        </div>
+        <div class="meta-item">
+          <span>👥</span>
+          <span id="courseStudents">0 студентов</span>
+        </div>
+        <div class="meta-item">
+          <span>📖</span>
+          <span id="courseLessons">0 уроков</span>
+        </div>
+      </div>
+
+      <div id="coursePrice" class="course-price">0 ₽</div>
+
+      <div id="courseDescription" class="course-description">
+        Загрузка описания...
+      </div>
+
+      <section class="section">
+        <h2 class="section-title">📚 Программа курса</h2>
+        <div id="lessonsList" class="lessons-list">
+          <div class="loading">Загрузка уроков...</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="buyButton" class="buy-button" style="display:none">
+    <button class="btn-primary" onclick="buyCourse()">
+      <span id="buyButtonText">Купить курс</span>
+    </button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => goBack());
+
+    const user = tg.initDataUnsafe.user || { id: 0 };
+    const API_URL = 'https://felix2-0.vercel.app/api';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+
+    let courseData = null;
+
+    async function loadCourse() {
+      try {
+        // TODO: Загрузить с API
+        // const response = await fetch(`${API_URL}/courses/${courseId}`);
+        // courseData = await response.json();
+
+        // Тестовые данные
+        courseData = {
+          id: courseId,
+          title: 'Основы трейдинга',
+          description: 'Полный курс по трейдингу для начинающих. Изучите основы технического анализа, управление рисками и психологию трейдинга.',
+          price: 2990,
+          rating: 4.8,
+          students: 1234,
+          image: 'https://via.placeholder.com/600x250?text=Trading+Course',
+          lessons: [
+            { id: 1, title: 'Введение в трейдинг', duration: 15, is_free: true, completed: false },
+            { id: 2, title: 'Технический анализ', duration: 25, is_free: false, completed: false },
+            { id: 3, title: 'Управление рисками', duration: 20, is_free: false, completed: false },
+            { id: 4, title: 'Психология трейдинга', duration: 30, is_free: false, completed: false }
+          ],
+          purchased: false
+        };
+
+        renderCourse();
+      } catch (error) {
+        console.error('Error loading course:', error);
+        tg.showAlert('Ошибка загрузки курса');
+      }
+    }
+
+    function renderCourse() {
+      document.getElementById('courseTitle').textContent = courseData.title;
+      document.getElementById('courseDescription').textContent = courseData.description;
+      document.getElementById('courseRating').textContent = courseData.rating;
+      document.getElementById('courseStudents').textContent = courseData.students + ' студентов';
+      document.getElementById('courseLessons').textContent = courseData.lessons.length + ' уроков';
+      document.getElementById('courseImage').src = courseData.image;
+
+      const priceEl = document.getElementById('coursePrice');
+      if (courseData.price > 0) {
+        priceEl.textContent = courseData.price + ' ₽';
+        priceEl.classList.remove('free');
+      } else {
+        priceEl.textContent = 'Бесплатно';
+        priceEl.classList.add('free');
+      }
+
+      renderLessons();
+
+      // Показать кнопку покупки
+      if (!courseData.purchased && courseData.price > 0) {
+        document.getElementById('buyButton').style.display = 'block';
+        document.getElementById('buyButtonText').textContent = `Купить за ${courseData.price} ₽`;
+      }
+    }
+
+    function renderLessons() {
+      const container = document.getElementById('lessonsList');
+      
+      container.innerHTML = courseData.lessons.map((lesson, index) => {
+        const isLocked = !courseData.purchased && !lesson.is_free;
+        const icon = lesson.completed ? '✓' : (isLocked ? '🔒' : '▶');
+        const iconClass = lesson.completed ? 'completed' : '';
+        
+        return `
+          <div class="lesson-item ${isLocked ? 'locked' : ''}" onclick="openLesson(${lesson.id}, ${isLocked})">
+            <div class="lesson-icon ${iconClass}">${icon}</div>
+            <div class="lesson-info">
+              <div class="lesson-title">${index + 1}. ${lesson.title}</div>
+              <div class="lesson-meta">
+                ${lesson.duration} мин
+                ${lesson.is_free ? ' • Бесплатно' : ''}
+                ${lesson.completed ? ' • Пройдено' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openLesson(lessonId, isLocked) {
+      if (isLocked) {
+        tg.showAlert('Купите курс, чтобы открыть этот урок');
+        return;
+      }
+      window.location.href = `lesson.html?id=${lessonId}`;
+    }
+
+    async function buyCourse() {
+      tg.showConfirm(`Купить курс "${courseData.title}" за ${courseData.price} ₽?`, async (confirmed) => {
+        if (confirmed) {
+          try {
+            // TODO: Интеграция Telegram Stars
+            // const invoice = await createInvoice(courseId, courseData.price);
+            // tg.openInvoice(invoice.url, handlePayment);
+            
+            tg.showAlert('Платежи будут доступны в следующей версии');
+          } catch (error) {
+            console.error('Payment error:', error);
+            tg.showAlert('Ошибка оплаты');
+          }
+        }
+      });
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    loadCourse();
+  </script>
+</body>
+</html>

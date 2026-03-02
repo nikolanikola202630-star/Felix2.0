@@ -29,11 +29,21 @@ Write-Host ""
 Write-Host "📋 Настройка переменных окружения..." -ForegroundColor Yellow
 Write-Host ""
 
-# Переменные
-$env:TELEGRAM_BOT_TOKEN = "8623255560:AAE7sC-7-eWA5LD-ebATDUh6nGUG0pYm03U"
-$env:GROQ_API_KEY = "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"
-$env:ADMIN_ID = "8264612178"
-$env:NODE_ENV = "production"
+# Переменные из .env.local
+Write-Host "📋 Загрузка переменных из .env.local..." -ForegroundColor Cyan
+if (Test-Path ".env.local") {
+    Get-Content ".env.local" | ForEach-Object {
+        if ($_ -match "^([^=]+)=(.+)$") {
+            $name = $matches[1]
+            $value = $matches[2]
+            Set-Item -Path "env:$name" -Value $value
+        }
+    }
+    Write-Host "✅ Переменные загружены" -ForegroundColor Green
+} else {
+    Write-Host "❌ Файл .env.local не найден!" -ForegroundColor Red
+    exit 1
+}
 
 # Запрос пароля БД
 Write-Host "🔑 Введите пароль от Supabase:" -ForegroundColor Cyan
