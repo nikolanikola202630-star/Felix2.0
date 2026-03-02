@@ -37,10 +37,13 @@ Thumbs.db
 # Scripts
 scripts/auto-commit.js
 scripts/deploy-hooks.js
+scripts/setup-vercel.js
 cleanup.ps1
 setup-vercel.ps1
 push-with-token.ps1
 open-github-desktop.ps1
+vercel-quick-setup.ps1
+fix-git-user.ps1
 
 # Kiro
 .kiro
@@ -48,3 +51,18 @@ open-github-desktop.ps1
 # Temporary files
 *.tmp
 *.log
+
+# Unused API files (keep only essential)
+api/webhook-v7-full.js
+api/webhook-v7.1.js
+api/export.js
+api/voice.js
+api/analytics.js
+api/stats.js
+api/search.js
+
+# Examples
+examples
+improvements
+migrations
+database/*.md

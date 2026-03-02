@@ -107,3 +107,68 @@ export class ExportService {
 }
 ```
 
+
+### 4. Storage Service (lib/storage-docs.js)
+```javascript
+import { put } from '@vercel/blob';
+
+export class StorageService {
+    async uploadDocument(buffer, filename, userId) {
+        const blob = await put(
+            `documents/${userId}/${filename}`,
+            buffer,
+            { access: 'public' }
+        );
+        
+        return {
+            url: blob.url,
+            size: buffer.length,
+            filename: filename
+        };
+    }
+    
+    async getDocument(url) {
+        const response = await fetch(url);
+        return await response.arrayBuffer();
+    }
+}
+```
+
+## База данных
+
+### Таблица documents
+```sql
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id BIGINT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    title TEXT NOT NULL,
+    content JSONB NOT NULL,
+    format VARCHAR(10) NOT NULL,
+    file_url TEXT,
+    file_size INTEGER,
+    pages INTEGER,
+    status VARCHAR(20) DEFAULT 'generating',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    metadata JSONB
+);
+
+CREATE INDEX idx_documents_user_id ON documents(user_id);
+CREATE INDEX idx_documents_type ON documents(type);
+CREATE INDEX idx_documents_created_at ON documents(created_at);
+```
+
+### Таблица templates
+```sql
+CREATE TABLE templates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    structure JSONB NOT NULL,
+    style JSONB NOT NULL,
+    is_public BOOLEAN DEFAULT true,
+    created_by BIGINT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```

@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
   "routes": [
     {
       "src": "/api/webhook",
@@ -41,8 +35,5 @@
     "silent": false,
     "autoJobCancelation": true
   },
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+  "outputDirectory": "."
 }
