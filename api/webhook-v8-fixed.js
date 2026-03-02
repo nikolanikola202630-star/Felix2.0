@@ -9,32 +9,6 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/elite-v6.html';
 
-// Lazy load ML modules to improve cold start
-let personalization = null;
-let selfLearning = null;
-
-function getPersonalization() {
-  if (!personalization) {
-    try {
-      personalization = require('../lib/ml/personalization');
-    } catch (e) {
-      console.log('Personalization not available');
-    }
-  }
-  return personalization;
-}
-
-function getSelfLearning() {
-  if (!selfLearning) {
-    try {
-      selfLearning = require('../lib/automation/self-learning-safe');
-    } catch (e) {
-      console.log('Self-learning not available');
-    }
-  }
-  return selfLearning;
-}
-
 // Send message with error handling
 async function sendMessage(chatId, text, keyboard = null, isTyping = false) {
   try {
@@ -107,31 +81,12 @@ async function editMessage(chatId, messageId, text, keyboard = null) {
 module.exports = async function handler(req, res) {
   // Health check
   if (req.method === 'GET') {
-    try {
-      const health = {
-        status: 'ok',
-        bot: 'Felix v8.6 Fixed',
-        timestamp: new Date().toISOString(),
-        env: process.env.NODE_ENV || 'production'
-      };
-
-      // Try to get system health if available
-      try {
-        const sl = getSelfLearning();
-        if (sl && typeof sl.getSystemHealth === 'function') {
-          health.system = await sl.getSystemHealth();
-        }
-      } catch (e) {
-        // Ignore if not available
-      }
-
-      return res.json(health);
-    } catch (error) {
-      return res.status(500).json({ 
-        status: 'error', 
-        message: error.message 
-      });
-    }
+    return res.json({
+      status: 'ok',
+      bot: 'Felix v8.6 Fixed',
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'production'
+    });
   }
 
   if (req.method !== 'POST') {
@@ -163,13 +118,6 @@ module.exports = async function handler(req, res) {
       } catch (error) {
         console.error('User creation error:', error);
         // Continue anyway
-      }
-
-      // Analyze behavior in background (non-blocking)
-      if (personalization) {
-        getPersonalization().analyzeUserBehavior(from.id).catch(err => {
-          console.error('Behavior analysis error:', err);
-        });
       }
 
       if (!text) return res.json({ ok: true });
@@ -273,22 +221,8 @@ async function handleAIMessage(chatId, userId, text) {
   try {
     await sendMessage(chatId, '⏳ Обрабатываю...', null, true);
     
-    // Get base prompt
-    const basePrompt = `Ответь на сообщение пользователя дружелюбно и полезно: ${text}`;
-    
-    // Try to personalize
-    let finalPrompt = basePrompt;
-    try {
-      const p = getPersonalization();
-      if (p && p.getPersonalizedPrompt) {
-        finalPrompt = await p.getPersonalizedPrompt(userId, basePrompt);
-      }
-    } catch (e) {
-      // Use base prompt
-    }
-
     // Get AI response
-    const response = await ai.getChatResponse(finalPrompt, [], {
+    const response = await ai.getChatResponse(`Ответь на сообщение пользователя дружелюбно и полезно: ${text}`, [], {
       temperature: 0.7,
       max_tokens: 1500
     });
