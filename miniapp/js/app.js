@@ -96,6 +96,21 @@ async function loadTabData(tabName) {
         case 'academy':
             await loadAcademy();
             break;
+        case 'notes':
+            await loadNotes();
+            break;
+        case 'partners':
+            await loadPartners();
+            break;
+        case 'library':
+            await loadLibrary();
+            break;
+        case 'analytics':
+            await loadAnalytics();
+            break;
+        case 'rating':
+            await loadRating();
+            break;
         case 'profile':
             await loadProfile();
             break;
@@ -328,3 +343,360 @@ function handleHashNavigation() {
 
 // Initialize on load
 window.addEventListener('load', init);
+
+
+// Load notes tab
+async function loadNotes() {
+    await loadSavedNotes();
+}
+
+// Load partners
+async function loadPartners() {
+    try {
+        const response = await fetch(`${API_URL}?endpoint=admin&action=getPartners`);
+        const data = await response.json();
+        
+        if (data.success && data.partners) {
+            renderPartners(data.partners);
+        }
+    } catch (error) {
+        console.error('Load partners error:', error);
+    }
+}
+
+// Render partners
+function renderPartners(partners) {
+    if (partners.length === 0) {
+        document.getElementById('partnersList').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🤝</div>
+                <div class="empty-text">Партнеры скоро появятся</div>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = partners.map(partner => `
+        <div class="partner-card" onclick="openPartner('${partner.id}')">
+            <div class="partner-logo">${partner.icon || '🏢'}</div>
+            <div class="partner-info">
+                <div class="partner-name">${partner.name}</div>
+                <div class="partner-desc">${partner.description}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('partnersList').innerHTML = html;
+}
+
+// Load library
+async function loadLibrary() {
+    try {
+        const response = await fetch(`${API_URL}?endpoint=learning&action=getLibrary&userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && data.items) {
+            renderLibrary(data.items);
+        }
+    } catch (error) {
+        console.error('Load library error:', error);
+    }
+}
+
+// Render library
+function renderLibrary(items) {
+    if (items.length === 0) {
+        document.getElementById('libraryList').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <div class="empty-text">Библиотека пуста</div>
+                <button class="btn btn-primary mt-20" onclick="showTab('academy')">
+                    Начать обучение
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = items.map(item => `
+        <div class="library-item" onclick="openLibraryItem('${item.id}')">
+            <div class="library-header">
+                <div class="library-icon">${item.icon || '📄'}</div>
+                <div class="library-title">${item.title}</div>
+            </div>
+            <div class="library-meta">
+                <span>📅 ${new Date(item.created_at).toLocaleDateString('ru-RU')}</span>
+                <span>⏱️ ${item.readTime || '5'} мин</span>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('libraryList').innerHTML = html;
+}
+
+// Load analytics
+async function loadAnalytics() {
+    try {
+        const response = await fetch(`${API_URL}?endpoint=learning&action=getAnalytics&userId=${user.id}`);
+        const data = await response.json();
+        
+        if (data.success && data.analytics) {
+            renderAnalytics(data.analytics);
+        }
+    } catch (error) {
+        console.error('Load analytics error:', error);
+    }
+}
+
+// Render analytics
+function renderAnalytics(analytics) {
+    const html = `
+        <div class="stats-grid mb-16">
+            <div class="stat-card">
+                <div class="stat-value">${analytics.totalTime || 0}</div>
+                <div class="stat-label">Минут обучения</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${analytics.lessonsCompleted || 0}</div>
+                <div class="stat-label">Уроков пройдено</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${analytics.streak || 0}</div>
+                <div class="stat-label">Дней подряд</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${analytics.avgScore || 0}%</div>
+                <div class="stat-label">Средний балл</div>
+            </div>
+        </div>
+        
+        <div class="card-title mb-16">📈 Активность по дням</div>
+        <div class="chart">
+            ${generateChartBars(analytics.dailyActivity || [])}
+        </div>
+        
+        <div class="card-title mb-16">🎯 Прогресс по темам</div>
+        ${generateTopicsProgress(analytics.topicsProgress || [])}
+    `;
+    
+    document.getElementById('analyticsContent').innerHTML = html;
+}
+
+// Generate chart bars
+function generateChartBars(data) {
+    if (data.length === 0) {
+        return '<div style="text-align: center; color: var(--text-secondary);">Нет данных</div>';
+    }
+    
+    const maxValue = Math.max(...data.map(d => d.value));
+    
+    return data.map(d => {
+        const height = (d.value / maxValue) * 100;
+        return `<div class="chart-bar" style="height: ${height}%" title="${d.label}: ${d.value}"></div>`;
+    }).join('');
+}
+
+// Generate topics progress
+function generateTopicsProgress(topics) {
+    if (topics.length === 0) {
+        return '<div style="text-align: center; color: var(--text-secondary);">Нет данных</div>';
+    }
+    
+    return topics.map(topic => `
+        <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 600;">${topic.name}</span>
+                <span style="color: var(--text-secondary);">${topic.progress}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${topic.progress}%"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Load rating
+async function loadRating() {
+    try {
+        const response = await fetch(`${API_URL}?endpoint=learning&action=getLeaderboard`);
+        const data = await response.json();
+        
+        if (data.success && data.leaderboard) {
+            renderRating(data.leaderboard);
+        }
+    } catch (error) {
+        console.error('Load rating error:', error);
+    }
+}
+
+// Render rating
+function renderRating(leaderboard) {
+    if (leaderboard.length === 0) {
+        document.getElementById('ratingList').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🏆</div>
+                <div class="empty-text">Рейтинг пуст</div>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = leaderboard.map((item, index) => {
+        const rank = index + 1;
+        let rankClass = '';
+        if (rank === 1) rankClass = 'gold';
+        else if (rank === 2) rankClass = 'silver';
+        else if (rank === 3) rankClass = 'bronze';
+        
+        return `
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank ${rankClass}">${rank}</div>
+                <div class="leaderboard-avatar">${item.avatar || '👤'}</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">${item.name}</div>
+                    <div class="leaderboard-score">
+                        <span class="leaderboard-xp">${item.xp} XP</span>
+                        • Уровень ${item.level}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('ratingList').innerHTML = html;
+}
+
+// Settings functions
+function showSettings() {
+    document.getElementById('settingsModal').classList.remove('hidden');
+    loadCurrentSettings();
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+function closeSettings() {
+    document.getElementById('settingsModal').classList.add('hidden');
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+function loadCurrentSettings() {
+    // Load saved settings
+    const style = localStorage.getItem('communicationStyle') || 'casual';
+    const language = localStorage.getItem('language') || 'ru';
+    const theme = localStorage.getItem('theme') || 'auto';
+    const model = localStorage.getItem('aiModel') || 'llama-3.3-70b-versatile';
+    const temperature = localStorage.getItem('aiTemperature') || '0.7';
+    
+    // Update UI
+    updateSettingButtons('style', style);
+    updateSettingButtons('language', language);
+    updateSettingButtons('theme', theme);
+    updateSettingButtons('model', model);
+    document.getElementById('tempValue').textContent = temperature;
+    
+    // Load avatars
+    loadAvatars();
+}
+
+function updateSettingButtons(setting, value) {
+    document.querySelectorAll(`[data-setting="${setting}"]`).forEach(btn => {
+        if (btn.dataset.value === value) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function updateSetting(setting, value) {
+    // Update UI
+    updateSettingButtons(setting, value);
+    
+    // Save to localStorage
+    const settingMap = {
+        style: 'communicationStyle',
+        language: 'language',
+        theme: 'theme',
+        model: 'aiModel'
+    };
+    
+    localStorage.setItem(settingMap[setting], value);
+    
+    // Apply theme immediately
+    if (setting === 'theme') {
+        applyTheme();
+    }
+    
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+function updateTemperature(value) {
+    const temp = (value / 10).toFixed(1);
+    document.getElementById('tempValue').textContent = temp;
+    localStorage.setItem('aiTemperature', temp);
+}
+
+function loadAvatars() {
+    const avatars = ['👤', '😊', '🤓', '😎', '🥳', '🤖', '👨‍💻', '👩‍💻', '🧑‍🎓', '👨‍🏫'];
+    const currentAvatar = localStorage.getItem('avatar') || '👤';
+    
+    const html = avatars.map(avatar => `
+        <div class="avatar-option ${avatar === currentAvatar ? 'active' : ''}" 
+             onclick="selectAvatar('${avatar}')">
+            ${avatar}
+        </div>
+    `).join('');
+    
+    document.getElementById('avatarGrid').innerHTML = html;
+}
+
+function selectAvatar(avatar) {
+    localStorage.setItem('avatar', avatar);
+    loadAvatars();
+    tg.HapticFeedback.impactOccurred('light');
+}
+
+async function saveSettings() {
+    try {
+        const settings = {
+            communicationStyle: localStorage.getItem('communicationStyle') || 'casual',
+            language: localStorage.getItem('language') || 'ru',
+            theme: localStorage.getItem('theme') || 'auto',
+            aiModel: localStorage.getItem('aiModel') || 'llama-3.3-70b-versatile',
+            aiTemperature: parseFloat(localStorage.getItem('aiTemperature') || '0.7'),
+            avatar: localStorage.getItem('avatar') || '👤'
+        };
+        
+        const response = await fetch(`${API_URL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                endpoint: 'admin',
+                action: 'saveUserSettings',
+                userId: user.id,
+                settings
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            tg.showAlert('✅ Настройки сохранены!');
+            tg.HapticFeedback.notificationOccurred('success');
+            closeSettings();
+        }
+    } catch (error) {
+        console.error('Save settings error:', error);
+        tg.showAlert('Ошибка сохранения настроек');
+    }
+}
+
+// Helper functions
+function openPartner(partnerId) {
+    tg.HapticFeedback.impactOccurred('light');
+    tg.showAlert(`Открытие партнера ${partnerId}...`);
+}
+
+function openLibraryItem(itemId) {
+    tg.HapticFeedback.impactOccurred('light');
+    tg.showAlert(`Открытие материала ${itemId}...`);
+}
