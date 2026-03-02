@@ -19,7 +19,7 @@ function getPersonalization() {
 
 function getSelfLearning() {
   if (!selfLearning) {
-    selfLearning = require('../lib/automation/self-learning');
+    selfLearning = require('../lib/automation/self-learning-safe');
   }
   return selfLearning;
 }
