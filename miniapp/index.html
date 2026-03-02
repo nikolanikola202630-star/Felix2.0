@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Felix Bot v6.0 - Elite Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Vercel Speed Insights -->
     <script type="module">
         import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights@1/dist/index.mjs';
         injectSpeedInsights();
+    </script>
+    <!-- Vercel Analytics -->
+    <script type="module">
+        import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/dist/index.mjs';
+        inject();
     </script>
     <style>
         * {
