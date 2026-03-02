@@ -6,7 +6,7 @@ const {
   enhanceNotes,
   extractKeyInfo 
 } = require('../../lib/voice/transcription');
-const { db } = require('../../lib/db');
+const db = require('../../lib/db').db;
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
