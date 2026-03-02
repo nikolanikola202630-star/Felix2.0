@@ -32,10 +32,13 @@
     "build": "echo 'No build step required'",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel",
+    "deploy:auto": "node scripts/auto-deploy.js",
     "vercel:setup": "node scripts/setup-vercel.js",
     "vercel:link": "vercel link",
     "vercel:env": "vercel env ls",
     "vercel:logs": "vercel logs",
-    "vercel:inspect": "vercel inspect"
+    "vercel:inspect": "vercel inspect",
+    "start:ml": "node -e \"require('./lib/automation/self-learning').start()\"",
+    "health": "curl https://felix2-0.vercel.app/api/webhook"
   }
 }
