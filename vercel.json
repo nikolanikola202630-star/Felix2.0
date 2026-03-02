@@ -4,9 +4,17 @@
     {
       "src": "api/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "miniapp/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/miniapp/(.*)",
+      "dest": "/miniapp/$1"
+    },
     {
       "src": "/api/(.*)",
       "dest": "/api/index.js"
