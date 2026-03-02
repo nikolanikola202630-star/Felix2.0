@@ -1,14 +1,12 @@
-// Felix Bot v8.3 - Full Featured with All Commands
+// Felix Bot v8.3 - Full Featured
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
-const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/elite-v2.html';
+const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/elite-v3.html';
 
-// Groq AI
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: GROQ_KEY });
 
-// Send message with keyboard
 async function send(chatId, text, keyboard = null) {
   const body = {
     chat_id: chatId,
@@ -16,57 +14,43 @@ async function send(chatId, text, keyboard = null) {
     parse_mode: 'HTML',
     reply_markup: keyboard || {
       inline_keyboard: [
-        [
-          { text: '📚 Помощь', callback_data: 'help' },
-          { text: '👤 Профиль', callback_data: 'profile' }
-        ],
-        [
-          { text: '🤖 AI Команды', callback_data: 'ai_commands' }
-        ],
-        [
-          { text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }
-        ]
+        [{ text: '📚 Помощь', callback_data: 'help' }, { text: '👤 Профиль', callback_data: 'profile' }],
+        [{ text: '🤖 AI Команды', callback_data: 'ai_commands' }],
+        [{ text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }]
       ]
     }
   };
 
-  const res = await fetch(`${TELEGRAM_API}/sendMessage`, {
+  await fetch(`${TELEGRAM_API}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  return await res.json();
 }
 
-// Edit message
 async function editMessage(chatId, messageId, text, keyboard = null) {
-  const body = {
-    chat_id: chatId,
-    message_id: messageId,
-    text,
-    parse_mode: 'HTML',
-    reply_markup: keyboard
-  };
-
-  const res = await fetch(`${TELEGRAM_API}/editMessageText`, {
+  await fetch(`${TELEGRAM_API}/editMessageText`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      text,
+      parse_mode: 'HTML',
+      reply_markup: keyboard
+    })
   });
-  return await res.json();
 }
 
-// Answer callback
-async function answerCallback(callbackId, text = '') {
+async function answerCallback(callbackId) {
   await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ callback_query_id: callbackId, text })
+    body: JSON.stringify({ callback_query_id: callbackId })
   });
 }
 
-// Get AI response with user context
-async function getAI(prompt, userId = null) {
+async function getAI(prompt) {
   try {
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
@@ -74,7 +58,6 @@ async function getAI(prompt, userId = null) {
       temperature: 0.7,
       max_tokens: 1000
     });
-    
     return completion.choices[0]?.message?.content || 'Ошибка AI';
   } catch (error) {
     console.error('AI error:', error);
@@ -84,7 +67,7 @@ async function getAI(prompt, userId = null) {
 
 module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
-    return res.json({ status: 'ok', bot: 'Felix v8.0 Full' });
+    return res.json({ status: 'ok', bot: 'Felix v8.3' });
   }
 
   if (req.method !== 'POST') {
@@ -94,7 +77,6 @@ module.exports = async function handler(req, res) {
   try {
     const { message, callback_query } = req.body;
 
-    // Handle callback
     if (callback_query) {
       const { data, message: msg, from } = callback_query;
       const chatId = msg.chat.id;
@@ -102,35 +84,35 @@ module.exports = async function handler(req, res) {
 
       await answerCallback(callback_query.id);
 
-      // Handle callbacks
       if (data === 'help') {
-        await editMessage(chatId, messageId, `
-📚 <b>Помощь Felix</b>
+        await editMessage(chatId, messageId, `📚 <b>Помощь Felix</b>
 
-<b>Основные команды:</b>
+<b>Основные:</b>
 /start - Главное меню
 /help - Справка
-/profile - Твой профиль
-/ai - AI команды
+/profile - Профиль
+/settings - Настройки
+/stats - Статистика
 
 <b>AI Команды:</b>
-/ask [текст] - Задать вопрос
-/summary [текст] - Резюме
-/analyze [текст] - Анализ
-/generate [тема] - Генерация
-/translate [текст] - Перевод
-/improve [текст] - Улучшение
+/ask - Задать вопрос
+/summary - Резюме
+/analyze - Анализ
+/generate - Генерация
+/translate - Перевод
+/improve - Улучшение
+/brainstorm - Идеи
+/explain - Объяснение
 
-Просто пиши мне - я отвечу! 💬
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '« Назад', callback_data: 'back' }]
-          ]
+<b>Обучение:</b>
+/courses - Курсы
+/progress - Прогресс
+/achievements - Достижения`, {
+          inline_keyboard: [[{ text: '« Назад', callback_data: 'back' }]]
         });
       }
       else if (data === 'profile') {
-        await editMessage(chatId, messageId, `
-👤 <b>Твой профиль</b>
+        await editMessage(chatId, messageId, `👤 <b>Твой профиль</b>
 
 <b>Имя:</b> ${from.first_name}
 <b>ID:</b> ${from.id}
@@ -141,10 +123,7 @@ module.exports = async function handler(req, res) {
 📊 Сообщений: 127
 🤖 AI запросов: 45
 📚 Курсов: 3
-🏆 Достижений: 12
-
-Открой Mini App для подробностей! 📱
-        `.trim(), {
+🏆 Достижений: 12`, {
           inline_keyboard: [
             [{ text: '📱 Открыть профиль', web_app: { url: `${MINIAPP_URL}#profile` } }],
             [{ text: '« Назад', callback_data: 'back' }]
@@ -152,49 +131,35 @@ module.exports = async function handler(req, res) {
         });
       }
       else if (data === 'ai_commands') {
-        await editMessage(chatId, messageId, `
-🤖 <b>AI Команды</b>
+        await editMessage(chatId, messageId, `🤖 <b>AI Команды</b>
 
-Выбери команду:
+💬 /ask [текст] - Задать вопрос
+📝 /summary [текст] - Резюме
+🔍 /analyze [текст] - Анализ
+✨ /generate [тема] - Генерация
+🌐 /translate [текст] - Перевод
+✏️ /improve [текст] - Улучшение
+💡 /brainstorm [тема] - Идеи
+📖 /explain [тема] - Объяснение
 
-💬 /ask - Задать вопрос
-📝 /summary - Краткое резюме
-🔍 /analyze - Анализ текста
-✨ /generate - Генерация контента
-🌐 /translate - Перевод
-✏️ /improve - Улучшение текста
-
-<b>Использование:</b>
-/ask Что такое AI?
-/summary [вставь текст]
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '« Назад', callback_data: 'back' }]
-          ]
+<b>Пример:</b>
+/ask Что такое AI?`, {
+          inline_keyboard: [[{ text: '« Назад', callback_data: 'back' }]]
         });
       }
       else if (data === 'back') {
-        await editMessage(chatId, messageId, `
-👋 <b>Привет! Я Felix - умный AI-ассистент с самообучением!</b>
+        await editMessage(chatId, messageId, `👋 <b>Привет! Я Felix - умный AI-ассистент!</b>
 
-🧠 Я адаптируюсь под ваш стиль общения
+🧠 Адаптируюсь под ваш стиль
 🛡️ Модерирую группы
 💬 Отвечаю на вопросы
 ✨ Генерирую контент
 
-Выберите действие:
-        `.trim(), {
+Выберите действие:`, {
           inline_keyboard: [
-            [
-              { text: '📚 Помощь', callback_data: 'help' },
-              { text: '👤 Профиль', callback_data: 'profile' }
-            ],
-            [
-              { text: '🤖 AI Команды', callback_data: 'ai_commands' }
-            ],
-            [
-              { text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }
-            ]
+            [{ text: '📚 Помощь', callback_data: 'help' }, { text: '👤 Профиль', callback_data: 'profile' }],
+            [{ text: '🤖 AI Команды', callback_data: 'ai_commands' }],
+            [{ text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }]
           ]
         });
       }
@@ -202,310 +167,198 @@ module.exports = async function handler(req, res) {
       return res.json({ ok: true });
     }
 
-    // Handle message
     if (message) {
       const { chat: { id: chatId }, from, text } = message;
-
       if (!text) return res.json({ ok: true });
 
-      // Handle /start
       if (text === '/start') {
-        await send(chatId, `
-👋 <b>Привет! Я Felix - умный AI-ассистент с самообучением!</b>
+        await send(chatId, `👋 <b>Привет! Я Felix - умный AI-ассистент!</b>
 
-🧠 Я адаптируюсь под ваш стиль общения
+🧠 Адаптируюсь под ваш стиль
 🛡️ Модерирую группы
 💬 Отвечаю на вопросы
 ✨ Генерирую контент
 
-Выберите действие:
-        `.trim());
+Выберите действие:`);
         return res.json({ ok: true });
       }
 
-      // Handle /help
       if (text === '/help') {
-        await send(chatId, `
-📚 <b>Помощь Felix</b>
+        await send(chatId, `📚 <b>Помощь Felix</b>
 
-<b>Основные команды:</b>
-/start - Главное меню
-/help - Справка
-/profile - Твой профиль
-/settings - Настройки
-/stats - Статистика
+<b>Основные:</b>
+/start /help /profile /settings /stats
 
-<b>AI Команды:</b>
-/ask [текст] - Задать вопрос
-/summary [текст] - Резюме
-/analyze [текст] - Анализ
-/generate [тема] - Генерация
-/translate [текст] - Перевод
-/improve [текст] - Улучшение
-/brainstorm [тема] - Идеи
-/explain [тема] - Объяснение
+<b>AI:</b>
+/ask /summary /analyze /generate /translate /improve /brainstorm /explain
 
 <b>Обучение:</b>
-/courses - Список курсов
-/progress - Мой прогресс
-/achievements - Достижения
-
-Просто пиши мне - я отвечу! 💬
-        `.trim());
+/courses /progress /achievements`);
         return res.json({ ok: true });
       }
 
-      // Handle /profile
       if (text === '/profile') {
-        await send(chatId, `
-👤 <b>Твой профиль</b>
+        await send(chatId, `👤 <b>Твой профиль</b>
 
 <b>Имя:</b> ${from.first_name}
 <b>ID:</b> ${from.id}
 <b>Уровень:</b> 5 🏆
 <b>Опыт:</b> 2450 XP
 
-<b>Статистика:</b>
 📊 Сообщений: 127
 🤖 AI запросов: 45
 📚 Курсов: 3
-🏆 Достижений: 12
-
-Открой Mini App для подробностей! 📱
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '📱 Открыть профиль', web_app: { url: `${MINIAPP_URL}#profile` } }]
-          ]
+🏆 Достижений: 12`, {
+          inline_keyboard: [[{ text: '📱 Открыть профиль', web_app: { url: `${MINIAPP_URL}#profile` } }]]
         });
         return res.json({ ok: true });
       }
 
-      // Handle /settings
       if (text === '/settings') {
-        await send(chatId, `
-⚙️ <b>Настройки</b>
+        await send(chatId, `⚙️ <b>Настройки</b>
 
-<b>Текущие настройки:</b>
 💬 Формат: Неформальный
 🌐 Язык: Русский
 🎨 Тема: Авто
-🤖 Модель: Llama 3.3 70B
-
-Открой Mini App для изменения настроек
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '⚙️ Открыть настройки', web_app: { url: `${MINIAPP_URL}#settings` } }]
-          ]
+🤖 Модель: Llama 3.3 70B`, {
+          inline_keyboard: [[{ text: '⚙️ Настройки', web_app: { url: `${MINIAPP_URL}#settings` } }]]
         });
         return res.json({ ok: true });
       }
 
-      // Handle /stats
       if (text === '/stats') {
-        await send(chatId, `
-📊 <b>Твоя статистика</b>
+        await send(chatId, `📊 <b>Статистика</b>
 
 <b>Активность:</b>
 📨 Сообщений: 127
 🤖 AI запросов: 45
-⏱️ Время обучения: 145 мин
+⏱️ Время: 145 мин
 🔥 Дней подряд: 7
 
 <b>Обучение:</b>
-📚 Курсов пройдено: 3
-📝 Уроков завершено: 42
+📚 Курсов: 3
+📝 Уроков: 42
 🎯 Средний балл: 87%
 
 <b>Достижения:</b>
-🏆 Получено: 12/50
-⭐ Редких: 3
-💎 Легендарных: 1
-        `.trim());
+🏆 Получено: 12/50`);
         return res.json({ ok: true });
       }
 
-      // Handle /courses
       if (text === '/courses') {
-        await send(chatId, `
-📚 <b>Доступные курсы</b>
+        await send(chatId, `📚 <b>Курсы</b>
 
-<b>Мои курсы:</b>
-💻 JavaScript Основы - 65%
-⚛️ React для начинающих - 30%
+<b>Мои:</b>
+💻 JavaScript - 65%
+⚛️ React - 30%
 
-<b>Рекомендуемые:</b>
+<b>Доступные:</b>
 🟢 Node.js Backend
 🎨 CSS & Design
-🔐 Безопасность
-
-Открой Mini App для просмотра всех курсов
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '📚 Открыть курсы', web_app: { url: `${MINIAPP_URL}#academy` } }]
-          ]
+🔐 Безопасность`, {
+          inline_keyboard: [[{ text: '📚 Все курсы', web_app: { url: `${MINIAPP_URL}#academy` } }]]
         });
         return res.json({ ok: true });
       }
 
-      // Handle /progress
       if (text === '/progress') {
-        await send(chatId, `
-📈 <b>Мой прогресс</b>
+        await send(chatId, `📈 <b>Прогресс</b>
 
 <b>JavaScript Основы</b>
 ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░ 65%
-Урок 15/24 • Осталось 3 часа
+Урок 15/24 • 3 часа
 
-<b>React для начинающих</b>
+<b>React</b>
 ▓▓▓▓▓▓░░░░░░░░░░░░░░ 30%
-Урок 5/18 • Осталось 4 часа
+Урок 5/18 • 4 часа
 
-<b>Следующий урок:</b>
+<b>Следующий:</b>
 🎯 Функции высшего порядка
-⏱️ 15 минут
-
-Продолжить обучение в Mini App
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '▶️ Продолжить', web_app: { url: `${MINIAPP_URL}#academy` } }]
-          ]
+⏱️ 15 минут`, {
+          inline_keyboard: [[{ text: '▶️ Продолжить', web_app: { url: `${MINIAPP_URL}#academy` } }]]
         });
         return res.json({ ok: true });
       }
 
-      // Handle /achievements
       if (text === '/achievements') {
-        await send(chatId, `
-🏆 <b>Достижения</b>
-
-<b>Получено: 12/50</b>
+        await send(chatId, `🏆 <b>Достижения</b> (12/50)
 
 ✅ 🎯 Первые шаги
 ✅ 🔥 Неделя подряд
 ✅ ⭐ Отличник
-✅ 💬 Болтун (100 сообщений)
-✅ 🤖 AI Мастер (50 запросов)
+✅ 💬 Болтун (100)
+✅ 🤖 AI Мастер (50)
 ✅ 📚 Книжный червь
 ✅ 🎓 Выпускник
-✅ 💎 Легенда (редкое)
+✅ 💎 Легенда
 ✅ 🌟 Звезда
 ✅ 🚀 Ракета
 ✅ 🎨 Творец
 ✅ 🧠 Гений
 
-🔒 38 достижений ещё не получено
-
-Открой Mini App для просмотра всех
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '🏆 Все достижения', web_app: { url: `${MINIAPP_URL}#profile` } }]
-          ]
+🔒 38 ещё не получено`, {
+          inline_keyboard: [[{ text: '🏆 Все', web_app: { url: `${MINIAPP_URL}#profile` } }]]
         });
         return res.json({ ok: true });
       }
 
-      // Handle /brainstorm
-      if (text.startsWith('/brainstorm ')) {
-        const topic = text.slice(12);
-        const ideas = await getAI(`Сгенерируй 5 креативных идей на тему: ${topic}. Каждую идею с новой строки с номером.`, chatId);
-        await send(chatId, `💡 <b>Идеи на тему "${topic}":</b>\n\n${ideas}`);
-        return res.json({ ok: true });
-      }
-
-      // Handle /explain
-      if (text.startsWith('/explain ')) {
-        const topic = text.slice(9);
-        const explanation = await getAI(`Объясни простыми словами: ${topic}. Используй примеры и аналогии.`, chatId);
-        await send(chatId, `📖 <b>Объяснение "${topic}":</b>\n\n${explanation}`);
-        return res.json({ ok: true });
-      }
-/help - Справка
-/profile - Твой профиль
-/ai - AI команды
-
-<b>AI Команды:</b>
-/ask [текст] - Задать вопрос
-/summary [текст] - Резюме
-/analyze [текст] - Анализ
-/generate [тема] - Генерация
-/translate [текст] - Перевод
-/improve [текст] - Улучшение
-
-Просто пиши мне - я отвечу! 💬
-        `.trim());
-        return res.json({ ok: true });
-      }
-
-      // Handle /profile
-      if (text === '/profile') {
-        await send(chatId, `
-👤 <b>Твой профиль</b>
-
-<b>Имя:</b> ${from.first_name}
-<b>ID:</b> ${from.id}
-<b>Уровень:</b> 5 🏆
-<b>Опыт:</b> 2450 XP
-
-<b>Статистика:</b>
-📊 Сообщений: 127
-🤖 AI запросов: 45
-📚 Курсов: 3
-🏆 Достижений: 12
-
-Открой Mini App для подробностей! 📱
-        `.trim(), {
-          inline_keyboard: [
-            [{ text: '📱 Открыть профиль', web_app: { url: `${MINIAPP_URL}#profile` } }]
-          ]
-        });
-        return res.json({ ok: true });
-      }
-
-      // Handle AI commands
       if (text.startsWith('/ask ')) {
-        const question = text.slice(5);
-        const answer = await getAI(`Ответь на вопрос: ${question}`, chatId);
-        await send(chatId, `💬 <b>Вопрос:</b> ${question}\n\n<b>Ответ:</b>\n${answer}`);
+        const q = text.slice(5);
+        const a = await getAI(`Ответь на вопрос: ${q}`);
+        await send(chatId, `💬 <b>Вопрос:</b> ${q}\n\n<b>Ответ:</b>\n${a}`);
         return res.json({ ok: true });
       }
 
       if (text.startsWith('/summary ')) {
-        const textToSummarize = text.slice(9);
-        const summary = await getAI(`Создай краткое резюме: ${textToSummarize}`, chatId);
-        await send(chatId, `📝 <b>Резюме:</b>\n${summary}`);
+        const t = text.slice(9);
+        const s = await getAI(`Создай краткое резюме: ${t}`);
+        await send(chatId, `📝 <b>Резюме:</b>\n${s}`);
         return res.json({ ok: true });
       }
 
       if (text.startsWith('/analyze ')) {
-        const textToAnalyze = text.slice(9);
-        const analysis = await getAI(`Проанализируй текст: ${textToAnalyze}`, chatId);
-        await send(chatId, `🔍 <b>Анализ:</b>\n${analysis}`);
+        const t = text.slice(9);
+        const a = await getAI(`Проанализируй: ${t}`);
+        await send(chatId, `🔍 <b>Анализ:</b>\n${a}`);
         return res.json({ ok: true });
       }
 
       if (text.startsWith('/generate ')) {
-        const topic = text.slice(10);
-        const content = await getAI(`Сгенерируй контент на тему: ${topic}`, chatId);
-        await send(chatId, `✨ <b>Сгенерированный контент:</b>\n${content}`);
+        const t = text.slice(10);
+        const g = await getAI(`Сгенерируй контент: ${t}`);
+        await send(chatId, `✨ <b>Контент:</b>\n${g}`);
         return res.json({ ok: true });
       }
 
       if (text.startsWith('/translate ')) {
-        const textToTranslate = text.slice(11);
-        const translation = await getAI(`Переведи текст (определи язык и переведи на русский или английский): ${textToTranslate}`, chatId);
-        await send(chatId, `🌐 <b>Перевод:</b>\n${translation}`);
+        const t = text.slice(11);
+        const tr = await getAI(`Переведи: ${t}`);
+        await send(chatId, `🌐 <b>Перевод:</b>\n${tr}`);
         return res.json({ ok: true });
       }
 
       if (text.startsWith('/improve ')) {
-        const textToImprove = text.slice(9);
-        const improved = await getAI(`Улучши текст, исправь ошибки: ${textToImprove}`, chatId);
-        await send(chatId, `✏️ <b>Улучшенный текст:</b>\n${improved}`);
+        const t = text.slice(9);
+        const i = await getAI(`Улучши текст: ${t}`);
+        await send(chatId, `✏️ <b>Улучшено:</b>\n${i}`);
         return res.json({ ok: true });
       }
 
-      // Regular message - AI response
-      const response = await getAI(text, chatId);
+      if (text.startsWith('/brainstorm ')) {
+        const t = text.slice(12);
+        const b = await getAI(`5 идей на тему: ${t}`);
+        await send(chatId, `💡 <b>Идеи "${t}":</b>\n\n${b}`);
+        return res.json({ ok: true });
+      }
+
+      if (text.startsWith('/explain ')) {
+        const t = text.slice(9);
+        const e = await getAI(`Объясни простыми словами: ${t}`);
+        await send(chatId, `📖 <b>Объяснение "${t}":</b>\n\n${e}`);
+        return res.json({ ok: true });
+      }
+
+      const response = await getAI(text);
       await send(chatId, response);
       return res.json({ ok: true });
     }
@@ -513,7 +366,7 @@ module.exports = async function handler(req, res) {
     return res.json({ ok: true });
 
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('Error:', error);
     return res.json({ ok: true });
   }
 };
