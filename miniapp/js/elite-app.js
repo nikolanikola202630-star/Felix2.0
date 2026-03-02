@@ -15,56 +15,88 @@ class FelixApp {
     
     this.setupEventListeners();
     this.animateOnLoad();
-    this.loadDynamicContent();
+    this.loadDataFromAPI();
+  }
+
+  async loadDataFromAPI() {
+    const userId = this.userData.id;
+    
+    if (!userId) {
+      console.log('No user ID, using default data');
+      this.loadDynamicContent();
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://felix2-0.vercel.app/api/miniapp-data?userId=${userId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load data');
+      }
+
+      const data = await response.json();
+      
+      // Update user data
+      this.userData = {
+        ...this.userData,
+        name: data.user.first_name,
+        level: data.settings.level,
+        xp: data.settings.xp,
+        stats: {
+          messages: data.stats.messages,
+          aiRequests: data.stats.ai_requests,
+          courses: data.courses.length,
+          achievements: data.achievements.length
+        },
+        courses: data.courses,
+        achievements: data.achievements,
+        partners: data.partners,
+        analytics: data.analytics
+      };
+
+      this.loadDynamicContent();
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.tg.showAlert('Ошибка загрузки данных. Используются локальные данные.');
+      this.loadDynamicContent();
+    }
   }
 
   loadUserData() {
-    // Mock data - в production загружать с API
+    // Return default data, will be updated from API
     return {
-      id: this.tg.initDataUnsafe?.user?.id || 123456,
-      name: this.tg.initDataUnsafe?.user?.first_name || 'Magic',
-      level: 5,
-      xp: 2450,
-      avatar: '🧙',
+      id: this.tg.initDataUnsafe?.user?.id || null,
+      name: this.tg.initDataUnsafe?.user?.first_name || 'User',
+      level: 1,
+      xp: 0,
+      avatar: '👤',
       stats: {
-        messages: 127,
-        aiRequests: 45,
-        courses: 3,
-        achievements: 12
+        messages: 0,
+        aiRequests: 0,
+        courses: 0,
+        achievements: 0
       },
-      courses: [
-        { id: 1, title: 'Основы работы с Felix', icon: '🤖', progress: 65, lessons: 12, duration: '2 часа', status: 'active' },
-        { id: 2, title: 'Самообучение бота', icon: '🧠', progress: 30, lessons: 8, duration: '1.5 часа', status: 'active' },
-        { id: 3, title: 'Модерация групп', icon: '🛡️', progress: 0, lessons: 10, duration: '2 часа', status: 'new' }
-      ],
-      achievements: [
-        { id: 1, title: 'Первые шаги', icon: '🎯', desc: 'Начало пути', date: 'Сегодня' },
-        { id: 2, title: 'Неделя подряд', icon: '🔥', desc: '7 дней активности', date: '2 часа назад' },
-        { id: 3, title: 'Отличник', icon: '⭐', desc: 'Средний балл 90+', date: 'Вчера' }
-      ],
-      partners: [
-        { id: 1, name: 'AI Academy', icon: '🎓', desc: 'Обучение AI • Premium', status: 'active' },
-        { id: 2, name: 'Tech Startup', icon: '🚀', desc: 'Стартап инкубатор', status: 'active' },
-        { id: 3, name: 'Design Studio', icon: '💼', desc: 'Дизайн и разработка', status: 'active' },
-        { id: 4, name: 'Green Tech', icon: '🌱', desc: 'Экологические технологии', status: 'active' }
-      ],
+      courses: [],
+      achievements: [],
+      partners: [],
       library: {
-        saved: 24,
-        favorites: 12,
-        notes: 8,
-        certificates: 3
+        saved: 0,
+        favorites: 0,
+        notes: 0,
+        certificates: 0
       },
       analytics: {
-        weeklyMessages: 342,
-        weeklyAI: 89,
-        weeklyLessons: 12,
-        weeklyAchievements: 5,
-        growth: 24,
-        studyTime: 145,
-        avgScore: 87,
-        streak: 7,
-        rank: 2,
-        totalUsers: 1247
+        weeklyMessages: 0,
+        weeklyAI: 0,
+        weeklyLessons: 0,
+        weeklyAchievements: 0,
+        growth: 0,
+        studyTime: 0,
+        avgScore: 0,
+        streak: 0,
+        rank: 0,
+        totalUsers: 0
       }
     };
   }

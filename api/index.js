@@ -1,5 +1,6 @@
 // Unified API Router - v8.6 Working
 const webhookHandler = require('./webhook-v8-fixed');
+const miniappDataHandler = require('./miniapp-data');
 
 module.exports = async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -12,11 +13,16 @@ module.exports = async function handler(req, res) {
     return webhookHandler(req, res);
   }
   
+  // Route to miniapp data handler
+  if (pathname === '/api/miniapp-data' || pathname.includes('miniapp-data')) {
+    return miniappDataHandler(req, res);
+  }
+  
   // Default health check
   return res.json({
     status: 'ok',
     version: '8.6-fixed',
-    endpoints: ['/api/webhook'],
+    endpoints: ['/api/webhook', '/api/miniapp-data'],
     pathname,
     timestamp: new Date().toISOString()
   });
