@@ -270,21 +270,46 @@ function renderMyCourses(courses) {
     document.getElementById('myCoursesList').innerHTML = html;
 }
 
-// Render courses
+// Render courses with enhanced visuals
 function renderCourses(courses) {
     const html = courses.map(course => `
-        <div class="course-card" onclick="openCourse(${course.id})">
-            <div class="course-image">${course.icon || '📚'}</div>
-            <div class="course-content">
-                <div class="course-title">${course.title}</div>
-                <div class="course-meta">
-                    <span>📊 ${course.lessons_count} уроков</span>
-                    <span>⭐ ${course.rating}/5</span>
-                    <span>👥 ${course.students_count}</span>
+        <div class="course-card-enhanced animate-fade-in-up hover-lift" onclick="openCourse(${course.id})">
+            <div class="course-image-enhanced">
+                ${course.icon || '📚'}
+                ${course.progress > 0 ? `<div class="course-badge">В процессе</div>` : ''}
+            </div>
+            <div class="course-content-enhanced">
+                <div class="course-title-enhanced">${course.title}</div>
+                <div class="course-description">${course.description || 'Изучите основы и продвинутые техники'}</div>
+                <div class="course-meta-enhanced">
+                    <div class="course-meta-item">
+                        <span class="course-meta-icon">📊</span>
+                        <span>${course.lessons_count} уроков</span>
+                    </div>
+                    <div class="course-meta-item">
+                        <span class="course-meta-icon">⏱️</span>
+                        <span>${course.duration}</span>
+                    </div>
+                    <div class="course-meta-item">
+                        <span class="course-meta-icon">⭐</span>
+                        <span>${course.rating}/5</span>
+                    </div>
+                    <div class="course-meta-item">
+                        <span class="course-meta-icon">👥</span>
+                        <span>${course.students_count}</span>
+                    </div>
                 </div>
-                <button class="btn btn-primary mt-20" onclick="event.stopPropagation(); startCourse(${course.id})">
-                    Начать курс
-                </button>
+                ${course.progress > 0 ? `
+                    <div class="progress-bar-enhanced">
+                        <div class="progress-fill-enhanced" style="width: ${course.progress}%"></div>
+                    </div>
+                    <div class="progress-text">${course.progress}% завершено</div>
+                ` : `
+                    <button class="btn-primary-enhanced mt-20" onclick="event.stopPropagation(); startCourse(${course.id})">
+                        <span>🚀</span>
+                        <span>Начать курс</span>
+                    </button>
+                `}
             </div>
         </div>
     `).join('');
@@ -304,37 +329,46 @@ async function loadProfile() {
     renderAchievements(data.achievements);
 }
 
-// Render profile
+// Render profile with enhanced visuals
 function renderProfile(data) {
+    const avatar = localStorage.getItem('avatar') || '👤';
+    
     const html = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="width: 80px; height: 80px; background: var(--gradient-primary); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 40px;">
-                👤
+        <div class="profile-card animate-scale-in">
+            <div class="profile-avatar animate-float">
+                ${avatar}
             </div>
-            <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">
+            <div class="profile-name">
                 ${user.first_name || 'Пользователь'}
             </div>
-            <div style="color: var(--text-secondary);">
-                ID: ${user.id}
+            <div class="profile-status">
+                <span class="badge badge-primary">Уровень ${data.stats?.level || 1}</span>
+                <span class="badge badge-success" style="margin-left: 8px;">
+                    ${data.stats?.xp || 0} XP
+                </span>
             </div>
         </div>
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">${data.stats?.level || 1}</div>
-                <div class="stat-label">Уровень</div>
+        <div class="stats-grid stagger-fade-in">
+            <div class="stat-card-enhanced">
+                <span class="stat-icon">📊</span>
+                <div class="stat-value-enhanced">${data.stats?.messages_count || 0}</div>
+                <div class="stat-label-enhanced">Сообщений</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">${data.stats?.xp || 0}</div>
-                <div class="stat-label">Опыт</div>
+            <div class="stat-card-enhanced">
+                <span class="stat-icon">🤖</span>
+                <div class="stat-value-enhanced">${data.stats?.ai_requests || 0}</div>
+                <div class="stat-label-enhanced">AI запросов</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">${data.stats?.messages_count || 0}</div>
-                <div class="stat-label">Сообщений</div>
+            <div class="stat-card-enhanced">
+                <span class="stat-icon">📚</span>
+                <div class="stat-value-enhanced">${data.stats?.courses_completed || 0}</div>
+                <div class="stat-label-enhanced">Курсов</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">${data.stats?.ai_requests || 0}</div>
-                <div class="stat-label">AI запросов</div>
+            <div class="stat-card-enhanced">
+                <span class="stat-icon">🔥</span>
+                <div class="stat-value-enhanced">${data.stats?.streak_days || 0}</div>
+                <div class="stat-label-enhanced">Дней подряд</div>
             </div>
         </div>
     `;
@@ -342,28 +376,40 @@ function renderProfile(data) {
     document.getElementById('profileInfo').innerHTML = html;
 }
 
-// Render achievements
+// Render achievements with enhanced visuals
 function renderAchievements(achievements) {
     if (achievements.length === 0) {
         document.getElementById('achievementsList').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">🏆</div>
-                <div class="empty-text">У тебя пока нет достижений</div>
-                <div style="color: var(--text-secondary); font-size: 14px;">
-                    Начни обучение чтобы получить первое!
+            <div class="empty-state-enhanced">
+                <div class="empty-icon-enhanced">🏆</div>
+                <div class="empty-title">Пока нет достижений</div>
+                <div class="empty-text-enhanced">
+                    Начни обучение и получи свое первое достижение!
                 </div>
+                <button class="btn-primary-enhanced" onclick="showTab('academy')">
+                    <span>📚</span>
+                    <span>К курсам</span>
+                </button>
             </div>
         `;
         return;
     }
     
     const html = achievements.map(achievement => `
-        <div class="achievement">
-            <div class="achievement-icon">${achievement.icon || '🏆'}</div>
-            <div class="achievement-info">
-                <div class="achievement-title">${achievement.title}</div>
-                <div class="achievement-desc">${achievement.description}</div>
+        <div class="achievement-enhanced ${achievement.unlocked ? 'animate-fade-in-left' : 'achievement-locked'}">
+            <div class="achievement-icon-enhanced">${achievement.icon || '🏆'}</div>
+            <div class="achievement-info-enhanced">
+                <div class="achievement-title-enhanced">${achievement.title}</div>
+                <div class="achievement-desc-enhanced">${achievement.description}</div>
+                ${achievement.progress !== undefined ? `
+                    <div class="achievement-progress">
+                        <div class="progress-bar-enhanced">
+                            <div class="progress-fill-enhanced" style="width: ${achievement.progress}%"></div>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
+            ${achievement.unlocked ? '<span class="badge badge-success">✓</span>' : '<span class="badge">🔒</span>'}
         </div>
     `).join('');
     
@@ -601,29 +647,85 @@ function openLibraryItem(itemId) {
 }
 
 
-// Render partners
+// Render partners with enhanced visuals
 function renderPartners(partners) {
     if (!partners || partners.length === 0) {
         document.getElementById('partnersList').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">🤝</div>
-                <div class="empty-text">Партнеры скоро появятся</div>
+            <div class="empty-state-enhanced">
+                <div class="empty-icon-enhanced">🤝</div>
+                <div class="empty-title">Партнеры скоро появятся</div>
+                <div class="empty-text-enhanced">
+                    Хотите стать партнером? Оставьте заявку!
+                </div>
+                <button class="btn-primary-enhanced" onclick="submitPartnerApplication()">
+                    <span>📝</span>
+                    <span>Подать заявку</span>
+                </button>
             </div>
         `;
         return;
     }
     
     const html = partners.map(partner => `
-        <div class="partner-card" onclick="openPartner('${partner.id}')">
-            <div class="partner-logo">${partner.icon || '🏢'}</div>
-            <div class="partner-info">
-                <div class="partner-name">${partner.name}</div>
-                <div class="partner-desc">${partner.description}</div>
+        <div class="partner-card-enhanced animate-fade-in-up" onclick="openPartner('${partner.id}')">
+            <div class="partner-logo-enhanced">${partner.icon || '🏢'}</div>
+            <div class="partner-info-enhanced">
+                <div class="partner-name-enhanced">${partner.name}</div>
+                <div class="partner-desc-enhanced">${partner.description}</div>
+                <div class="partner-tags">
+                    ${partner.tags ? partner.tags.map(tag => `<span class="partner-tag">${tag}</span>`).join('') : ''}
+                </div>
             </div>
         </div>
     `).join('');
     
     document.getElementById('partnersList').innerHTML = html;
+}
+
+// Submit partner application
+async function submitPartnerApplication() {
+    tg.HapticFeedback.impactOccurred('medium');
+    
+    const name = await tg.showPopup({
+        title: 'Заявка на партнерство',
+        message: 'Введите название вашей компании:',
+        buttons: [
+            { id: 'cancel', type: 'cancel' },
+            { id: 'submit', type: 'default', text: 'Отправить' }
+        ]
+    });
+    
+    if (name === 'submit') {
+        try {
+            const response = await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'submitApplication',
+                    userId: user.id,
+                    data: {
+                        type: 'partner',
+                        applicationData: {
+                            name: 'Новый партнер',
+                            description: 'Описание партнера',
+                            icon: '🏢',
+                            contact: user.first_name
+                        }
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                tg.showAlert('✅ Заявка отправлена! Администратор рассмотрит её в ближайшее время.');
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        } catch (error) {
+            console.error('Submit application error:', error);
+            tg.showAlert('Ошибка отправки заявки');
+        }
+    }
 }
 
 // Render library
