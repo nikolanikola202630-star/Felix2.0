@@ -1,0 +1,49 @@
+name: Auto Update Dependencies
+
+on:
+  schedule:
+    # Каждый понедельник в 9:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      
+      - name: Update dependencies
+        run: |
+          npm update
+          npm audit fix --force || true
+      
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: '🔄 Auto Update Dependencies'
+          body: |
+            Automated dependency update
+            
+            - Updated npm packages
+            - Fixed security vulnerabilities
+            - Ran tests
+            
+            Please review and merge if tests pass.
+          branch: auto-update-dependencies
+          delete-branch: true

@@ -1,0 +1,51 @@
+name: Daily Database Backup
+
+on:
+  schedule:
+    # Run every day at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          BACKUP_FILE="backup-$(date +%Y%m%d-%H%M%S).sql"
+          pg_dump $DATABASE_URL > $BACKUP_FILE
+          gzip $BACKUP_FILE
+          echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
+      
+      - name: Upload to GitHub Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: database-backup
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+      
+      # Optional: Upload to S3
+      # - name: Upload to S3
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl private
+      #   env:
+      #     AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     SOURCE_DIR: ${{ env.BACKUP_FILE }}
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Backup failed! Check the logs."
+          # Add notification logic (Telegram, Slack, etc.)
