@@ -64,4 +64,47 @@ async function getAIResponse(userId, userMessage) {
         
         return response;
     } catch (error) {
-        console.error('
+        console.error('AI response error:', error);
+        return 'Извините, произошла ошибка при обработке запроса.';
+    }
+}
+
+export default async function handler(req, res) {
+    if (req.method === 'GET') {
+        return res.json({ status: 'ok', bot: 'Felix v7.0' });
+    }
+    
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { message } = req.body;
+        
+        if (!message?.text) {
+            return res.json({ ok: true });
+        }
+
+        const { chat: { id: chatId }, from: { id: userId }, text } = message;
+        
+        // Get or create user
+        await db.getOrCreateUser(message.from);
+        
+        // Save user message
+        await db.saveMessage(userId, 'user', text);
+        
+        // Get AI response
+        const aiResponse = await getAIResponse(userId, text);
+        
+        // Save AI response
+        await db.saveMessage(userId, 'assistant', aiResponse);
+        
+        // Send response
+        await send(chatId, aiResponse);
+        
+        return res.json({ ok: true });
+    } catch (error) {
+        console.error('Webhook error:', error);
+        return res.status(500).json({ error: 'Internal error' });
+    }
+}
