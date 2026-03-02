@@ -4,18 +4,21 @@ const appHandler = require('./app/index');
 const voiceHandler = require('./voice/index');
 
 module.exports = async function handler(req, res) {
-  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = url.pathname;
+  
+  console.log('Request:', pathname);
   
   // Route to appropriate handler
-  if (pathname.startsWith('/api/webhook')) {
+  if (pathname === '/api/webhook' || pathname.includes('webhook')) {
     return webhookHandler(req, res);
   }
   
-  if (pathname.startsWith('/api/app')) {
+  if (pathname === '/api/app' || pathname.includes('/app')) {
     return appHandler(req, res);
   }
   
-  if (pathname.startsWith('/api/voice')) {
+  if (pathname === '/api/voice' || pathname.includes('/voice')) {
     return voiceHandler(req, res);
   }
   
@@ -23,6 +26,7 @@ module.exports = async function handler(req, res) {
   return res.json({
     status: 'ok',
     version: '8.0',
-    endpoints: ['/api/webhook', '/api/app', '/api/voice']
+    endpoints: ['/api/webhook', '/api/app', '/api/voice'],
+    pathname
   });
 };
