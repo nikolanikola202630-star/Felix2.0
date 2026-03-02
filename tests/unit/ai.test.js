@@ -1,75 +1,63 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ai } from '../../lib/ai.js';
 
-// Mock fetch
-global.fetch = vi.fn();
+const createMockClient = (impl) => ({
+  chat: {
+    completions: {
+      create: impl
+    }
+  }
+});
 
 describe('AI Module', () => {
+  let consoleErrorSpy;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    ai.__resetClient();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    delete process.env.AI_RATE_LIMIT_PER_MINUTE;
+    consoleErrorSpy.mockRestore();
   });
 
   describe('getChatResponse', () => {
-    it('should return AI response with context', async () => {
-      const mockResponse = {
-        choices: [{
-          message: {
-            content: 'ÐŸÑ€Ð¸Ð²ÐµÑ‚! ÐšÐ°Ðº Ð´ÐµÐ»Ð°?'
-          }
-        }],
-        usage: {
-          total_tokens: 150
-        }
-      };
-
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse
+    it('returns AI response with context', async () => {
+      const mockCreate = vi.fn().mockResolvedValue({
+        choices: [{ message: { content: 'Ïðèâåò! Êàê äåëà?' } }],
+        usage: { total_tokens: 150 }
       });
 
-      // Ð”Ð¸Ð½Ð°Ð¼Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚
-      const { ai } = await import('../../lib/ai.js');
+      ai.__setClient(createMockClient(mockCreate));
 
-      const result = await ai.getChatResponse(
-        'ÐŸÑ€Ð¸Ð²ÐµÑ‚',
-        [],
-        { temperature: 0.7, model: 'llama-3.3-70b-versatile' }
-      );
+      const result = await ai.getChatResponse('Ïðèâåò', [], {
+        temperature: 0.7,
+        model: 'llama-3.3-70b-versatile'
+      });
 
-      expect(result.content).toBe('ÐŸÑ€Ð¸Ð²ÐµÑ‚! ÐšÐ°Ðº Ð´ÐµÐ»Ð°?');
+      expect(result.content).toBe('Ïðèâåò! Êàê äåëà?');
       expect(result.tokens).toBe(150);
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.groq.com/openai/v1/chat/completions',
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json'
-          })
-        })
-      );
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+      expect(mockCreate.mock.calls[0][0].messages[0].role).toBe('system');
     });
 
-    it('should handle API errors', async () => {
-      global.fetch.mockRejectedValueOnce(new Error('API Error'));
-
-      const { ai } = await import('../../lib/ai.js');
+    it('handles API errors', async () => {
+      ai.__setClient(createMockClient(vi.fn().mockRejectedValue(new Error('API Error'))));
 
       const result = await ai.getChatResponse('test', []);
-      
-      expect(result.content).toContain('ÐžÑˆÐ¸Ð±ÐºÐ°');
+      expect(typeof result.content).toBe('string');
+      expect(result.content.length).toBeGreaterThan(0);
+      expect(result.error).toBe(true);
     });
 
-    it('should include conversation history', async () => {
-      const mockResponse = {
+    it('includes conversation history', async () => {
+      const mockCreate = vi.fn().mockResolvedValue({
         choices: [{ message: { content: 'Response' } }],
         usage: { total_tokens: 100 }
-      };
-
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse
       });
 
-      const { ai } = await import('../../lib/ai.js');
+      ai.__setClient(createMockClient(mockCreate));
 
       const history = [
         { role: 'user', content: 'Previous message' },
@@ -78,30 +66,48 @@ describe('AI Module', () => {
 
       await ai.getChatResponse('New message', history);
 
-      const callArgs = global.fetch.mock.calls[0][1];
-      const body = JSON.parse(callArgs.body);
-      
-      expect(body.messages.length).toBeGreaterThan(2); // system + history + new
+      const payload = mockCreate.mock.calls[0][0];
+      expect(payload.messages.length).toBeGreaterThan(2);
+    });
+
+    it('applies per-user rate limiting', async () => {
+      process.env.AI_RATE_LIMIT_PER_MINUTE = '2';
+
+      ai.__setClient(
+        createMockClient(
+          vi.fn().mockResolvedValue({
+            choices: [{ message: { content: 'ok' } }],
+            usage: { total_tokens: 1 }
+          })
+        )
+      );
+
+      const first = await ai.getChatResponse('1', [], { userId: 1001 });
+      const second = await ai.getChatResponse('2', [], { userId: 1001 });
+      const third = await ai.getChatResponse('3', [], { userId: 1001 });
+
+      expect(first.error).toBeFalsy();
+      expect(second.error).toBeFalsy();
+      expect(third.error).toBe(true);
+      expect(third.rateLimited).toBe(true);
     });
   });
 
   describe('createSummary', () => {
-    it('should create brief summary', async () => {
-      const mockResponse = {
-        choices: [{ message: { content: 'Summary text' } }],
-        usage: { total_tokens: 50 }
-      };
-
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse
-      });
-
-      const { ai } = await import('../../lib/ai.js');
+    it('creates brief summary', async () => {
+      ai.__setClient(
+        createMockClient(
+          vi.fn().mockResolvedValue({
+            choices: [{ message: { content: 'Summary text' } }],
+            usage: { total_tokens: 50 }
+          })
+        )
+      );
 
       const result = await ai.createSummary('Long text...', 'brief');
-      
+
       expect(result.content).toBe('Summary text');
+      expect(result.tokens).toBe(50);
     });
   });
 });

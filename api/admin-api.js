@@ -1,5 +1,7 @@
 // Admin API Endpoint
 const adminSystem = require('../lib/admin/admin-system');
+const referralSystem = require('../lib/partners/referral-system');
+const supportSystem = require('../lib/support/support-system');
 
 module.exports = async function handler(req, res) {
   // CORS headers
@@ -22,7 +24,9 @@ module.exports = async function handler(req, res) {
     const protectedActions = [
       'addCourse', 'updateCourse', 'deleteCourse',
       'addPartner', 'updatePartner', 'deletePartner',
-      'reviewApplication', 'getApplications', 'getAdminStats'
+      'reviewApplication', 'getApplications', 'getAdminStats',
+      'assignPartner', 'deactivatePartner', 'getPartnerAccounts',
+      'getSupportInbox', 'replySupport', 'setSupportThreadStatus'
     ];
 
     if (protectedActions.includes(action) && !adminSystem.isAdmin(userId)) {
@@ -85,6 +89,55 @@ module.exports = async function handler(req, res) {
       case 'getPendingApplications':
         const pending = await adminSystem.getPendingApplications();
         return res.json({ success: true, applications: pending });
+
+      // Backward compatibility for legacy admin mini app
+      case 'getPartnerRequests':
+        const partnerRequests = await adminSystem.getPendingApplications();
+        return res.json({ success: true, requests: partnerRequests });
+
+      case 'approvePartnerRequest':
+        const approvedRequest = await adminSystem.reviewApplication(
+          data.requestId,
+          'approved',
+          'Approved from admin panel',
+          userId
+        );
+        return res.json({ success: true, application: approvedRequest });
+
+      case 'rejectPartnerRequest':
+        const rejectedRequest = await adminSystem.reviewApplication(
+          data.requestId,
+          'rejected',
+          data.reason || 'Rejected by admin',
+          userId
+        );
+        return res.json({ success: true, application: rejectedRequest });
+
+      // Referral partner accounts
+      case 'assignPartner':
+        const partnerAccount = await referralSystem.assignPartner(userId, data.targetUserId);
+        return res.json({ success: true, account: partnerAccount });
+
+      case 'deactivatePartner':
+        const deactivatedAccount = await referralSystem.deactivatePartner(userId, data.targetUserId);
+        return res.json({ success: true, account: deactivatedAccount });
+
+      case 'getPartnerAccounts':
+        const accounts = await referralSystem.getAdminPartners(userId);
+        return res.json({ success: true, partners: accounts });
+
+      // Support inbox
+      case 'getSupportInbox':
+        const threads = await supportSystem.getAdminInbox(userId, data?.status || null);
+        return res.json({ success: true, threads });
+
+      case 'replySupport':
+        const replyResult = await supportSystem.sendAdminReply(userId, data.threadId, data.message);
+        return res.json({ success: true, result: replyResult });
+
+      case 'setSupportThreadStatus':
+        const updatedThread = await supportSystem.setThreadStatus(userId, data.threadId, data.status);
+        return res.json({ success: true, thread: updatedThread });
 
       // Admin Stats
       case 'getAdminStats':

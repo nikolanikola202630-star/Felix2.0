@@ -1,9 +1,21 @@
 // Felix Elite Mini App - Full Functional with Animations & Sync
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp || {
+    initDataUnsafe: {},
+    ready: () => {},
+    expand: () => {},
+    showAlert: (text) => alert(text),
+    showPopup: () => {},
+    HapticFeedback: {
+        impactOccurred: () => {},
+        notificationOccurred: () => {}
+    }
+};
 tg.ready();
 tg.expand();
 
 const API_URL = '/api/app';
+const PARTNER_API_URL = '/api/partner';
+const SUPPORT_API_URL = '/api/support';
 const user = tg.initDataUnsafe?.user || { id: 123456, first_name: 'Demo User' };
 
 // Animation helper
@@ -73,6 +85,9 @@ const MOCK_DATA = {
 async function init() {
     // Apply theme
     applyTheme();
+
+    // Track referral code from URL if present
+    await trackReferralFromUrl();
     
     // Load user data
     await loadUserData();
@@ -84,6 +99,25 @@ async function init() {
     
     // Handle hash navigation
     handleHashNavigation();
+}
+
+async function trackReferralFromUrl() {
+    try {
+        const url = new URL(window.location.href);
+        const ref = url.searchParams.get('ref');
+        if (!ref) return;
+
+        const sessionKey = 'felix_ref_session_id';
+        let sessionId = localStorage.getItem(sessionKey);
+        if (!sessionId) {
+            sessionId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+            localStorage.setItem(sessionKey, sessionId);
+        }
+
+        await fetch(`${PARTNER_API_URL}?action=trackReferral&ref=${encodeURIComponent(ref)}&sessionId=${encodeURIComponent(sessionId)}`);
+    } catch (error) {
+        console.error('Referral track error:', error);
+    }
 }
 
 // Apply theme
@@ -111,13 +145,36 @@ function toggleTheme() {
 // Load user data
 async function loadUserData() {
     try {
+        // 1) Prefer unified sync endpoint
+        try {
+            const syncResponse = await fetch(`/api/sync?action=getUserData&userId=${user.id}`);
+            const syncData = await syncResponse.json();
+
+            if (syncData.success && syncData.data?.stats) {
+                updateStats({
+                    level: syncData.data.stats.level || 1,
+                    xp: syncData.data.stats.xp || 0,
+                    courses_completed: syncData.data.stats.courses_completed || 0,
+                    achievements_count: syncData.data.stats.achievements_count || 0
+                });
+                return;
+            }
+        } catch (error) {
+            console.log('Sync endpoint unavailable, fallback to app endpoint');
+        }
+
         // Try to load from API, fallback to mock data
         try {
             const response = await fetch(`${API_URL}?endpoint=admin&action=getUserSettings&userId=${user.id}`);
             const data = await response.json();
             
             if (data.success) {
-                updateStats(data.stats);
+                updateStats({
+                    level: data.stats?.level || data.settings?.level || MOCK_DATA.stats.level,
+                    xp: data.stats?.xp || data.settings?.xp || MOCK_DATA.stats.xp,
+                    courses_completed: data.stats?.courses_completed || MOCK_DATA.stats.courses_completed,
+                    achievements_count: data.stats?.achievements_count || MOCK_DATA.stats.achievements_count
+                });
                 return;
             }
         } catch (error) {
@@ -146,7 +203,14 @@ function showTab(tabName) {
     document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
     });
-    event.target.classList.add('active');
+
+    const targetButton =
+        document.querySelector(`.nav-tab[onclick="showTab('${tabName}')"]`) ||
+        document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+
+    if (targetButton) {
+        targetButton.classList.add('active');
+    }
     
     // Hide all tabs with fade out
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -493,6 +557,18 @@ async function loadNotes() {
 
 // Load partners
 async function loadPartners() {
+    try {
+        const response = await fetch(`${PARTNER_API_URL}?action=dashboard&userId=${user.id}`);
+        const data = await response.json();
+
+        if (data.success && data.isPartner) {
+            renderPartnerDashboard(data);
+            return;
+        }
+    } catch (error) {
+        console.error('Load partner dashboard error:', error);
+    }
+
     renderPartners(MOCK_DATA.partners);
 }
 
@@ -513,13 +589,22 @@ async function loadRating() {
 
 // Settings functions
 function showSettings() {
-    document.getElementById('settingsModal').classList.remove('hidden');
+    const modal = document.getElementById('settingsModal');
+    if (!modal) {
+        tg.showAlert('Настройки доступны в боте через команду /settings');
+        return;
+    }
+
+    modal.classList.remove('hidden');
     loadCurrentSettings();
     tg.HapticFeedback.impactOccurred('light');
 }
 
 function closeSettings() {
-    document.getElementById('settingsModal').classList.add('hidden');
+    const modal = document.getElementById('settingsModal');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
     tg.HapticFeedback.impactOccurred('light');
 }
 
@@ -680,6 +765,102 @@ function renderPartners(partners) {
     `).join('');
     
     document.getElementById('partnersList').innerHTML = html;
+}
+
+function renderPartnerDashboard(data) {
+    const stats = data.stats || { total: 0, unique: 0, blocked: 0, clicks: [] };
+    const recentRows = (stats.clicks || []).slice(0, 20).map((click) => `
+        <tr>
+            <td>${new Date(click.clicked_at).toLocaleString('ru-RU')}</td>
+            <td>${click.is_unique ? 'Уникальный' : 'Повтор'}</td>
+            <td>${click.referer || '—'}</td>
+            <td>${click.blocked_reason || '—'}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('partnersList').innerHTML = `
+        <div class="card">
+            <div class="card-title mb-16">💼 Кабинет партнера</div>
+            <div style="background: var(--bg); border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 12px; word-break: break-all;">
+                ${data.referralLink}
+            </div>
+            <button class="btn btn-primary" onclick="copyReferralLink('${data.referralLink.replace(/'/g, '&#39;')}')">🔗 Скопировать ссылку</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">${stats.total}</div>
+                <div class="stat-label">Всего переходов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${stats.unique}</div>
+                <div class="stat-label">Уникальных</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${stats.blocked}</div>
+                <div class="stat-label">Заблокировано</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${stats.total > 0 ? Math.round((stats.unique / stats.total) * 100) : 0}%</div>
+                <div class="stat-label">Качество трафика</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title mb-16">📋 История переходов</div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                        <tr style="text-align:left; border-bottom:1px solid var(--border);">
+                            <th style="padding:8px 4px;">Время</th>
+                            <th style="padding:8px 4px;">Тип</th>
+                            <th style="padding:8px 4px;">Источник</th>
+                            <th style="padding:8px 4px;">Фильтр</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentRows || '<tr><td colspan="4" style="padding:10px 4px; color: var(--text-secondary);">Переходов пока нет</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+async function copyReferralLink(link) {
+    try {
+        await navigator.clipboard.writeText(link);
+        tg.showAlert('Ссылка скопирована');
+    } catch (error) {
+        tg.showAlert(link);
+    }
+}
+
+async function openHumanSupport() {
+    const message = window.prompt('Опишите вопрос для администратора:');
+    if (!message || !message.trim()) return;
+
+    try {
+        const response = await fetch(SUPPORT_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'sendUserMessage',
+                userId: user.id,
+                message: message.trim()
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showAlert('Сообщение отправлено администратору. Ответ появится в чате поддержки.');
+        } else {
+            tg.showAlert(`Ошибка: ${data.error || 'Не удалось отправить сообщение'}`);
+        }
+    } catch (error) {
+        console.error('Support send error:', error);
+        tg.showAlert('Ошибка отправки сообщения');
+    }
 }
 
 // Submit partner application

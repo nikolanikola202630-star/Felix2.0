@@ -1,94 +1,121 @@
-﻿// Felix Bot v7.0 - Working Version
+const { db } = require('../../lib/db');
+const { ai } = require('../../lib/ai');
+
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/';
 
-async function sendMessage(chatId, text) {
-  const response = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+async function telegram(method, body) {
+  if (!TOKEN) return { ok: false };
+  const response = await fetch(`${TELEGRAM_API}/${method}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [[{
-          text: '📱 Открыть Felix App',
-          web_app: { url: MINIAPP_URL }
-        }]]
+    body: JSON.stringify(body)
+  });
+  return response.json();
+}
+
+async function sendMessage(chatId, text, keyboard = null) {
+  return telegram('sendMessage', {
+    chat_id: chatId,
+    text,
+    parse_mode: 'HTML',
+    reply_markup:
+      keyboard ||
+      {
+        inline_keyboard: [[{ text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }]]
       }
-    })
   });
-  return await response.json();
 }
 
-async function getAIResponse(prompt) {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: 'Ты Felix - умный ассистент. Отвечай кратко на русском.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 1024
-    })
-  });
-  
-  const data = await response.json();
-  return data.choices[0]?.message?.content || 'Не могу ответить';
+function buildHelp() {
+  return (
+    '📚 <b>Felix Bot</b>\n\n' +
+    '/start - запуск\n' +
+    '/help - помощь\n' +
+    '/stats - статистика\n' +
+    '/ask [вопрос] - вопрос AI\n\n' +
+    'Также можно писать обычным сообщением.'
+  );
 }
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
-    return res.json({ status: 'ok', bot: 'Felix v7.0 ✅', timestamp: new Date().toISOString() });
+    return res.json({
+      status: 'ok',
+      bot: 'Felix webhook',
+      timestamp: new Date().toISOString()
+    });
   }
-  
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { message } = req.body;
-    if (!message?.text) return res.json({ ok: true });
+    const message = req.body?.message;
+    if (!message || !message.text) return res.json({ ok: true });
 
-    const { chat: { id: chatId }, from, text } = message;
+    const chatId = message.chat.id;
+    const user = message.from || {};
+    const text = String(message.text || '').trim();
+    const userId = user.id;
 
-    if (text.startsWith('/')) {
-      const [cmd, ...args] = text.split(' ');
-      const arg = args.join(' ');
+    await db.getOrCreateUser(user).catch(() => null);
+    await db.saveMessage(userId, 'user', text, 'text').catch(() => null);
 
-      if (cmd === '/start') {
-        await sendMessage(chatId, `👋 Привет, ${from.first_name}!\n\n🤖 Я Felix - AI-ассистент.\n\n📱 Откройте Mini App!`);
-        return res.json({ ok: true });
-      }
-
-      if (cmd === '/help') {
-        await sendMessage(chatId, '📚 <b>Felix Bot v7.0</b>\n\n/start - Начать\n/help - Помощь\n/ask [текст] - Задать вопрос');
-        return res.json({ ok: true });
-      }
-
-      if (cmd === '/ask' && arg) {
-        const aiResponse = await getAIResponse(arg);
-        await sendMessage(chatId, `💬 <b>Ответ:</b>\n\n${aiResponse}`);
-        return res.json({ ok: true });
-      }
-
-      await sendMessage(chatId, '❓ Неизвестная команда. Используйте /help');
+    if (text === '/start') {
+      await sendMessage(
+        chatId,
+        `👋 Привет, ${user.first_name || 'друг'}!\n\nЯ Felix: AI-ассистент, аналитика, обучение и mini app.`,
+        {
+          inline_keyboard: [
+            [{ text: '📱 Открыть Mini App', web_app: { url: MINIAPP_URL } }],
+            [{ text: '📚 Помощь', callback_data: 'help' }]
+          ]
+        }
+      );
       return res.json({ ok: true });
     }
 
-    const aiResponse = await getAIResponse(text);
-    await sendMessage(chatId, aiResponse);
-    return res.json({ ok: true });
+    if (text === '/help') {
+      await sendMessage(chatId, buildHelp());
+      return res.json({ ok: true });
+    }
 
+    if (text === '/stats') {
+      const stats = await db.getUserStats(userId).catch(() => null);
+      const total = stats?.messages_count || stats?.total_messages || 0;
+      const aiRequests = stats?.ai_requests || 0;
+      const courses = stats?.courses_completed || 0;
+      await sendMessage(
+        chatId,
+        `📊 <b>Твоя статистика</b>\n\nСообщений: ${total}\nAI-запросов: ${aiRequests}\nКурсов завершено: ${courses}`
+      );
+      return res.json({ ok: true });
+    }
+
+    const prompt = text.startsWith('/ask ') ? text.slice(5).trim() : text;
+    const history = await db.getHistory(userId, { limit: 10 }).catch(() => ({ messages: [] }));
+    const aiResponse = await ai.getChatResponse(
+      prompt,
+      (history?.messages || [])
+        .reverse()
+        .map((m) => ({ role: m.role, content: m.content })),
+      { language: 'ru', userId }
+    );
+
+    await sendMessage(chatId, aiResponse.content || 'Не удалось сформировать ответ');
+    await db
+      .saveMessage(userId, 'assistant', aiResponse.content || '', 'text', {
+        tokens: aiResponse.tokens || 0,
+        latency: aiResponse.latency || 0
+      })
+      .catch(() => null);
+
+    return res.json({ ok: true });
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Webhook error:', error);
+    return res.json({ ok: true });
   }
 };
