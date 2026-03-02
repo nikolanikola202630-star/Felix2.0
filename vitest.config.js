@@ -13,7 +13,6 @@ export default defineConfig({
         '*.config.js',
         'miniapp/'
       ]
-    },
-    setupFiles: ['./tests/setup.js']
+    }
   }
 });

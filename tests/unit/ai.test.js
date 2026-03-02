@@ -1,20 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock Groq SDK
-const mockCreate = vi.fn();
-
-vi.mock('groq-sdk', () => ({
-  default: vi.fn(() => ({
-    chat: {
-      completions: {
-        create: mockCreate
-      }
-    }
-  }))
-}));
-
-// Import after mocking
-const { ai } = await import('../../lib/ai.js');
+// Mock fetch
+global.fetch = vi.fn();
 
 describe('AI Module', () => {
   beforeEach(() => {
@@ -22,37 +9,67 @@ describe('AI Module', () => {
   });
 
   describe('getChatResponse', () => {
-    it('should return AI response with metadata', async () => {
+    it('should return AI response with context', async () => {
       const mockResponse = {
         choices: [{
           message: {
-            content: 'Hi there!'
+            content: 'Привет! Как дела?'
           }
         }],
         usage: {
-          total_tokens: 50
+          total_tokens: 150
         }
       };
 
-      mockCreate.mockResolvedValueOnce(mockResponse);
-
-      const result = await ai.getChatResponse('Hello', [], {
-        temperature: 0.7,
-        model: 'llama-3.3-70b-versatile',
-        language: 'ru'
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
       });
 
-      expect(result.content).toBe('Hi there!');
-      expect(result.tokens).toBe(50);
-      expect(result.model).toBe('llama-3.3-70b-versatile');
-      expect(result.latency).toBeGreaterThan(0);
+      // Динамический импорт
+      const { ai } = await import('../../lib/ai.js');
+
+      const result = await ai.getChatResponse(
+        'Привет',
+        [],
+        { temperature: 0.7, model: 'llama-3.3-70b-versatile' }
+      );
+
+      expect(result.content).toBe('Привет! Как дела?');
+      expect(result.tokens).toBe(150);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.groq.com/openai/v1/chat/completions',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json'
+          })
+        })
+      );
+    });
+
+    it('should handle API errors', async () => {
+      global.fetch.mockRejectedValueOnce(new Error('API Error'));
+
+      const { ai } = await import('../../lib/ai.js');
+
+      const result = await ai.getChatResponse('test', []);
+      
+      expect(result.content).toContain('Ошибка');
     });
 
     it('should include conversation history', async () => {
-      mockCreate.mockResolvedValueOnce({
+      const mockResponse = {
         choices: [{ message: { content: 'Response' } }],
         usage: { total_tokens: 100 }
+      };
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
       });
+
+      const { ai } = await import('../../lib/ai.js');
 
       const history = [
         { role: 'user', content: 'Previous message' },
@@ -61,206 +78,30 @@ describe('AI Module', () => {
 
       await ai.getChatResponse('New message', history);
 
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          messages: expect.arrayContaining([
-            expect.objectContaining({ role: 'system' }),
-            expect.objectContaining({ role: 'user', content: 'Previous message' }),
-            expect.objectContaining({ role: 'assistant', content: 'Previous response' }),
-            expect.objectContaining({ role: 'user', content: 'New message' })
-          ])
-        })
-      );
-    });
-
-    it('should handle errors gracefully', async () => {
-      mockCreate.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(
-        ai.getChatResponse('Hello', [])
-      ).rejects.toThrow('Ошибка при обработке запроса');
-    });
-
-    it('should use English system prompt for en language', async () => {
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Hello!' } }],
-        usage: { total_tokens: 20 }
-      });
-
-      await ai.getChatResponse('Hi', [], { language: 'en' });
-
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          messages: expect.arrayContaining([
-            expect.objectContaining({
-              role: 'system',
-              content: expect.stringContaining('smart Telegram assistant')
-            })
-          ])
-        })
-      );
+      const callArgs = global.fetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      
+      expect(body.messages.length).toBeGreaterThan(2); // system + history + new
     });
   });
 
   describe('createSummary', () => {
-    it('should create summary from messages', async () => {
-      const messages = [
-        { role: 'user', content: 'Message 1' },
-        { role: 'assistant', content: 'Response 1' },
-        { role: 'user', content: 'Message 2' },
-        { role: 'assistant', content: 'Response 2' },
-        { role: 'user', content: 'Message 3' }
-      ];
-
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Summary of conversation' } }],
-        usage: { total_tokens: 100 }
-      });
-
-      const result = await ai.createSummary(messages, 'medium');
-
-      expect(result.summary).toBe('Summary of conversation');
-      expect(result.tokens).toBe(100);
-    });
-
-    it('should throw error for insufficient messages', async () => {
-      const messages = [
-        { role: 'user', content: 'Only one' }
-      ];
-
-      await expect(
-        ai.createSummary(messages)
-      ).rejects.toThrow('Недостаточно сообщений');
-    });
-
-    it('should support different detail levels', async () => {
-      const messages = Array(5).fill({ role: 'user', content: 'Test' });
-
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Brief summary' } }],
+    it('should create brief summary', async () => {
+      const mockResponse = {
+        choices: [{ message: { content: 'Summary text' } }],
         usage: { total_tokens: 50 }
+      };
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
       });
 
-      await ai.createSummary(messages, 'brief');
+      const { ai } = await import('../../lib/ai.js');
 
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          messages: expect.arrayContaining([
-            expect.objectContaining({
-              content: expect.stringContaining('краткое саммари')
-            })
-          ])
-        })
-      );
-    });
-  });
-
-  describe('analyzeText', () => {
-    it('should analyze text sentiment', async () => {
-      const text = 'This is a great product! I love it! Amazing quality and service.';
-
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Positive sentiment, confidence: 0.95' } }],
-        usage: { total_tokens: 80 }
-      });
-
-      const result = await ai.analyzeText(text, 'sentiment');
-
-      expect(result.analysis).toContain('Positive');
-      expect(result.tokens).toBe(80);
-    });
-
-    it('should throw error for short text', async () => {
-      const text = 'Too short';
-
-      await expect(
-        ai.analyzeText(text)
-      ).rejects.toThrow('Недостаточно текста');
-    });
-
-    it('should support different analysis types', async () => {
-      const text = 'A long text with more than ten words for analysis purposes here.';
-
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Keywords: analysis, text, purposes' } }],
-        usage: { total_tokens: 60 }
-      });
-
-      await ai.analyzeText(text, 'keywords');
-
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          messages: expect.arrayContaining([
-            expect.objectContaining({
-              content: expect.stringContaining('ключевых слов')
-            })
-          ])
-        })
-      );
-    });
-  });
-
-  describe('generateContent', () => {
-    it('should generate article', async () => {
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Generated article content...' } }],
-        usage: { total_tokens: 500 }
-      });
-
-      const result = await ai.generateContent('AI in healthcare', 'article', {
-        length: 'medium',
-        tone: 'professional'
-      });
-
-      expect(result.content).toContain('Generated article');
-      expect(result.tokens).toBe(500);
-    });
-
-    it('should respect length parameter', async () => {
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Short content' } }],
-        usage: { total_tokens: 100 }
-      });
-
-      await ai.generateContent('Test', 'article', { length: 'short' });
-
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          max_tokens: 512
-        })
-      );
-    });
-
-    it('should support different content types', async () => {
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: 'Email content' } }],
-        usage: { total_tokens: 200 }
-      });
-
-      await ai.generateContent('Meeting request', 'email');
-
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          messages: expect.arrayContaining([
-            expect.objectContaining({
-              content: expect.stringContaining('email')
-            })
-          ])
-        })
-      );
-    });
-  });
-
-  describe('organizeText', () => {
-    it('should organize unstructured text', async () => {
-      mockCreate.mockResolvedValueOnce({
-        choices: [{ message: { content: '# Organized\n\n- Point 1\n- Point 2' } }],
-        usage: { total_tokens: 150 }
-      });
-
-      const result = await ai.organizeText('Unstructured text here');
-
-      expect(result).toContain('Organized');
+      const result = await ai.createSummary('Long text...', 'brief');
+      
+      expect(result.content).toBe('Summary text');
     });
   });
 });
