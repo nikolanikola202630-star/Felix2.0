@@ -1,5 +1,5 @@
-// Unified API Router - All endpoints in one
-const webhookHandler = require('./webhook-simple-v8');
+// Unified API Router - All endpoints in one (v8.6 Fixed)
+const webhookHandler = require('./webhook-v8-fixed');
 const appHandler = require('./app/index');
 const voiceHandler = require('./voice/index');
 
@@ -25,8 +25,9 @@ module.exports = async function handler(req, res) {
   // Default health check
   return res.json({
     status: 'ok',
-    version: '8.3',
+    version: '8.6-fixed',
     endpoints: ['/api/webhook', '/api/app', '/api/voice'],
-    pathname
+    pathname,
+    timestamp: new Date().toISOString()
   });
 };
