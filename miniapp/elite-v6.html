@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Felix Bot - Elite</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Dark Theme (Default) */
+    :root[data-theme="dark"] {
+      --bg-primary: #1a1d2e;
+      --bg-secondary: #22263a;
+      --bg-card: #2a2f45;
+      --bg-hover: #353b52;
+      --accent: #ff8c42;
+      --accent-hover: #ffa05c;
+      --text-primary: #ffffff;
+      --text-secondary: #8b92b0;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Light Theme */
+    :root[data-theme="light"] {
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f0f2f5;
+      --accent: #ff8c42;
+      --accent-hover: #ffa05c;
+      --text-primary: #1a1d2e;
+      --text-secondary: #6b7280;
+      --border: rgba(0, 0, 0, 0.1);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      min-height: 100vh;
+      transition: background 0.3s ease;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0 20px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 32px;
+    }
+
+    .header-info h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .header-info p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 20px;
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    /* Navigation */
+    .nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 4px 0;
+    }
+
+    .nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-item {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+
+    .nav-item:active {
+      transform: scale(0.95);
+    }
+
+    .nav-item.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+    }
+
+    /* Welcome Card */
+    .welcome-card {
+      background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .welcome-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      flex-shrink: 0;
+    }
+
+    .welcome-text {
+      flex: 1;
+      color: #ffffff;
+    }
+
+    .welcome-text h2 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .welcome-text p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .level-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .stat-card:active {
+      transform: scale(0.98);
+      background: var(--bg-hover);
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-badge {
+      background: #10b981;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .view-all {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card:active {
+      transform: scale(0.98);
+      background: var(--bg-hover);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-badge {
+      background: rgba(255, 140, 66, 0.2);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-top: 12px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .progress-value {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff8c42 0%, #ff6b35 100%);
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Bottom Spacing */
+    .bottom-spacing {
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">🧙</div>
+        <div class="header-info">
+          <h1>Felix Bot</h1>
+          <p>Self-Learning AI Admin</p>
+        </div>
+      </div>
+      <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+      <div class="nav-item active" data-tab="profile">👤 Профиль</div>
+      <div class="nav-item" data-tab="academy">🎓 Академия</div>
+      <div class="nav-item" data-tab="partners">🤝 Партнеры</div>
+      <div class="nav-item" data-tab="library">📚 Библиотека</div>
+      <div class="nav-item" data-tab="analytics">📊 Аналитика</div>
+      <div class="nav-item" data-tab="settings">⚙️ Настройки</div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div class="tab-content active" id="profile">
+      <div class="welcome-card">
+        <div class="welcome-content">
+          <div class="avatar">🧙</div>
+          <div class="welcome-text">
+            <h2>Magic</h2>
+            <p>Открой все возможности</p>
+            <div class="level-badge">🏆 Уровень 5 • 2450 XP</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon">📊</span>
+          <div class="stat-value">127</div>
+          <div class="stat-label">Сообщений</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">🤖</span>
+          <div class="stat-value">45</div>
+          <div class="stat-label">AI Запросов</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">📚</span>
+          <div class="stat-value">3</div>
+          <div class="stat-label">Курсов</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">🏆</span>
+          <div class="stat-value">12</div>
+          <div class="stat-label">Достижений</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏆 Новые достижения</div>
+          <div class="view-all">Все →</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <div class="card-info">
+              <div class="card-title">Первые шаги</div>
+              <div class="card-meta">Начало пути • Сегодня</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🔥</div>
+            <div class="card-info">
+              <div class="card-title">Неделя подряд</div>
+              <div class="card-meta">7 дней активности • 2 часа назад</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academy Tab -->
+    <div class="tab-content" id="academy">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">
+            🎓 Академия Felix
+            <span class="section-badge">NEW</span>
+          </div>
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 13px;">
+          Изучите все возможности бота и станьте экспертом
+        </p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🤖</div>
+            <div class="card-info">
+              <div class="card-title">Основы работы с Felix</div>
+              <div class="card-meta">
+                12 уроков • 2 часа
+                <span class="card-badge">В процессе</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-label">Урок 8 из 12</span>
+              <span class="progress-value">65%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🧠</div>
+            <div class="card-info">
+              <div class="card-title">Самообучение бота</div>
+              <div class="card-meta">
+                8 уроков • 1.5 часа
+                <span class="card-badge">В процессе</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-label">Урок 3 из 8</span>
+              <span class="progress-value">30%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 30%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🛡️</div>
+            <div class="card-info">
+              <div class="card-title">Модерация групп</div>
+              <div class="card-meta">
+                10 уроков • 2 часа
+                <span class="card-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">Новый</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-label">Не начат</span>
+              <span class="progress-value">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partners Tab -->
+    <div class="tab-content" id="partners">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🤝 Наши партнеры</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎓</div>
+            <div class="card-info">
+              <div class="card-title">AI Academy</div>
+              <div class="card-meta">Обучение AI • Premium</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🚀</div>
+            <div class="card-info">
+              <div class="card-title">Tech Startup</div>
+              <div class="card-meta">Стартап инкубатор</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">💼</div>
+            <div class="card-info">
+              <div class="card-title">Design Studio</div>
+              <div class="card-meta">Дизайн и разработка</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Library Tab -->
+    <div class="tab-content" id="library">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📚 Моя библиотека</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📖</div>
+            <div class="card-info">
+              <div class="card-title">Сохраненные материалы</div>
+              <div class="card-meta">24 документа</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <div class="card-info">
+              <div class="card-title">Избранное</div>
+              <div class="card-meta">12 элементов</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">📝</div>
+            <div class="card-info">
+              <div class="card-title">Мои заметки</div>
+              <div class="card-meta">8 заметок</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div class="tab-content" id="analytics">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📊 Общая статистика</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-icon">📈</span>
+            <div class="stat-value">+24%</div>
+            <div class="stat-label">Рост активности</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-icon">⏱️</span>
+            <div class="stat-value">145м</div>
+            <div class="stat-label">Время обучения</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-icon">🎯</span>
+            <div class="stat-value">87%</div>
+            <div class="stat-label">Средний балл</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-icon">🔥</span>
+            <div class="stat-value">7</div>
+            <div class="stat-label">Дней подряд</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">⚙️ Основные настройки</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">💬</div>
+            <div class="card-info">
+              <div class="card-title">Стиль общения</div>
+              <div class="card-meta">Неформальный</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🌐</div>
+            <div class="card-info">
+              <div class="card-title">Язык интерфейса</div>
+              <div class="card-meta">Русский</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎨</div>
+            <div class="card-info">
+              <div class="card-title">Тема оформления</div>
+              <div class="card-meta">Авто (темная)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-spacing"></div>
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Theme Management
+    const root = document.documentElement;
+    const themeToggle = document.querySelector('.theme-toggle');
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+
+    function setTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('theme', theme);
+      currentTheme = theme;
+      
+      // Update Telegram theme
+      tg.setHeaderColor(theme === 'dark' ? '#1a1d2e' : '#f5f7fa');
+      tg.setBackgroundColor(theme === 'dark' ? '#1a1d2e' : '#f5f7fa');
+    }
+
+    function toggleTheme() {
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+      }
+    }
+
+    // Initialize theme
+    setTheme(currentTheme);
+
+    // Tab Navigation
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const tabId = item.dataset.tab;
+        
+        // Remove active class
+        navItems.forEach(nav => nav.classList.remove('active'));
+        tabContents.forEach(tab => tab.classList.remove('active'));
+        
+        // Add active class
+        item.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        
+        // Haptic feedback
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('light');
+        }
+      });
+    });
+
+    // Card interactions
+    document.querySelectorAll('.card, .stat-card').forEach(card => {
+      card.addEventListener('click', () => {
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('light');
+        }
+      });
+    });
+
+    // Animate progress bars
+    setTimeout(() => {
+      document.querySelectorAll('.progress-fill').forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 100);
+      });
+    }, 500);
+
+    // View all handler
+    document.querySelectorAll('.view-all').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('medium');
+        }
+        tg.showAlert('Функция в разработке');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const GROQ_KEY = process.env.GROQ_API_KEY;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
-const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/elite-v5.html';
+const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/elite-v6.html';
 
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: GROQ_KEY });
