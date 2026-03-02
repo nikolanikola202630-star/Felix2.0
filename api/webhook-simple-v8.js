@@ -8,10 +8,6 @@ const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/mini
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: GROQ_KEY });
 
-// Sync & Learning systems
-const userSync = require('../lib/sync/user-sync');
-const adaptiveLearning = require('../lib/learning/adaptive-learning');
-
 // Send message with keyboard
 async function send(chatId, text, keyboard = null) {
   const body = {
@@ -72,26 +68,12 @@ async function answerCallback(callbackId, text = '') {
 // Get AI response with user context
 async function getAI(prompt, userId = null) {
   try {
-    // Get user settings if available
-    let settings = { temperature: 0.7, model: 'llama-3.3-70b-versatile' };
-    if (userId) {
-      const userData = await userSync.getCached(userId);
-      if (userData?.settings) {
-        settings = userData.settings;
-      }
-    }
-
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: settings.aiModel || 'llama-3.3-70b-versatile',
-      temperature: settings.aiTemperature || 0.7,
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
       max_tokens: 1000
     });
-    
-    // Track activity
-    if (userId) {
-      await userSync.trackActivity(userId, { type: 'ai_request' });
-    }
     
     return completion.choices[0]?.message?.content || 'Ошибка AI';
   } catch (error) {
@@ -427,7 +409,6 @@ module.exports = async function handler(req, res) {
         const topic = text.slice(12);
         const ideas = await getAI(`Сгенерируй 5 креативных идей на тему: ${topic}. Каждую идею с новой строки с номером.`, chatId);
         await send(chatId, `💡 <b>Идеи на тему "${topic}":</b>\n\n${ideas}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -436,7 +417,6 @@ module.exports = async function handler(req, res) {
         const topic = text.slice(9);
         const explanation = await getAI(`Объясни простыми словами: ${topic}. Используй примеры и аналогии.`, chatId);
         await send(chatId, `📖 <b>Объяснение "${topic}":</b>\n\n${explanation}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 /help - Справка
@@ -486,7 +466,6 @@ module.exports = async function handler(req, res) {
         const question = text.slice(5);
         const answer = await getAI(`Ответь на вопрос: ${question}`, chatId);
         await send(chatId, `💬 <b>Вопрос:</b> ${question}\n\n<b>Ответ:</b>\n${answer}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -494,7 +473,6 @@ module.exports = async function handler(req, res) {
         const textToSummarize = text.slice(9);
         const summary = await getAI(`Создай краткое резюме: ${textToSummarize}`, chatId);
         await send(chatId, `📝 <b>Резюме:</b>\n${summary}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -502,7 +480,6 @@ module.exports = async function handler(req, res) {
         const textToAnalyze = text.slice(9);
         const analysis = await getAI(`Проанализируй текст: ${textToAnalyze}`, chatId);
         await send(chatId, `🔍 <b>Анализ:</b>\n${analysis}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -510,7 +487,6 @@ module.exports = async function handler(req, res) {
         const topic = text.slice(10);
         const content = await getAI(`Сгенерируй контент на тему: ${topic}`, chatId);
         await send(chatId, `✨ <b>Сгенерированный контент:</b>\n${content}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -518,7 +494,6 @@ module.exports = async function handler(req, res) {
         const textToTranslate = text.slice(11);
         const translation = await getAI(`Переведи текст (определи язык и переведи на русский или английский): ${textToTranslate}`, chatId);
         await send(chatId, `🌐 <b>Перевод:</b>\n${translation}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
@@ -526,24 +501,10 @@ module.exports = async function handler(req, res) {
         const textToImprove = text.slice(9);
         const improved = await getAI(`Улучши текст, исправь ошибки: ${textToImprove}`, chatId);
         await send(chatId, `✏️ <b>Улучшенный текст:</b>\n${improved}`);
-        await userSync.trackActivity(chatId, { type: 'ai_request' });
         return res.json({ ok: true });
       }
 
-      // Regular message - AI response with learning
-      await userSync.trackActivity(chatId, { type: 'message_sent' });
-      
-      // Analyze learning style periodically
-      const userData = await userSync.getCached(chatId);
-      if (!userData || !userData.lastAnalysis || 
-          (Date.now() - new Date(userData.lastAnalysis).getTime()) > 86400000) {
-        // Analyze once per day
-        const interactions = [
-          { type: 'message', description: text }
-        ];
-        await adaptiveLearning.analyzeLearningStyle(chatId, interactions);
-      }
-      
+      // Regular message - AI response
       const response = await getAI(text, chatId);
       await send(chatId, response);
       return res.json({ ok: true });
