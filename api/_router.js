@@ -37,11 +37,25 @@ module.exports = async (req, res) => {
     }
 
     // 4. Partner группа
+    if (pathname.startsWith('/api/partner-enhanced')) {
+      return require('./partner-enhanced')(req, res);
+    }
+    
     if (pathname.startsWith('/api/partner')) {
       return require('./routes/partner')(req, res);
     }
 
-    // 5. Health & System группа
+    // 5. Admin Enhanced
+    if (pathname.startsWith('/api/admin-enhanced')) {
+      return require('./admin-enhanced')(req, res);
+    }
+
+    // 6. Referral Bot
+    if (pathname.startsWith('/api/referral-bot')) {
+      return require('./referral-bot')(req, res);
+    }
+
+    // 7. Health & System группа
     if (pathname.startsWith('/api/health') ||
         pathname.startsWith('/api/webhook') ||
         pathname.startsWith('/api/miniapp') ||
