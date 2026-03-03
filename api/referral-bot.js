@@ -161,10 +161,10 @@ async function handleReferral(chatId, userId, userName, refCode, req) {
     try {
       await db.getOrCreateUser({
         id: userId,
-        username: from.username,
-        first_name: from.first_name,
-        last_name: from.last_name,
-        language_code: from.language_code
+        username: userName.username || null,
+        first_name: userName,
+        last_name: from.last_name || null,
+        language_code: from.language_code || 'ru'
       });
     } catch (dbError) {
       console.error('User save error:', dbError);
