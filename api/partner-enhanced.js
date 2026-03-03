@@ -104,13 +104,36 @@ async function getPartnerStats(req, res) {
     // Get referral stats
     const stats = await db.getPartnerReferralStats(userId, 10);
 
-    // Get earnings (TODO: implement when payment system is ready)
-    const earnings = {
+    // Get earnings from purchases table
+    let earnings = {
       total: 0,
       pending: 0,
       paid: 0,
       available: 0
     };
+    
+    try {
+      const earningsResult = await db.query(`
+        SELECT 
+          COALESCE(SUM(partner_commission), 0) as total,
+          COALESCE(SUM(CASE WHEN status = 'pending' THEN partner_commission ELSE 0 END), 0) as pending,
+          COALESCE(SUM(CASE WHEN status = 'completed' THEN partner_commission ELSE 0 END), 0) as paid
+        FROM purchases 
+        WHERE partner_id = $1
+      `, [userId]);
+      
+      if (earningsResult && earningsResult.rows.length > 0) {
+        earnings = {
+          total: parseFloat(earningsResult.rows[0].total) || 0,
+          pending: parseFloat(earningsResult.rows[0].pending) || 0,
+          paid: parseFloat(earningsResult.rows[0].paid) || 0,
+          available: parseFloat(earningsResult.rows[0].paid) || 0
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching earnings:', error);
+      // Keep default earnings object
+    }
 
     // Get recent referrals
     const recentReferrals = stats.clicks.slice(0, 5).map(click => ({

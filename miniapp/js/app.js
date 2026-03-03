@@ -17,11 +17,11 @@ const haptic = {
   selection: () => tg.HapticFeedback?.selectionChanged()
 };
 
-// Конфигурация
+// Конфигурация (NO HARDCODED KEYS!)
 const CONFIG = {
-  API_URL: 'https://felix2-0.vercel.app/api',
-  GROQ_API_KEY: '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',
-  BOT_TOKEN: '8623255560:AAE7sC-7-eWA5LD-ebATDUh6nGUG0pYm03U'
+  API_URL: window.location.origin + '/api',
+  // API keys are stored securely on the server
+  // Never expose API keys in frontend code!
 };
 
 // Глобальное состояние
@@ -95,16 +95,27 @@ function displayUserInfo() {
 // Загрузка статистики пользователя
 async function loadUserStats() {
   try {
-    // TODO: Загрузить с API
-    // const stats = await fetch(`${CONFIG.API_URL}/user/stats?user_id=${FelixApp.user.id}`).then(r => r.json());
+    const response = await fetch(`${CONFIG.API_URL}/stats?user_id=${FelixApp.user.id}`);
     
-    // Тестовые данные
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
+        FelixApp.data.stats = data.stats;
+        
+        document.getElementById('coursesCount').textContent = data.stats.courses_purchased || 0;
+        document.getElementById('hoursLearned').textContent = (data.stats.hours_learned || 0) + 'ч';
+        document.getElementById('bonusBalance').textContent = (data.stats.bonus_balance || 0) + '₽';
+        return;
+      }
+    }
+    
+    // Fallback - тестовые данные
     const stats = {
-      courses_purchased: 2,
-      hours_learned: 15,
-      bonus_balance: 500,
-      achievements: 5,
-      referrals: 3
+      courses_purchased: 0,
+      hours_learned: 0,
+      bonus_balance: 0,
+      achievements: 0,
+      referrals: 0
     };
     
     FelixApp.data.stats = stats;
@@ -114,6 +125,10 @@ async function loadUserStats() {
     document.getElementById('bonusBalance').textContent = stats.bonus_balance + '₽';
   } catch (error) {
     console.error('Error loading stats:', error);
+    // Показать нули при ошибке
+    document.getElementById('coursesCount').textContent = '0';
+    document.getElementById('hoursLearned').textContent = '0ч';
+    document.getElementById('bonusBalance').textContent = '0₽';
   }
 }
 
@@ -195,38 +210,58 @@ async function loadCourses() {
 // Загрузка активности
 async function loadActivities() {
   try {
-    // TODO: Загрузить с API
+    const response = await fetch(`${CONFIG.API_URL}/history?user_id=${FelixApp.user.id}&limit=10`);
     
-    // Тестовые данные
-    const activities = [
-      {
-        id: 1,
-        type: 'lesson_completed',
-        title: 'Завершен урок "Введение в трейдинг"',
-        time: '2 часа назад',
-        icon: '✅'
-      },
-      {
-        id: 2,
-        type: 'achievement',
-        title: 'Получено достижение "Первый шаг"',
-        time: '5 часов назад',
-        icon: '🏆'
-      },
-      {
-        id: 3,
-        type: 'referral',
-        title: 'Новый реферал зарегистрировался',
-        time: '1 день назад',
-        icon: '👥'
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.history) {
+        const activities = data.history.map(item => ({
+          id: item.id,
+          type: item.action_type || 'activity',
+          title: item.message || item.action_type,
+          time: formatTimeAgo(item.created_at),
+          icon: getActivityIcon(item.action_type)
+        }));
+        
+        FelixApp.data.activities = activities;
+        renderActivities(activities);
+        return;
       }
-    ];
+    }
     
-    FelixApp.data.activities = activities;
-    renderActivities(activities);
+    // Fallback - пустой список
+    FelixApp.data.activities = [];
+    renderActivities([]);
   } catch (error) {
     console.error('Error loading activities:', error);
+    FelixApp.data.activities = [];
+    renderActivities([]);
   }
+}
+
+// Вспомогательные функции
+function formatTimeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return 'только что';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} мин назад`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} ч назад`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)} дн назад`;
+  return date.toLocaleDateString('ru-RU');
+}
+
+function getActivityIcon(type) {
+  const icons = {
+    'lesson_completed': '✅',
+    'course_purchased': '🎓',
+    'achievement': '🏆',
+    'referral': '👥',
+    'ai_request': '🤖',
+    'voice_message': '🎙️'
+  };
+  return icons[type] || '📌';
 }
 
 // AI рекомендация
@@ -234,16 +269,42 @@ async function getAIRecommendation() {
   try {
     const { user, data } = FelixApp;
     
-    // TODO: Получить персональную рекомендацию от AI
-    // const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {...});
+    // Получить персональную рекомендацию от AI через наш API
+    const response = await fetch(`${CONFIG.API_URL}/learning`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.id,
+        action: 'get_recommendation',
+        context: {
+          courses: data.myCourses.length,
+          bonus_balance: data.stats.bonus_balance || 0
+        }
+      })
+    });
     
-    // Тестовая рекомендация
-    const recommendations = [
-      `${user.first_name}, продолжи курс "Основы трейдинга" - осталось всего 55%! 📈`,
-      `Рекомендую начать курс "Python для начинающих" - он бесплатный и очень популярный! 🐍`,
-      `У тебя ${data.stats.bonus_balance}₽ бонусов - используй их для покупки нового курса! 💰`,
-      `Пригласи друга и получи 10% бонусов с его покупок! 🎁`
-    ];
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success && result.recommendation) {
+        document.getElementById('aiRecommendation').textContent = result.recommendation;
+        return;
+      }
+    }
+    
+    // Fallback - умные рекомендации на основе данных
+    const recommendations = [];
+    
+    if (data.myCourses.length > 0) {
+      const inProgress = data.myCourses[0];
+      recommendations.push(`${user.first_name}, продолжи "${inProgress.title}" - осталось ${100 - inProgress.progress}%! 📈`);
+    }
+    
+    if (data.stats.bonus_balance > 0) {
+      recommendations.push(`У тебя ${data.stats.bonus_balance}₽ бонусов - используй их для покупки нового курса! 💰`);
+    }
+    
+    recommendations.push(`Пригласи друга и получи 10% бонусов с его покупок! 🎁`);
+    recommendations.push(`Продолжай обучение и развивайся каждый день! 🚀`);
     
     const randomRec = recommendations[Math.floor(Math.random() * recommendations.length)];
     document.getElementById('aiRecommendation').textContent = randomRec;
@@ -326,12 +387,32 @@ function renderActivities(activities) {
 }
 
 // Обработка реферального кода
-function handleReferral(code) {
+async function handleReferral(code) {
   console.log('Referral code:', code);
   
-  // TODO: Сохранить в БД
-  // await fetch(`${CONFIG.API_URL}/referral/save`, {...});
+  try {
+    // Сохранить в БД через API
+    const response = await fetch(`${CONFIG.API_URL}/partner`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'track_referral',
+        user_id: FelixApp.user.id,
+        referral_code: code
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
+        console.log('Referral tracked:', data);
+      }
+    }
+  } catch (error) {
+    console.error('Error tracking referral:', error);
+  }
   
+  // Показать уведомление пользователю
   if (code.startsWith('ref_partner')) {
     haptic.success();
     tg.showAlert('✨ Вы перешли по партнерской ссылке! Получите бонусы при покупке.');
@@ -438,23 +519,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Performance Monitoring
-if (window.performance && window.performance.timing) {
+// Performance Monitoring (using modern API)
+if (window.performance && window.PerformanceObserver) {
   window.addEventListener('load', () => {
     setTimeout(() => {
-      const perfData = window.performance.timing;
-      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-      const connectTime = perfData.responseEnd - perfData.requestStart;
-      const renderTime = perfData.domComplete - perfData.domLoading;
-      
-      console.log('📊 Performance Metrics:');
-      console.log(`  Page Load: ${pageLoadTime}ms`);
-      console.log(`  Connect: ${connectTime}ms`);
-      console.log(`  Render: ${renderTime}ms`);
-      
-      // Отправить метрики на сервер (опционально)
-      if (pageLoadTime > 3000) {
-        console.warn('⚠️ Slow page load detected');
+      try {
+        const perfEntries = performance.getEntriesByType('navigation');
+        if (perfEntries.length > 0) {
+          const perfData = perfEntries[0];
+          const pageLoadTime = perfData.loadEventEnd - perfData.fetchStart;
+          const connectTime = perfData.responseEnd - perfData.requestStart;
+          const renderTime = perfData.domComplete - perfData.domInteractive;
+          
+          console.log('📊 Performance Metrics:');
+          console.log(`  Page Load: ${Math.round(pageLoadTime)}ms`);
+          console.log(`  Connect: ${Math.round(connectTime)}ms`);
+          console.log(`  Render: ${Math.round(renderTime)}ms`);
+          
+          if (pageLoadTime > 3000) {
+            console.warn('⚠️ Slow page load detected');
+          }
+        }
+      } catch (error) {
+        console.error('Performance monitoring error:', error);
       }
     }, 0);
   });

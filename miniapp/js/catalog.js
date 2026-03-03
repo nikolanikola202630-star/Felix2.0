@@ -71,29 +71,37 @@ class CatalogManager {
 
   async loadCourses() {
     try {
-      const response = await fetch('/api/courses');
+      // Загрузка с API
+      const response = await fetch(`${window.location.origin}/api/courses-full`);
       if (!response.ok) throw new Error('API error');
       
       const data = await response.json();
-      this.allCourses = data.courses || [];
-      this.filteredCourses = [...this.allCourses];
-      this.renderCourses();
+      if (data.success) {
+        this.allCourses = data.courses || [];
+        this.filteredCourses = [...this.allCourses];
+        this.renderCourses();
+        console.log(`✅ Loaded ${this.allCourses.length} courses from API`);
+        return;
+      }
     } catch (error) {
       console.error('Error loading courses from API:', error);
-      await this.loadLocalCourses();
     }
+    
+    // Fallback на локальные данные
+    await this.loadLocalCourses();
   }
 
   async loadLocalCourses() {
     try {
-      const response = await fetch('../data/courses-structure.json');
+      const response = await fetch('../data/courses-real.json');
       const data = await response.json();
       this.allCourses = data.courses || [];
       this.filteredCourses = [...this.allCourses];
       this.renderCourses();
+      console.log(`✅ Loaded ${this.allCourses.length} courses from local data`);
     } catch (error) {
       console.error('Error loading local courses:', error);
-      this.showEmptyState('Ошибка загрузки курсов');
+      this.showEmptyState('Не удалось загрузить курсы. Попробуйте обновить страницу.');
     }
   }
 
@@ -148,12 +156,14 @@ class CatalogManager {
   }
 
   createCourseCard(course) {
-    const totalLessons = course.themes?.reduce((sum, theme) => sum + (theme.lessons?.length || 0), 0) || 0;
+    const totalLessons = course.totalLessons || 
+      course.themes?.reduce((sum, theme) => sum + (theme.lessons?.length || 0), 0) || 0;
+    const freeLessons = course.freeLessons || 0;
     
     return `
-      <div class="course-card" onclick="catalogManager.openCourse('${course.slug}')">
+      <div class="course-card stagger-item" onclick="catalogManager.openCourse(${course.id})">
         <img src="${course.image}" alt="${course.title}" class="course-image" loading="lazy">
-        <div class="course-badge">${this.levelLabels[course.level]}</div>
+        ${course.level ? `<div class="course-badge">${this.levelLabels[course.level] || course.level}</div>` : ''}
         
         <div class="course-content">
           <div class="course-category">
@@ -161,7 +171,7 @@ class CatalogManager {
           </div>
           
           <h3 class="course-title">${this.escapeHtml(course.title)}</h3>
-          <p class="course-description">${this.escapeHtml(course.description)}</p>
+          <p class="course-description">${this.escapeHtml(course.description || '')}</p>
           
           <div class="course-meta">
             <div class="meta-item">
@@ -169,18 +179,28 @@ class CatalogManager {
               <span>${course.rating}</span>
             </div>
             <div class="meta-item">
-              <span>⏱️</span>
-              <span>${course.duration_hours}ч</span>
+              <span>👥</span>
+              <span>${this.formatNumber(course.students)}</span>
             </div>
             <div class="meta-item">
-              <span>📊</span>
+              <span>📚</span>
               <span>${totalLessons} уроков</span>
             </div>
+            ${freeLessons > 0 ? `
+            <div class="meta-item" style="color: var(--success);">
+              <span>🎁</span>
+              <span>${freeLessons} бесплатно</span>
+            </div>
+            ` : ''}
           </div>
           
           <div class="course-footer">
-            <div class="course-price">${course.price.toLocaleString('ru-RU')} ₽</div>
-            <div class="course-students">${course.students.toLocaleString('ru-RU')} студентов</div>
+            <div class="course-price ${course.price === 0 ? 'free' : ''}">
+              ${course.price === 0 ? 'Бесплатно' : course.price.toLocaleString('ru-RU') + ' ₽'}
+            </div>
+            <button class="course-btn" onclick="event.stopPropagation(); catalogManager.openCourse(${course.id})">
+              ${course.price === 0 ? 'Начать' : 'Подробнее'}
+            </button>
           </div>
         </div>
       </div>
@@ -204,14 +224,23 @@ class CatalogManager {
     const names = {
       psychology: 'Психология',
       'self-development': 'Саморазвитие',
-      business: 'Бизнес'
+      business: 'Бизнес',
+      programming: 'Программирование',
+      finance: 'Финансы'
     };
     return names[category] || category;
   }
 
-  openCourse(slug) {
+  formatNumber(num) {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'k';
+    }
+    return num;
+  }
+
+  openCourse(courseId) {
     this.hapticFeedback('medium');
-    window.location.href = `course.html?slug=${slug}`;
+    window.location.href = `course.html?id=${courseId}`;
   }
 
   hapticFeedback(type = 'light') {

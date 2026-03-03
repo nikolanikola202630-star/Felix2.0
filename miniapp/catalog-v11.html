@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Каталог курсов - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+  <link rel="stylesheet" href="css/enhanced-animations.css">
+  <style>
+    body {
+      background: var(--bg-primary);
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: var(--space-4);
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      background: var(--bg-primary);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      padding: var(--space-4) 0;
+      margin: 0 calc(var(--space-4) * -1) var(--space-6);
+      padding-left: var(--space-4);
+      padding-right: var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .back-btn:hover {
+      background: var(--bg-tertiary);
+      transform: translateX(-2px);
+    }
+
+    .header-title {
+      flex: 1;
+    }
+
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: var(--space-1);
+      letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Search */
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4) var(--space-3) 48px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      font-size: 15px;
+      transition: all var(--transition-base);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--text-secondary);
+    }
+
+    /* Categories */
+    .categories {
+      display: flex;
+      gap: var(--space-2);
+      overflow-x: auto;
+      padding-bottom: var(--space-2);
+      margin-bottom: var(--space-6);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-chip {
+      flex-shrink: 0;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      white-space: nowrap;
+    }
+
+    .category-chip:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .category-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Course Grid */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+
+    /* Course Card */
+    .course-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .course-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .course-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    .course-content {
+      padding: var(--space-4);
+    }
+
+    .course-category {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-2);
+    }
+
+    .course-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      line-height: 1.4;
+      color: var(--text-primary);
+    }
+
+    .course-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .course-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .course-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border);
+    }
+
+    .course-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .course-price.free {
+      color: var(--success);
+    }
+
+    .course-btn {
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .course-btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-16) var(--space-4);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .empty-text {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: var(--space-12);
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--bg-tertiary);
+      border-top-color: var(--primary);
+      border-radius: var(--radius-full);
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--space-4);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div class="back-btn" onclick="goBack()">←</div>
+        <div class="header-title">
+          <h1>🎓 Каталог курсов</h1>
+          <div class="header-subtitle" id="coursesCount">Загрузка...</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          class="search-input" 
+          id="searchInput"
+          placeholder="Найти курс по названию..."
+          oninput="handleSearch()"
+        >
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories" id="categories">
+      <div class="category-chip active" data-category="all" onclick="filterByCategory('all')">
+        Все курсы
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-btn" data-filter="free" onclick="toggleFilter('free')">
+        🎁 Бесплатные
+      </div>
+      <div class="filter-btn" data-filter="popular" onclick="toggleFilter('popular')">
+        🔥 Популярные
+      </div>
+      <div class="filter-btn" data-filter="new" onclick="toggleFilter('new')">
+        ✨ Новые
+      </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid" id="coursesGrid">
+      <div class="loading">
+        <div class="spinner"></div>
+        Загружаем курсы...
+      </div>
+    </div>
+  </div>
+
+  <script src="js/catalog.js?v=202603032100"></script>
+  <script>
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
+    tg?.expand();
+    tg?.BackButton.show();
+    tg?.BackButton.onClick(() => goBack());
+
+    function goBack() {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

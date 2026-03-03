@@ -1,10 +1,24 @@
 // Felix Academy - Единый бот со всем функционалом
 // Объединяет Felix Bot v9.0 + Академия + Партнерка
+// Version: 10.3 - Synchronized with Referral Bot
+// ⟁ EGOIST ECOSYSTEM
 
-const TOKEN = '8623255560:AAE7sC-7-eWA5LD-ebATDUh6nGUG0pYm03U';
+// Environment variables (NO HARDCODED KEYS!)
+const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/index.html';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+if (!TOKEN) {
+  console.error('❌ BOT_TOKEN is required in environment variables');
+  process.exit(1);
+}
+
+if (!GROQ_API_KEY) {
+  console.error('❌ GROQ_API_KEY is required in environment variables');
+  process.exit(1);
+}
+
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
-const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/index.html'; // Production URL (Telegram требует HTTPS)
-const GROQ_API_KEY = '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';
 
 // In-memory хранилище (для локального тестирования)
 const users = new Map();
@@ -151,7 +165,34 @@ async function handleMessage(message) {
         // Реферальный код
         if (arg && arg.startsWith('ref_')) {
           user.referrer = arg;
-          console.log(`🔗 Реферал: ${arg}`);
+          const partnerIdMatch = arg.match(/ref_(?:partner)?(\d+)/);
+          if (partnerIdMatch) {
+            const partnerId = parseInt(partnerIdMatch[1]);
+            console.log(`🔗 Реферал от партнера: ${partnerId}`);
+            
+            // Приветствие с упоминанием партнера
+            await send(chatId, `🎉 <b>Добро пожаловать в Felix Academy!</b>
+
+Привет, ${firstName}! 👋
+
+Ты перешел по реферальной ссылке от партнера!
+
+<b>⟁ Felix Academy - EGOIST ECOSYSTEM</b>
+
+🎓 <b>Что тебя ждет:</b>
+• Курсы по трейдингу, IT, психологии
+• AI-ассистент 24/7
+• Партнерская программа (20% комиссия)
+• Аналитика прогресса
+
+💰 <b>Специальное предложение:</b>
+При покупке любого курса ты и твой партнер получите бонусы!
+
+<b>🚀 Начни обучение прямо сейчас!</b>
+
+<i>Создано в ⟁ EGOIST ECOSYSTEM © 2026</i>`);
+            break;
+          }
         }
 
         await send(chatId, `⟁ <b>Felix Academy - EGOIST ECOSYSTEM</b>

@@ -1,6 +1,7 @@
 // Felix Academy - Referral Bot Handler v2.0
 // EGOIST ECOSYSTEM Edition
 // With partner customization support
+// Synchronized with Main Bot v10.3
 
 const { db } = require('../lib/db');
 const crypto = require('crypto');

@@ -1,0 +1,357 @@
+{
+  "courses": [
+    {
+      "id": 1,
+      "title": "Детективная лаборатория сознания",
+      "slug": "psychology-detective-lab",
+      "description": "Погрузитесь в увлекательный мир психологии через призму детективных расследований. Научитесь понимать мотивы людей, распознавать ложь и манипуляции.",
+      "category": "psychology",
+      "price": 2990,
+      "rating": 4.8,
+      "students": 1247,
+      "duration": "6 недель",
+      "level": "Начальный",
+      "language": "Русский",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+      "instructor": {
+        "name": "Анна Петрова",
+        "avatar": "👩‍🏫",
+        "bio": "Психолог с 10-летним стажем, автор 3 книг"
+      },
+      "features": [
+        "25 видеоуроков",
+        "Практические задания",
+        "Сертификат",
+        "Доступ навсегда"
+      ],
+      "themes": [
+        {
+          "id": 1,
+          "title": "Введение в психологию",
+          "lessons": [
+            {
+              "id": 1,
+              "title": "Что такое психология?",
+              "duration": "15:30",
+              "type": "video",
+              "is_free": true,
+              "description": "Знакомство с основами психологии и её методами"
+            },
+            {
+              "id": 2,
+              "title": "История психологии",
+              "duration": "20:15",
+              "type": "video",
+              "is_free": true,
+              "description": "От древних философов до современных исследований"
+            },
+            {
+              "id": 3,
+              "title": "Методы исследования",
+              "duration": "18:45",
+              "type": "video",
+              "is_free": false,
+              "description": "Как психологи изучают человеческое поведение"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Психология восприятия",
+          "lessons": [
+            {
+              "id": 4,
+              "title": "Как мы видим мир",
+              "duration": "22:10",
+              "type": "video",
+              "is_free": false,
+              "description": "Механизмы зрительного восприятия"
+            },
+            {
+              "id": 5,
+              "title": "Иллюзии и обманы",
+              "duration": "19:30",
+              "type": "video",
+              "is_free": false,
+              "description": "Почему наш мозг нас обманывает"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Эмоции и чувства",
+          "lessons": [
+            {
+              "id": 6,
+              "title": "Базовые эмоции",
+              "duration": "25:00",
+              "type": "video",
+              "is_free": false,
+              "description": "6 универсальных эмоций человека"
+            },
+            {
+              "id": 7,
+              "title": "Эмоциональный интеллект",
+              "duration": "28:15",
+              "type": "video",
+              "is_free": false,
+              "description": "Как управлять своими эмоциями"
+            }
+          ]
+        }
+      ],
+      "totalLessons": 25,
+      "freeLessons": 2
+    },
+    {
+      "id": 2,
+      "title": "Путь к лучшей версии себя",
+      "slug": "self-development-path",
+      "description": "Комплексный курс по саморазвитию: от постановки целей до их достижения. Измените свою жизнь за 8 недель!",
+      "category": "self-development",
+      "price": 3990,
+      "rating": 4.9,
+      "students": 2156,
+      "duration": "8 недель",
+      "level": "Все уровни",
+      "language": "Русский",
+      "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80",
+      "instructor": {
+        "name": "Дмитрий Соколов",
+        "avatar": "👨‍💼",
+        "bio": "Коуч, спикер, автор бестселлера 'Твой путь'"
+      },
+      "features": [
+        "40 видеоуроков",
+        "Рабочая тетрадь",
+        "Личный план развития",
+        "Сертификат"
+      ],
+      "themes": [
+        {
+          "id": 1,
+          "title": "Самопознание",
+          "lessons": [
+            {
+              "id": 1,
+              "title": "Кто я?",
+              "duration": "18:20",
+              "type": "video",
+              "is_free": true,
+              "description": "Упражнения для самопознания"
+            },
+            {
+              "id": 2,
+              "title": "Мои ценности",
+              "duration": "22:45",
+              "type": "video",
+              "is_free": true,
+              "description": "Определение жизненных приоритетов"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Постановка целей",
+          "lessons": [
+            {
+              "id": 3,
+              "title": "SMART цели",
+              "duration": "20:30",
+              "type": "video",
+              "is_free": false,
+              "description": "Как правильно ставить цели"
+            },
+            {
+              "id": 4,
+              "title": "Визуализация",
+              "duration": "16:15",
+              "type": "video",
+              "is_free": false,
+              "description": "Техники визуализации желаемого"
+            }
+          ]
+        }
+      ],
+      "totalLessons": 40,
+      "freeLessons": 3
+    },
+    {
+      "id": 3,
+      "title": "От идеи до устойчивого предприятия",
+      "slug": "business-from-idea",
+      "description": "Полный гайд по созданию и развитию бизнеса: от идеи до первой прибыли. Реальные кейсы и практические инструменты.",
+      "category": "business",
+      "price": 4990,
+      "rating": 4.7,
+      "students": 892,
+      "duration": "10 недель",
+      "level": "Средний",
+      "language": "Русский",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+      "instructor": {
+        "name": "Елена Волкова",
+        "avatar": "👩‍💻",
+        "bio": "Предприниматель, основатель 3 успешных стартапов"
+      },
+      "features": [
+        "50 видеоуроков",
+        "Шаблоны документов",
+        "Менторская поддержка",
+        "Сертификат MBA"
+      ],
+      "themes": [
+        {
+          "id": 1,
+          "title": "Поиск идеи",
+          "lessons": [
+            {
+              "id": 1,
+              "title": "Как найти идею",
+              "duration": "25:00",
+              "type": "video",
+              "is_free": true,
+              "description": "Методы генерации бизнес-идей"
+            },
+            {
+              "id": 2,
+              "title": "Валидация идеи",
+              "duration": "30:15",
+              "type": "video",
+              "is_free": false,
+              "description": "Как проверить идею до запуска"
+            }
+          ]
+        }
+      ],
+      "totalLessons": 50,
+      "freeLessons": 2
+    },
+    {
+      "id": 4,
+      "title": "Python для начинающих",
+      "slug": "python-beginners",
+      "description": "Изучите Python с нуля за 6 недель. Практические проекты, реальные задачи, поддержка сообщества.",
+      "category": "programming",
+      "price": 0,
+      "rating": 4.9,
+      "students": 3421,
+      "duration": "6 недель",
+      "level": "Начальный",
+      "language": "Русский",
+      "image": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80",
+      "instructor": {
+        "name": "Алексей Иванов",
+        "avatar": "👨‍💻",
+        "bio": "Senior Python Developer, 8 лет опыта"
+      },
+      "features": [
+        "30 видеоуроков",
+        "10 практических проектов",
+        "Код-ревью",
+        "Сертификат"
+      ],
+      "themes": [
+        {
+          "id": 1,
+          "title": "Основы Python",
+          "lessons": [
+            {
+              "id": 1,
+              "title": "Установка и настройка",
+              "duration": "12:30",
+              "type": "video",
+              "is_free": true,
+              "description": "Подготовка рабочего окружения"
+            },
+            {
+              "id": 2,
+              "title": "Переменные и типы данных",
+              "duration": "18:45",
+              "type": "video",
+              "is_free": true,
+              "description": "Основы работы с данными"
+            }
+          ]
+        }
+      ],
+      "totalLessons": 30,
+      "freeLessons": 30
+    },
+    {
+      "id": 5,
+      "title": "Основы трейдинга и инвестиций",
+      "slug": "trading-basics",
+      "description": "Научитесь торговать на финансовых рынках. От базовых понятий до продвинутых стратегий.",
+      "category": "finance",
+      "price": 5990,
+      "rating": 4.6,
+      "students": 1567,
+      "duration": "12 недель",
+      "level": "Начальный",
+      "language": "Русский",
+      "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+      "instructor": {
+        "name": "Михаил Петров",
+        "avatar": "👨‍💼",
+        "bio": "Трейдер с 15-летним опытом, CFA"
+      },
+      "features": [
+        "60 видеоуроков",
+        "Торговые стратегии",
+        "Демо-счет",
+        "Сертификат"
+      ],
+      "themes": [
+        {
+          "id": 1,
+          "title": "Введение в трейдинг",
+          "lessons": [
+            {
+              "id": 1,
+              "title": "Что такое трейдинг?",
+              "duration": "20:00",
+              "type": "video",
+              "is_free": true,
+              "description": "Основы финансовых рынков"
+            }
+          ]
+        }
+      ],
+      "totalLessons": 60,
+      "freeLessons": 3
+    }
+  ],
+  "categories": [
+    {
+      "id": "psychology",
+      "name": "Психология",
+      "icon": "🧠",
+      "color": "#667eea"
+    },
+    {
+      "id": "self-development",
+      "name": "Саморазвитие",
+      "icon": "🚀",
+      "color": "#764ba2"
+    },
+    {
+      "id": "business",
+      "name": "Бизнес",
+      "icon": "💼",
+      "color": "#10b981"
+    },
+    {
+      "id": "programming",
+      "name": "Программирование",
+      "icon": "💻",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "finance",
+      "name": "Финансы",
+      "icon": "💰",
+      "color": "#f59e0b"
+    }
+  ]
+}

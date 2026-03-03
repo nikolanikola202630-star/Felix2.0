@@ -21,8 +21,8 @@ module.exports = async (req, res) => {
     }
 
   try {
-    // Читаем файл с курсами
-    const coursesPath = path.join(process.cwd(), 'data', 'courses-structure.json');
+    // Читаем файл с реальными курсами
+    const coursesPath = path.join(process.cwd(), 'data', 'courses-real.json');
     const coursesData = JSON.parse(fs.readFileSync(coursesPath, 'utf8'));
 
     // Получаем параметры запроса
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
 
     // Фильтр по уровню
     if (level) {
-      filteredCourses = filteredCourses.filter(c => c.level === level || c.level === 'all');
+      filteredCourses = filteredCourses.filter(c => c.level === level || c.level === 'Все уровни');
     }
 
     // Фильтр только бесплатные
@@ -50,22 +50,14 @@ module.exports = async (req, res) => {
       filteredCourses = filteredCourses.filter(c => c.price === 0);
     }
 
-    // Добавляем вычисляемые поля
-    filteredCourses = filteredCourses.map(course => ({
-      ...course,
-      totalLessons: course.themes.reduce((sum, theme) => sum + theme.lessons.length, 0),
-      freeLessons: course.themes.reduce((sum, theme) => 
-        sum + theme.lessons.filter(l => l.is_free).length, 0
-      )
-    }));
-
     // Санитизация данных перед отправкой
     const sanitizedCourses = sanitizeObject(filteredCourses);
 
     return res.status(200).json({
       success: true,
       count: sanitizedCourses.length,
-      courses: sanitizedCourses
+      courses: sanitizedCourses,
+      categories: coursesData.categories
     });
 
   } catch (error) {

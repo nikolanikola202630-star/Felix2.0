@@ -6,6 +6,7 @@
   <title>Felix Academy - Флагман</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="css/flagship-premium.css">
+  <link rel="stylesheet" href="css/enhanced-animations.css">
   <link rel="stylesheet" href="css/micro-animations.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3B82F6">
@@ -701,20 +702,20 @@
         <div class="hero-header">
           <div class="avatar" id="avatar">👤</div>
           <div class="hero-text">
-            <h1>Привет, <span id="userName">Пользователь</span>! 👋</h1>
-            <p>Продолжай обучение и развивайся каждый день</p>
+            <h1>С возвращением, <span id="userName">Друг</span>! 👋</h1>
+            <p>Сегодня отличный день для новых знаний</p>
           </div>
         </div>
         <div class="hero-stats">
-          <div class="hero-stat">
+          <div class="hero-stat" onclick="openSection('my-courses')">
             <div class="hero-stat-value" id="coursesCount">0</div>
-            <div class="hero-stat-label">Курсов</div>
+            <div class="hero-stat-label">Активных курсов</div>
           </div>
-          <div class="hero-stat">
+          <div class="hero-stat" onclick="openSection('analytics')">
             <div class="hero-stat-value" id="hoursLearned">0ч</div>
-            <div class="hero-stat-label">Обучения</div>
+            <div class="hero-stat-label">Времени обучения</div>
           </div>
-          <div class="hero-stat">
+          <div class="hero-stat" onclick="openSection('profile')">
             <div class="hero-stat-value" id="bonusBalance">0₽</div>
             <div class="hero-stat-label">Бонусов</div>
           </div>
@@ -764,26 +765,26 @@
     </div>
 
     <!-- AI Рекомендация -->
-    <div class="ai-card">
+    <div class="ai-card" onclick="openSection('ai')">
       <div class="ai-header">
         <div class="ai-icon">🤖</div>
-        <div class="ai-title">Рекомендация AI</div>
+        <div class="ai-title">Персональная рекомендация</div>
       </div>
       <div class="ai-text" id="aiRecommendation">
-        Загрузка персональных рекомендаций...
+        Анализирую твой прогресс и подбираю лучшие курсы...
       </div>
     </div>
 
     <!-- Продолжить обучение -->
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">📖 Продолжить обучение</h2>
-        <a href="#" onclick="openSection('my-courses'); return false;" class="see-all">Все →</a>
+        <h2 class="section-title">📖 Продолжай там, где остановился</h2>
+        <a href="#" onclick="openSection('my-courses'); return false;" class="see-all">Все курсы →</a>
       </div>
       <div id="continueCourses" class="carousel">
         <div class="loading">
           <div class="spinner"></div>
-          Загрузка курсов...
+          Загружаем твои курсы...
         </div>
       </div>
     </section>
@@ -791,8 +792,8 @@
     <!-- Бесплатные уроки -->
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">🎁 Бесплатные уроки</h2>
-        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Все →</a>
+        <h2 class="section-title">🎁 Попробуй бесплатно</h2>
+        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Смотреть все →</a>
       </div>
       <div id="freeLessons" class="carousel">
         <div class="loading">Загрузка...</div>
@@ -802,8 +803,8 @@
     <!-- Популярные курсы -->
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">🔥 Популярные курсы</h2>
-        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Все →</a>
+        <h2 class="section-title">🔥 Топ курсов этой недели</h2>
+        <a href="#" onclick="openSection('catalog'); return false;" class="see-all">Весь каталог →</a>
       </div>
       <div id="popularCourses" class="carousel">
         <div class="loading">Загрузка...</div>
@@ -813,10 +814,10 @@
     <!-- Последняя активность -->
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">⚡ Последняя активность</h2>
+        <h2 class="section-title">⚡ Твоя активность</h2>
       </div>
       <div id="activityList" class="activity-list">
-        <div class="loading">Загрузка активности...</div>
+        <div class="loading">Загружаем историю...</div>
       </div>
     </section>
   </div>
@@ -827,18 +828,18 @@
       <div class="nav-icon">🏠</div>
       <div>Главная</div>
     </a>
-    <a href="#" onclick="openSection('academy'); return false;" class="nav-item">
+    <a href="#" onclick="openSection('catalog'); return false;" class="nav-item">
       <div class="nav-icon">🎓</div>
-      <div>Академия</div>
+      <div>Каталог</div>
     </a>
     <a href="#" onclick="openSection('ai'); return false;" class="nav-item">
       <div class="nav-icon">🤖</div>
       <div>AI</div>
       <span class="nav-badge">3</span>
     </a>
-    <a href="#" onclick="openSection('community'); return false;" class="nav-item">
-      <div class="nav-icon">👥</div>
-      <div>Сообщество</div>
+    <a href="#" onclick="openSection('my-courses'); return false;" class="nav-item">
+      <div class="nav-icon">📚</div>
+      <div>Мои курсы</div>
     </a>
     <a href="#" onclick="openSection('profile'); return false;" class="nav-item">
       <div class="nav-icon">👤</div>
@@ -849,7 +850,7 @@
   <script src="js/personalization.js?v=202603031400"></script>
   <script src="js/performance.js?v=202603031400"></script>
   <script src="js/lazy-load.js?v=202603031400"></script>
-  <script src="js/app.js?v=202603031400"></script>
+  <script src="js/app.js?v=202603032000"></script>
   <script src="js/footer.js?v=202603031400"></script>
 </body>
 </html>
