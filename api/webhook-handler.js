@@ -4,7 +4,7 @@
 const { db } = require('../lib/db');
 const { ai } = require('../lib/ai');
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TOKEN = process.env.BOT_TOKEN || '8623255560:AAE7sC-7-eWA5LD-ebATDUh6nGUG0pYm03U';
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/index.html';
 

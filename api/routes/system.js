@@ -85,6 +85,11 @@ module.exports = async (req, res) => {
       return require('../automation')(req, res);
     }
 
+    // /api/ai-chat-folders (все подпути)
+    if (pathname.startsWith('/api/ai-chat-folders')) {
+      return require('../ai-chat-folders')(req, res);
+    }
+
     // 404
     return res.status(404).json({
       error: 'System endpoint not found',
@@ -99,9 +104,3 @@ module.exports = async (req, res) => {
     });
   }
 };
-
-
-    // /api/ai-chat-folders (все подпути)
-    if (pathname.startsWith('/api/ai-chat-folders')) {
-      return require('../ai-chat-folders')(req, res);
-    }
