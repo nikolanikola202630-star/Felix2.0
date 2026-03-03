@@ -4,12 +4,24 @@
     {
       "src": "api/_router.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "miniapp/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/_router.js"
+    },
+    {
+      "src": "/miniapp/(.*)",
+      "dest": "/miniapp/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
     }
   ]
 }
