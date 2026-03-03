@@ -8,6 +8,7 @@
   
   <!-- Стили -->
   <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="css/components-v12.css">
   <link rel="stylesheet" href="css/flagship-premium.css">
   
   <style>
@@ -256,6 +257,7 @@
   <script src="core/utils.js"></script>
   <script src="core/router.js"></script>
   <script src="core/api.js"></script>
+  <script src="js/pages-v12.js"></script>
 
   <!-- Главное приложение -->
   <script>
@@ -338,137 +340,26 @@
       renderHome() {
         const user = FelixState.get('user');
         const stats = FelixState.get('stats') || {};
-        
-        document.getElementById('app').innerHTML = `
-          <div class="page-content">
-            <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">
-              Привет, ${user.first_name}! 👋
-            </h1>
-            
-            <div class="card mb-4">
-              <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-3);">
-                📊 Твоя статистика
-              </h2>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3);">
-                <div class="text-center">
-                  <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--primary);">
-                    ${stats.courses_purchased || 0}
-                  </div>
-                  <div style="font-size: var(--text-sm); color: var(--text-secondary);">Курсов</div>
-                </div>
-                <div class="text-center">
-                  <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--success);">
-                    ${stats.hours_learned || 0}ч
-                  </div>
-                  <div style="font-size: var(--text-sm); color: var(--text-secondary);">Обучения</div>
-                </div>
-                <div class="text-center">
-                  <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--warning);">
-                    ${stats.bonus_balance || 0}₽
-                  </div>
-                  <div style="font-size: var(--text-sm); color: var(--text-secondary);">Бонусов</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <h2 style="font-size: var(--text-xl); font-weight: var(--font-semibold); margin-bottom: var(--space-3);">
-                🚀 Быстрые действия
-              </h2>
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3);">
-                <button class="btn btn-primary" onclick="FelixApp.navigate('academy')">
-                  🎓 Академия
-                </button>
-                <button class="btn btn-secondary" onclick="FelixApp.navigate('community')">
-                  👥 Сообщество
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
+        document.getElementById('app').innerHTML = PagesV12.renderHome(user, stats);
       }
 
       renderAcademy() {
-        document.getElementById('app').innerHTML = `
-          <div class="page-content">
-            <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">
-              🎓 Академия
-            </h1>
-            <div class="card text-center">
-              <div style="font-size: 64px; margin-bottom: var(--space-4);">📚</div>
-              <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">
-                Академия загружается...
-              </p>
-              <button class="btn btn-primary" onclick="FelixApp.navigate('home')">
-                ← Назад на главную
-              </button>
-            </div>
-          </div>
-        `;
+        document.getElementById('app').innerHTML = PagesV12.renderAcademy();
       }
 
       renderCommunity() {
-        document.getElementById('app').innerHTML = `
-          <div class="page-content">
-            <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">
-              👥 Сообщество
-            </h1>
-            <div class="card text-center">
-              <div style="font-size: 64px; margin-bottom: var(--space-4);">💬</div>
-              <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">
-                Сообщество загружается...
-              </p>
-              <button class="btn btn-primary" onclick="FelixApp.navigate('home')">
-                ← Назад на главную
-              </button>
-            </div>
-          </div>
-        `;
+        document.getElementById('app').innerHTML = PagesV12.renderCommunity();
       }
 
       renderSettings() {
-        document.getElementById('app').innerHTML = `
-          <div class="page-content">
-            <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">
-              ⚙️ Настройки
-            </h1>
-            <div class="card text-center">
-              <div style="font-size: 64px; margin-bottom: var(--space-4);">🔧</div>
-              <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">
-                Настройки загружаются...
-              </p>
-              <button class="btn btn-primary" onclick="FelixApp.navigate('home')">
-                ← Назад на главную
-              </button>
-            </div>
-          </div>
-        `;
+        const user = FelixState.get('user');
+        document.getElementById('app').innerHTML = PagesV12.renderSettings(user);
       }
 
       renderProfile() {
         const user = FelixState.get('user');
-        
-        document.getElementById('app').innerHTML = `
-          <div class="page-content">
-            <h1 style="font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-6);">
-              👤 Профиль
-            </h1>
-            <div class="card">
-              <div style="text-align: center; margin-bottom: var(--space-4);">
-                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto var(--space-3);">
-                  ${user.first_name[0].toUpperCase()}
-                </div>
-                <h2 style="font-size: var(--text-2xl); font-weight: var(--font-bold);">
-                  ${user.first_name}
-                </h2>
-                <p style="color: var(--text-secondary);">@${user.username || 'user'}</p>
-              </div>
-              <button class="btn btn-primary" style="width: 100%;" onclick="FelixApp.navigate('home')">
-                ← Назад на главную
-              </button>
-            </div>
-          </div>
-        `;
+        const stats = FelixState.get('stats') || {};
+        document.getElementById('app').innerHTML = PagesV12.renderProfile(user, stats);
       }
     }
 

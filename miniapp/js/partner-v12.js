@@ -13,6 +13,12 @@ class PartnerDashboardV12 {
     this.tg?.ready();
     this.tg?.expand();
     this.loadDashboard();
+    
+    // Автозагрузка данных для вкладки рефералов
+    setTimeout(() => {
+      this.loadReferrals();
+      this.loadEarnings();
+    }, 1000);
   }
 
   async loadDashboard() {

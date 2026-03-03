@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EGOIST Admin Panel</title>
+    <title>Felix Academy - Admin Panel V12</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="css/components-v12.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
@@ -28,10 +30,6 @@
                     <span class="nav-icon">👥</span>
                     <span>Пользователи</span>
                 </button>
-                <button class="nav-item" onclick="showSection('notes')">
-                    <span class="nav-icon">📝</span>
-                    <span>Конспекты</span>
-                </button>
                 <button class="nav-item" onclick="showSection('courses')">
                     <span class="nav-icon">📚</span>
                     <span>Курсы</span>
@@ -39,6 +37,10 @@
                 <button class="nav-item" onclick="showSection('partners')">
                     <span class="nav-icon">🤝</span>
                     <span>Партнеры</span>
+                </button>
+                <button class="nav-item" onclick="showSection('notes')">
+                    <span class="nav-icon">📝</span>
+                    <span>Конспекты</span>
                 </button>
                 <button class="nav-item" onclick="showSection('applications')">
                     <span class="nav-icon">📋</span>
@@ -106,6 +108,24 @@
                         </div>
                         <div class="stat-trend">0%</div>
                     </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalRevenue">0₽</div>
+                            <div class="stat-label">Общий доход</div>
+                        </div>
+                        <div class="stat-trend positive">+15%</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🛒</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="totalPurchases">0</div>
+                            <div class="stat-label">Покупок</div>
+                        </div>
+                        <div class="stat-trend positive">+18%</div>
+                    </div>
                 </div>
 
                 <div class="grid-2">
@@ -171,6 +191,51 @@
                 <div class="grid-3" id="notesGrid"></div>
             </div>
 
+            <!-- Courses Section -->
+            <div id="coursesSection" class="section">
+                <div class="section-header">
+                    <h1>Курсы</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="adminPanelV12.loadCourses()">
+                            <span>🔄</span>
+                            <span>Обновить</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid-3" id="coursesGrid"></div>
+            </div>
+
+            <!-- Partners Section -->
+            <div id="partnersSection" class="section">
+                <div class="section-header">
+                    <h1>Партнеры</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="adminPanelV12.loadPartners()">
+                            <span>🔄</span>
+                            <span>Обновить</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Email</th>
+                                <th>Статус</th>
+                                <th>Комиссия</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partnersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Applications Section -->
             <div id="applicationsSection" class="section">
                 <div class="section-header">
@@ -190,6 +255,10 @@
         </div>
     </div>
 
-    <script src="js/admin.js"></script>
+    <script src="core/state.js"></script>
+    <script src="core/router.js"></script>
+    <script src="core/api.js"></script>
+    <script src="core/utils.js"></script>
+    <script src="js/admin-v12.js"></script>
 </body>
 </html>

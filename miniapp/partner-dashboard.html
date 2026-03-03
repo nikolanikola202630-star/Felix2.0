@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Felix Academy - Партнерский кабинет</title>
+  <title>Felix Academy - Partner Dashboard V12</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="css/components-v12.css">
   <style>
     * {
       margin: 0;
@@ -442,6 +444,33 @@
         </div>
       </div>
 
+      <div style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px;">📊 Статистика рефералов</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalReferrals">0</div>
+            <div class="stat-label">Всего переходов</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="activeReferrals">0</div>
+            <div class="stat-label">Активных</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="conversionRate">0%</div>
+            <div class="stat-label">Конверсия</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 10px;">🔗 Ваша реферальная ссылка</h3>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" id="referralLink" readonly 
+            style="flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: white;">
+          <button class="btn btn-secondary" onclick="partnerDashboardV12.copyReferralLink()">📋 Копировать</button>
+        </div>
+      </div>
+
       <div id="recentActivity"></div>
     </div>
 
@@ -463,7 +492,7 @@
 
     <!-- Реферальный бот -->
     <div id="referralTab" class="tab-content">
-      <div class="card">
+      <div style="background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         <h2 style="margin-bottom: 20px;">🤖 Персонализация реферального бота</h2>
         <p style="color: var(--text-light); margin-bottom: 20px;">
           Настройте своего реферального бота: измените приветствие, брендинг, добавьте условия доступа (подписка, квиз, анкета).
@@ -488,14 +517,51 @@
               <div class="stat-label">Конверсия</div>
             </div>
           </div>
+
+          <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 10px;">Список рефералов</h4>
+            <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden;">
+              <table class="data-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Имя</th>
+                    <th>Username</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                  </tr>
+                </thead>
+                <tbody id="referralsTableBody">
+                  <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--text-light);">Загрузка...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div style="margin-top: 20px; padding: 20px; background: var(--bg); border-radius: 12px;">
           <h3 style="margin-bottom: 10px;">🔗 Ваша реферальная ссылка</h3>
           <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <input type="text" id="partnerRefLink" readonly 
+            <input type="text" id="referralLink" readonly 
               style="flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: white;">
-            <button class="btn btn-secondary" onclick="copyPartnerRefLink()">📋 Копировать</button>
+            <button class="btn btn-secondary" onclick="partnerDashboardV12.copyReferralLink()">📋 Копировать</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: var(--bg); border-radius: 12px;">
+          <h3 style="margin-bottom: 10px;">💰 История заработка</h3>
+          <div class="table-container" style="background: white; border-radius: 8px; overflow: hidden; margin-top: 15px;">
+            <table class="data-table" style="width: 100%;">
+              <thead>
+                <tr>
+                  <th>Сумма</th>
+                  <th>Тип</th>
+                  <th>Дата</th>
+                </tr>
+              </thead>
+              <tbody id="earningsTableBody">
+                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-light);">Загрузка...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -523,6 +589,10 @@
     </div>
   </div>
 
-  <script src="js/partner-dashboard.js"></script>
+  <script src="core/state.js"></script>
+  <script src="core/router.js"></script>
+  <script src="core/api.js"></script>
+  <script src="core/utils.js"></script>
+  <script src="js/partner-v12.js"></script>
 </body>
 </html>

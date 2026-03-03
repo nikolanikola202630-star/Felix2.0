@@ -13,6 +13,13 @@ class AdminPanelV12 {
     this.tg?.ready();
     this.tg?.expand();
     this.loadDashboard();
+    
+    // Автозагрузка данных
+    setTimeout(() => {
+      this.loadUsers();
+      this.loadCourses();
+      this.loadPartners();
+    }, 1000);
   }
 
   async loadDashboard() {
