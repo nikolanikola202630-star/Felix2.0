@@ -1,13 +1,12 @@
 // Felix Academy Bot - Production Webhook Handler
 // EGOIST ECOSYSTEM Edition v9.0 FULL
 
+const { db } = require('../lib/db');
+const { ai } = require('../lib/ai');
+
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/index.html';
-
-// In-memory rate limiting
-const userRequests = new Map();
 
 // Send message helper
 async function send(chatId, text, keyboard = null) {
@@ -36,55 +35,45 @@ async function send(chatId, text, keyboard = null) {
   }
 }
 
-// AI helper
+// AI helper with database integration
 async function getAIResponse(prompt, userId) {
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: 'Ты AI-ассистент Felix Academy. Помогаешь с обучением, отвечаешь кратко и по делу на русском.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      })
+    // Get user history from DB
+    const history = await db.getHistory(userId, { limit: 5 });
+    const messages = history.messages.map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+
+    // Get AI response
+    const response = await ai.getChatResponse(prompt, messages, { userId });
+    
+    // Save messages to DB
+    await db.saveMessage(userId, 'user', prompt, 'text');
+    await db.saveMessage(userId, 'assistant', response.content, 'text', {
+      tokens: response.tokens,
+      latency: response.latency,
+      model: response.model
     });
 
-    if (!res.ok) return 'AI временно недоступен';
-    
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || 'Не могу ответить';
+    // Increment AI usage counter
+    await db.incrementAIUsage(userId);
+
+    return response.content;
   } catch (error) {
     console.error('AI error:', error);
-    return 'Ошибка AI';
+    return 'Ошибка AI. Попробуй позже.';
   }
 }
 
-// Rate limiting
-function checkRateLimit(userId) {
-  const now = Date.now();
-  const userReqs = userRequests.get(userId) || [];
-  const recentReqs = userReqs.filter(t => now - t < 3600000); // 1 hour
-  
-  if (recentReqs.length >= 10) {
-    return false;
+// Rate limiting with database
+async function checkRateLimit(userId) {
+  try {
+    return await db.checkAILimit(userId);
+  } catch (error) {
+    console.error('Rate limit check error:', error);
+    return true; // Allow on error
   }
-  
-  recentReqs.push(now);
-  userRequests.set(userId, recentReqs);
-  return true;
 }
 
 // Main webhook handler
@@ -120,12 +109,26 @@ module.exports = async (req, res) => {
 
     console.log(`📨 ${userName} (${userId}): ${text}`);
 
+    // Save or update user in database
+    try {
+      await db.getOrCreateUser({
+        id: userId,
+        username: from.username,
+        first_name: from.first_name,
+        last_name: from.last_name,
+        language_code: from.language_code
+      });
+    } catch (dbError) {
+      console.error('DB user error:', dbError);
+    }
+
     if (text.startsWith('/')) {
       await handleCommand(chatId, userId, userName, text);
     } else {
       // AI ответ на обычное сообщение
-      if (!checkRateLimit(userId)) {
-        await send(chatId, '⏱️ Лимит AI запросов: 10/час. Попробуй позже.');
+      const canUseAI = await checkRateLimit(userId);
+      if (!canUseAI) {
+        await send(chatId, '⏱️ Лимит AI запросов: 50/день. Попробуй завтра.');
         return res.json({ ok: true });
       }
       
@@ -136,6 +139,7 @@ module.exports = async (req, res) => {
     return res.json({ ok: true });
   } catch (error) {
     console.error('Webhook error:', error);
+    await db.logError('webhook', error.message, { body: req.body });
     return res.status(200).json({ ok: true });
   }
 };
@@ -194,23 +198,46 @@ async function handleCommand(chatId, userId, userName, text) {
         return send(chatId, '❓ Используй: /ask [твой вопрос]\n\nНапример:\n/ask что такое трейдинг?');
       }
       
-      if (!checkRateLimit(userId)) {
-        return send(chatId, '⏱️ Лимит AI запросов: 10/час. Попробуй позже.');
+      const canUseAI = await checkRateLimit(userId);
+      if (!canUseAI) {
+        return send(chatId, '⏱️ Лимит AI запросов: 50/день. Попробуй завтра.');
       }
       
       const aiResponse = await getAIResponse(arg, userId);
       await send(chatId, `🤖 <b>Felix AI:</b>\n\n${aiResponse}`);
     },
 
-    profile: () => send(chatId, `👤 <b>Твой профиль</b>
+    profile: async () => {
+      try {
+        const stats = await db.getUserStats(userId);
+        const progress = await db.getUserProgress(userId);
+        
+        return send(chatId, `👤 <b>Твой профиль</b>
+
+ID: <code>${userId}</code>
+Имя: ${userName}
+
+📊 <b>Статистика:</b>
+• Сообщений: ${stats.messages_count || 0}
+• AI запросов: ${stats.ai_requests || 0}
+• Курсов завершено: ${progress.completed_courses || 0}
+• Активных курсов: ${progress.active_courses || 0}
+
+🔗 <b>Реферальная ссылка:</b>
+<code>https://t.me/fel12x_bot?start=ref_${userId}</code>
+
+Пригласи друга и получи бонусы! 🎁`);
+      } catch (error) {
+        console.error('Profile error:', error);
+        return send(chatId, `👤 <b>Твой профиль</b>
 
 ID: <code>${userId}</code>
 Имя: ${userName}
 
 🔗 <b>Реферальная ссылка:</b>
-<code>https://t.me/fel12x_bot?start=ref_${userId}</code>
-
-Пригласи друга и получи бонусы! 🎁`),
+<code>https://t.me/fel12x_bot?start=ref_${userId}</code>`);
+      }
+    },
 
     partner: () => send(chatId, `💼 <b>Партнерская программа Felix Academy</b>
 
