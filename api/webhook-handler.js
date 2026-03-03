@@ -184,6 +184,10 @@ async function handleCommand(chatId, userId, userName, text) {
 /ask [вопрос] - Спросить AI
 Или просто напиши мне - я отвечу!
 
+<b>📚 Обучение:</b>
+/community - Сообщество студентов
+/settings - Настройки и персонализация
+
 <b>💼 Партнерка:</b>
 /partner - Информация
 /partner_panel - Кабинет
@@ -267,7 +271,7 @@ ID: <code>${userId}</code>
     },
 
     admin: () => {
-      const ADMIN_IDS = [123456789];
+      const ADMIN_IDS = [1907288209, 8264612178];
       
       if (!ADMIN_IDS.includes(userId)) {
         return send(chatId, '❌ Нет прав администратора.');
@@ -281,6 +285,64 @@ ID: <code>${userId}</code>
           { text: '⚙️ Админ-Панель', web_app: { url: adminUrl } }
         ], [
           { text: '📚 Управление Курсами', web_app: { url: adminUrl.replace('admin-panel', 'admin-courses') } }
+        ], [
+          { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
+        ]]
+      });
+    },
+
+    community: () => {
+      const communityUrl = `${MINIAPP_URL.replace('index.html', 'community.html')}?user_id=${userId}`;
+      return send(chatId, `👥 <b>Сообщество Felix Academy</b>
+
+Присоединяйся к нашему сообществу:
+
+🎯 <b>Что внутри:</b>
+• Обсуждения курсов
+• Обмен опытом
+• Вопросы и ответы
+• Нетворкинг
+• Мотивация и поддержка
+
+💬 <b>Активность:</b>
+• Форум по темам
+• Чат студентов
+• Группы по интересам
+• События и вебинары
+
+<i>⟁ EGOIST ECOSYSTEM</i>`, {
+        inline_keyboard: [[
+          { text: '👥 Открыть Сообщество', web_app: { url: communityUrl } }
+        ], [
+          { text: '💬 Telegram Чат', url: 'https://t.me/egoist_ecosystem' }
+        ], [
+          { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
+        ]]
+      });
+    },
+
+    settings: () => {
+      const settingsUrl = `${MINIAPP_URL.replace('index.html', 'settings.html')}?user_id=${userId}`;
+      return send(chatId, `⚙️ <b>Настройки</b>
+
+Персонализируй свой опыт обучения:
+
+🎨 <b>Доступно:</b>
+• Тема оформления (светлая/темная)
+• Язык интерфейса
+• Уведомления
+• AI настройки (температура, модель)
+• Приватность
+
+📊 <b>Персонализация:</b>
+• Рекомендации курсов
+• Темп обучения
+• Сложность материала
+• Напоминания
+
+<i>⟁ EGOIST ECOSYSTEM</i>`, {
+        inline_keyboard: [[
+          { text: '⚙️ Открыть Настройки', web_app: { url: settingsUrl } }
         ], [
           { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
         ]]

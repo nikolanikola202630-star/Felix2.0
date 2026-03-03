@@ -1,47 +1,69 @@
-import { db } from '../lib/db.js';
+// Felix Academy - Settings API
+// EGOIST ECOSYSTEM Edition
+// Full personalization system
 
-export default async function handler(req, res) {
+const { db } = require('../lib/db');
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   try {
-    const { user_id } = req.method === 'GET' ? req.query : req.body;
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const userId = url.searchParams.get('user_id');
 
-    if (!user_id) {
-      return res.status(400).json({ error: 'user_id is required' });
+    if (!userId) {
+      return res.status(400).json({ error: 'user_id required' });
     }
-
-    const userId = parseInt(user_id);
 
     if (req.method === 'GET') {
-      // Get settings
+      // Get user settings
       const settings = await db.getUserSettings(userId);
-      return res.status(200).json(settings);
-    } else if (req.method === 'PUT') {
-      // Update settings
-      const { ai_temperature, ai_model, theme, notifications_enabled } = req.body;
+      return res.json({ 
+        success: true,
+        settings: settings || {}
+      });
+    }
 
-      // Validate temperature
-      if (ai_temperature !== undefined) {
-        const temp = parseFloat(ai_temperature);
-        if (temp < 0 || temp > 2) {
-          return res.status(400).json({ error: 'Temperature must be between 0 and 2' });
-        }
+    if (req.method === 'POST') {
+      // Save user settings
+      const { settings } = req.body;
+      
+      if (!settings) {
+        return res.status(400).json({ error: 'settings required' });
       }
 
-      const settings = await db.updateUserSettings(userId, {
-        ai_temperature,
-        ai_model,
-        theme,
-        notifications_enabled
+      // Update settings in database
+      await db.updateUserSettings(userId, {
+        ai_temperature: settings['ai-temperature'],
+        ai_model: settings['ai-model'],
+        theme: settings.theme,
+        notifications_enabled: settings['notifications-lessons']
       });
 
-      return res.status(200).json({
+      // Save full settings as JSON
+      await db.query(
+        `UPDATE user_settings 
+         SET preferences = $2, updated_at = NOW()
+         WHERE user_id = $1`,
+        [userId, JSON.stringify(settings)]
+      );
+
+      return res.json({ 
         success: true,
-        settings
+        message: 'Settings saved'
       });
-    } else {
-      return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    return res.status(405).json({ error: 'Method not allowed' });
+
   } catch (error) {
-    console.error('Error in settings API:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('Settings API error:', error);
+    return res.status(500).json({ error: error.message });
   }
-}
+};

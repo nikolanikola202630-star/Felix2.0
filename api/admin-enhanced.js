@@ -4,7 +4,7 @@
 
 const { db } = require('../lib/db');
 
-const ADMIN_IDS = [123456789]; // Замени на реальные ID админов
+const ADMIN_IDS = [1907288209, 8264612178]; // Telegram ID администраторов
 
 // Check admin rights
 function isAdmin(userId) {

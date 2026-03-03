@@ -50,13 +50,13 @@ module.exports = async (req, res) => {
       return require('../analytics')(req, res);
     }
 
-    // /api/community
-    if (pathname === '/api/community') {
+    // /api/community - all community endpoints
+    if (pathname.startsWith('/api/community')) {
       return require('../community')(req, res);
     }
 
     // /api/settings
-    if (pathname === '/api/settings') {
+    if (pathname.startsWith('/api/settings')) {
       return require('../settings')(req, res);
     }
 
