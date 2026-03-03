@@ -12,15 +12,23 @@
       "dest": "/api/_router.js"
     },
     {
-      "src": "/miniapp/(.*)",
+      "src": "/miniapp/(.*\\.(html|js|css|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
       "dest": "/miniapp/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/miniapp/elite.html"
+      "src": "/miniapp/(.*)",
+      "dest": "/miniapp/$1"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "headers": [
+    {
+      "source": "/miniapp/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
+        }
+      ]
+    }
+  ]
 }
