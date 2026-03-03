@@ -64,7 +64,8 @@ module.exports = async (req, res) => {
         pathname.startsWith('/api/community') ||
         pathname.startsWith('/api/settings') ||
         pathname.startsWith('/api/sync') ||
-        pathname.startsWith('/api/export')) {
+        pathname.startsWith('/api/export') ||
+        pathname.startsWith('/api/ai-chat-folders')) {
       return require('./routes/system')(req, res);
     }
 

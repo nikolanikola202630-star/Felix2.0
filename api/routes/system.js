@@ -99,3 +99,9 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+
+    // /api/ai-chat-folders (все подпути)
+    if (pathname.startsWith('/api/ai-chat-folders')) {
+      return require('../ai-chat-folders')(req, res);
+    }
