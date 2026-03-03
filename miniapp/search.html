@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поиск - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+</head>
+<body>
+  <div class="container" style="padding: var(--space-4);">
+    <h1 style="margin-bottom: var(--space-6);">🔍 Поиск</h1>
+    <div style="margin-bottom: var(--space-6);">
+      <input type="text" id="searchInput" placeholder="Введите запрос..." autofocus style="width: 100%; padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-color); background: var(--bg-secondary); font-size: 16px;">
+    </div>
+    <div id="results"><div style="text-align:center;padding:var(--space-16);color:var(--text-secondary)"><div style="font-size:64px;margin-bottom:var(--space-4)">🔍</div><p>Начните вводить запрос</p></div></div>
+  </div>
+  <script>
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
+    tg?.expand();
+    tg?.BackButton.show();
+    tg?.BackButton.onClick(() => window.location.href = 'index.html');
+    const data = [
+      { id: 1, type: 'course', title: 'Детективная лаборатория сознания', desc: 'Курс по психологии' },
+      { id: 2, type: 'course', title: 'Эмоциональный интеллект', desc: 'Развитие эмоций' }
+    ];
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      if (!query) { document.getElementById('results').innerHTML = '<div style="text-align:center;padding:var(--space-16);color:var(--text-secondary)"><div style="font-size:64px;margin-bottom:var(--space-4)">🔍</div><p>Начните вводить запрос</p></div>'; return; }
+      const filtered = data.filter(item => item.title.toLowerCase().includes(query));
+      document.getElementById('results').innerHTML = filtered.length ? filtered.map(item => <div style="background: var(--bg-secondary); padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-3); cursor: pointer;" onclick="window.location.href='{item.type}.html?id={item.id}'"><div style="font-weight: 600;">{item.title}</div><div style="color: var(--text-secondary); font-size: 14px;">{item.desc}</div></div>).join('') : '<div style="text-align:center;padding:var(--space-16);color:var(--text-secondary)"><div style="font-size:64px;margin-bottom:var(--space-4)">😔</div><p>Ничего не найдено</p></div>';
+    });
+  </script>
+  <script src="js/footer.js?v=202603031032"></script>
+</body>
+</html>

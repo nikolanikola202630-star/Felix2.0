@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+</head>
+<body>
+  <div class="container" style="padding: var(--space-4);">
+    <h1 style="margin-bottom: var(--space-6);">📚 Каталог Курсов</h1>
+    <div style="margin-bottom: var(--space-4);">
+      <input type="text" id="search" placeholder="🔍 Поиск..." style="width: 100%; padding: var(--space-3); border-radius: var(--radius-lg); border: 1px solid var(--border-color); background: var(--bg-secondary);">
+    </div>
+    <div id="courses" style="display: grid; gap: var(--space-4);"></div>
+  </div>
+  <script>
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
+    tg?.expand();
+    tg?.BackButton.show();
+    tg?.BackButton.onClick(() => window.location.href = 'index.html');
+    const courses = [
+      { id: 1, title: 'Детективная лаборатория сознания', price: 2990, rating: 4.9 },
+      { id: 2, title: 'Эмоциональный интеллект', price: 3490, rating: 4.8 }
+    ];
+    document.getElementById('courses').innerHTML = courses.map(c => <div style="background: var(--bg-secondary); padding: var(--space-4); border-radius: var(--radius-lg); cursor: pointer;" onclick="window.location.href='course.html?id=' + c.id + ''"><div style="font-weight: 600; margin-bottom: var(--space-2);">{c.title}</div><div style="display: flex; justify-content: space-between;"><span>⭐ {c.rating}</span><span style="color: var(--primary); font-weight: 700;">{c.price} ₽</span></div></div>).join('');
+  </script>
+  <script src="js/footer.js?v=202603031032"></script>
+</body>
+</html>

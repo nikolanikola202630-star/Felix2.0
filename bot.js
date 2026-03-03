@@ -154,44 +154,57 @@ async function handleMessage(message) {
           console.log(`🔗 Реферал: ${arg}`);
         }
 
-        await send(chatId, `🎓 <b>Добро пожаловать в Felix Academy!</b>
+        await send(chatId, `⟁ <b>Felix Academy - EGOIST ECOSYSTEM</b>
 
 Привет, ${firstName}! 👋
 
-<b>Что я умею:</b>
-🎓 Академия - курсы по трейдингу, IT, психологии
-🤖 AI-Ассистент - помощь 24/7
-💼 Партнерка - зарабатывай 20%
-📊 Аналитика - отслеживай прогресс
+Я Felix - твой персональный ассистент и консьерж образовательной платформы.
 
-<b>Команды:</b>
+<b>🎓 Что я предлагаю:</b>
+• Курсы по трейдингу, IT, психологии
+• AI-помощник 24/7
+• Партнерская программа (20% комиссия)
+• Аналитика прогресса
+• Сертификаты после обучения
+
+<b>⚡ Быстрый старт:</b>
 /help - Все команды
 /profile - Твой профиль
-/partner - Партнерская программа
+/partner_panel - Партнерский кабинет
+/admin - Админ-панель (для админов)
 /ask [вопрос] - Спросить AI
 
-Открой Академию через кнопку ниже! 👇`);
+<b>📱 Открой Академию через кнопку ниже!</b>
+
+<i>Создано в ⟁ EGOIST ECOSYSTEM © 2026</i>`);
         break;
 
       case 'help':
         await send(chatId, `📖 <b>Команды Felix Academy</b>
 
-<b>Основные:</b>
+<b>🎯 Основные:</b>
 /start - Главное меню
 /help - Эта справка
 /profile - Твой профиль
-/partner - Партнерский кабинет
+/courses - Список курсов
 
-<b>AI:</b>
+<b>🤖 AI-Ассистент:</b>
 /ask [вопрос] - Спросить AI
-Или просто напиши мне что-нибудь!
+Или просто напиши мне любой вопрос!
 
-<b>Курсы:</b>
-Открой Академию через кнопку ниже 👇
+<b>💼 Партнерка:</b>
+/partner - Информация о программе
+/partner_panel - Открыть партнерский кабинет
 
-<b>Статус:</b> 🏠 Локальный тест
-<b>Пользователей:</b> ${users.size}
-<b>Курсов:</b> ${courses.length}`);
+<b>⚙️ Админ (только для админов):</b>
+/admin - Открыть админ-панель
+
+<b>📊 Статистика:</b>
+👥 Пользователей: ${users.size}
+📚 Курсов: ${courses.length}
+🤖 AI запросов: ${Array.from(users.values()).reduce((sum, u) => sum + u.ai_requests, 0)}
+
+<i>⟁ EGOIST ECOSYSTEM © 2026</i>`);
         break;
 
       case 'profile':
@@ -213,23 +226,83 @@ AI запросов: ${user.ai_requests}
         break;
 
       case 'partner':
-        await send(chatId, `💼 <b>Партнерский кабинет</b>
+        await send(chatId, `💼 <b>Партнерская программа Felix Academy</b>
 
+<b>💰 Условия:</b>
+• 20% с каждой покупки по твоей ссылке
+• Минимум для вывода: 1000 ₽
+• Выплаты на карту или криптовалюту
+• Пожизненные отчисления
+
+<b>🎯 Как работает:</b>
+1. Получи свою реферальную ссылку
+2. Поделись с друзьями
+3. Получай 20% с их покупок
+4. Выводи деньги когда угодно
+
+<b>🔗 Твоя партнерская ссылка:</b>
+<code>https://t.me/fel12x_bot?start=ref_partner${userId}</code>
+
+<b>📊 Твоя статистика:</b>
 Баланс: 0 ₽
 Переходов: 0
 Регистраций: 0
 Покупок: 0
-Заработано: 0 ₽
 
-🔗 <b>Партнерская ссылка:</b>
-<code>t.me/YourBot?start=ref_partner${userId}</code>
+Используй /partner_panel для открытия полного кабинета! 👇`);
+        break;
 
-<b>Условия:</b>
-• 20% с каждой покупки
-• Минимум для вывода: 1000 ₽
-• Выплаты на карту или крипту
+      case 'partner_panel':
+        const partnerUrl = `${MINIAPP_URL.replace('index.html', 'partner-dashboard.html')}?user_id=${userId}`;
+        await send(chatId, `💼 <b>Партнерский кабинет</b>
 
-Открой партнерский кабинет в Академии! 👇`);
+Открываю твой партнерский кабинет...
+
+В кабинете ты найдешь:
+• 📊 Детальную статистику
+• 💰 Историю выплат
+• 🔗 Промо-материалы
+• 📈 Аналитику переходов
+
+<i>⟁ EGOIST ECOSYSTEM</i>`, {
+          inline_keyboard: [[
+            { text: '💼 Открыть Партнерский Кабинет', web_app: { url: partnerUrl } }
+          ], [
+            { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
+          ]]
+        });
+        break;
+
+      case 'admin':
+        // Проверка прав админа (замени на свой ID)
+        const ADMIN_IDS = [123456789]; // Добавь свой Telegram ID
+        
+        if (!ADMIN_IDS.includes(userId)) {
+          await send(chatId, '❌ У тебя нет прав администратора.');
+          break;
+        }
+
+        const adminUrl = `${MINIAPP_URL.replace('index.html', 'admin-panel.html')}?admin_id=${userId}`;
+        await send(chatId, `⚙️ <b>Админ-панель Felix Academy</b>
+
+Добро пожаловать, администратор!
+
+<b>Доступные функции:</b>
+• 👥 Управление пользователями
+• 📚 Управление курсами
+• 💰 Финансы и выплаты
+• 📊 Аналитика платформы
+• ⚙️ Настройки системы
+
+<i>⟁ EGOIST ECOSYSTEM</i>`, {
+          inline_keyboard: [[
+            { text: '⚙️ Открыть Админ-Панель', web_app: { url: adminUrl } }
+          ], [
+            { text: '📚 Управление Курсами', web_app: { url: adminUrl.replace('admin-panel', 'admin-courses') } }
+          ], [
+            { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
+          ]]
+        });
         break;
 
       case 'ask':
