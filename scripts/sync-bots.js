@@ -3,6 +3,9 @@
 // EGOIST ECOSYSTEM Edition v10.3
 // Синхронизирует оба бота с базой данных и проверяет их работоспособность
 
+// Load environment variables from .env.local
+require('dotenv').config({ path: '.env.local' });
+
 const { db } = require('../lib/db');
 
 const MAIN_BOT_TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
