@@ -10,25 +10,6 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/_router.js"
-    },
-    {
-      "src": "/miniapp/(.*\\.(html|js|css|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/miniapp/$1"
-    },
-    {
-      "src": "/miniapp/(.*)",
-      "dest": "/miniapp/$1"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/miniapp/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, must-revalidate"
-        }
-      ]
     }
   ]
 }
