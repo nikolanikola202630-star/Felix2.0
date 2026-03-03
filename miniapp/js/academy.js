@@ -98,3 +98,13 @@ if (document.readyState === 'loading') {
 }
 
 window.academyManager = academyManager;
+
+
+// Close academy and return to bot
+function closeAcademy() {
+  if (tg) {
+    tg.close();
+  } else {
+    window.history.back();
+  }
+}

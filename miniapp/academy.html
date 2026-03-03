@@ -31,6 +31,28 @@
       border-radius: 16px;
       color: white;
       margin-bottom: 24px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      color: white;
+    }
+
+    .close-btn:active {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .welcome h1 {
@@ -190,6 +212,7 @@
   <div class="container">
     <!-- Приветствие -->
     <div class="welcome">
+      <button class="close-btn" onclick="closeAcademy()">✕</button>
       <h1>Привет, <span id="userName">Пользователь</span>! 👋</h1>
       <p>Продолжай обучение или выбери новый курс</p>
     </div>
