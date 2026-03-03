@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Голосовой ввод - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+  <link rel="stylesheet" href="css/micro-animations.css">
+  <style>
+    .voice-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: var(--space-8);
+    }
+
+    .voice-button {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      font-size: 64px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+      position: relative;
+    }
+
+    .voice-button:active {
+      transform: scale(0.95);
+    }
+
+    .voice-button.recording {
+      animation: pulse 1.5s infinite;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 15px 60px rgba(239, 68, 68, 0.5); }
+    }
+
+    .voice-status {
+      margin-top: var(--space-6);
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .voice-text {
+      margin-top: var(--space-4);
+      padding: var(--space-4);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      min-height: 100px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .voice-actions {
+      margin-top: var(--space-6);
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    .transcript-item {
+      background: var(--bg-secondary);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-3);
+    }
+
+    .transcript-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .wave-container {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin-top: var(--space-4);
+      height: 40px;
+      align-items: center;
+    }
+
+    .wave-bar {
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      animation: wave 1s infinite ease-in-out;
+    }
+
+    .wave-bar:nth-child(1) { animation-delay: 0s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes wave {
+      0%, 100% { height: 10px; }
+      50% { height: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="voice-container">
+      <button class="voice-button" id="voiceButton" onclick="toggleRecording()">
+        🎙️
+      </button>
+
+      <div class="voice-status" id="voiceStatus">
+        Нажмите для записи
+      </div>
+
+      <div class="wave-container" id="waveContainer" style="display: none;">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+
+      <div class="voice-text" id="voiceText" style="display: none;">
+        <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-2);">
+          Распознанный текст:
+        </div>
+        <div id="transcriptText"></div>
+      </div>
+
+      <div class="voice-actions" id="voiceActions" style="display: none;">
+        <button class="btn btn-primary" onclick="sendToAI()">
+          🤖 Отправить AI
+        </button>
+        <button class="btn btn-secondary" onclick="copyText()">
+          📋 Копировать
+        </button>
+        <button class="btn btn-secondary" onclick="clearText()">
+          🗑️ Очистить
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: var(--space-8);">
+      <h3 style="margin-bottom: var(--space-4);">История записей</h3>
+      <div id="transcriptHistory"></div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.location.href = 'index.html');
+
+    let recognition = null;
+    let isRecording = false;
+    let currentTranscript = '';
+    let transcriptHistory = [];
+
+    // Проверка поддержки Web Speech API
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      
+      recognition.lang = 'ru-RU';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        console.log('Recording started');
+        isRecording = true;
+        document.getElementById('voiceButton').classList.add('recording');
+        document.getElementById('voiceStatus').textContent = 'Слушаю... Говорите';
+        document.getElementById('waveContainer').style.display = 'flex';
+        tg.HapticFeedback?.impactOccurred('medium');
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        currentTranscript = finalTranscript || interimTranscript;
+        
+        if (currentTranscript) {
+          document.getElementById('voiceText').style.display = 'block';
+          document.getElementById('transcriptText').textContent = currentTranscript;
+          document.getElementById('voiceActions').style.display = 'flex';
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        stopRecording();
+        
+        let errorMessage = 'Ошибка распознавания';
+        if (event.error === 'no-speech') {
+          errorMessage = 'Речь не обнаружена';
+        } else if (event.error === 'not-allowed') {
+          errorMessage = 'Доступ к микрофону запрещен';
+        }
+        
+        tg.showAlert(errorMessage);
+      };
+
+      recognition.onend = () => {
+        stopRecording();
+        if (currentTranscript) {
+          saveToHistory(currentTranscript);
+        }
+      };
+    } else {
+      document.getElementById('voiceStatus').textContent = 'Голосовой ввод не поддерживается';
+      document.getElementById('voiceButton').disabled = true;
+      tg.showAlert('Ваш браузер не поддерживает голосовой ввод');
+    }
+
+    function toggleRecording() {
+      if (!recognition) return;
+
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        currentTranscript = '';
+        document.getElementById('transcriptText').textContent = '';
+        recognition.start();
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      document.getElementById('voiceButton').classList.remove('recording');
+      document.getElementById('voiceStatus').textContent = 'Нажмите для записи';
+      document.getElementById('waveContainer').style.display = 'none';
+      tg.HapticFeedback?.impactOccurred('light');
+    }
+
+    function saveToHistory(text) {
+      const timestamp = new Date().toLocaleString('ru-RU');
+      transcriptHistory.unshift({ text, timestamp });
+      
+      // Сохранить в localStorage
+      localStorage.setItem('voiceHistory', JSON.stringify(transcriptHistory.slice(0, 10)));
+      
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('transcriptHistory');
+      
+      if (transcriptHistory.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: var(--space-8);">История пуста</div>';
+        return;
+      }
+
+      container.innerHTML = transcriptHistory.map((item, index) => `
+        <div class="transcript-item stagger-item" style="animation-delay: ${index * 50}ms">
+          <div class="transcript-time">${item.timestamp}</div>
+          <div>${item.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function sendToAI() {
+      if (!currentTranscript) return;
+      
+      tg.HapticFeedback?.impactOccurred('medium');
+      
+      // Сохранить текст в sessionStorage для передачи в AI-чат
+      sessionStorage.setItem('voiceMessage', currentTranscript);
+      
+      // Перейти в AI-чат
+      window.location.href = 'ai-chat.html';
+    }
+
+    function copyText() {
+      if (!currentTranscript) return;
+      
+      navigator.clipboard.writeText(currentTranscript).then(() => {
+        tg.showAlert('✅ Текст скопирован');
+        tg.HapticFeedback?.notificationOccurred('success');
+      }).catch(() => {
+        tg.showAlert('Ошибка копирования');
+      });
+    }
+
+    function clearText() {
+      currentTranscript = '';
+      document.getElementById('voiceText').style.display = 'none';
+      document.getElementById('voiceActions').style.display = 'none';
+      document.getElementById('transcriptText').textContent = '';
+      tg.HapticFeedback?.impactOccurred('light');
+    }
+
+    // Загрузить историю из localStorage
+    const savedHistory = localStorage.getItem('voiceHistory');
+    if (savedHistory) {
+      transcriptHistory = JSON.parse(savedHistory);
+      renderHistory();
+    } else {
+      renderHistory();
+    }
+
+    console.log('🎙️ Voice input page loaded');
+  </script>
+</body>
+</html>

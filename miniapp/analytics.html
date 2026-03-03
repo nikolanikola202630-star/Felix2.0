@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Аналитика - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+  <link rel="stylesheet" href="css/micro-animations.css">
+  <style>
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+      margin-bottom: var(--space-6);
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: var(--space-2);
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .chart-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-2);
+      height: 200px;
+      padding: var(--space-2) 0;
+    }
+
+    .bar {
+      flex: 1;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      position: relative;
+      transition: all 0.3s ease;
+      min-height: 20px;
+    }
+
+    .bar-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .bar-value {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .progress-item {
+      margin-bottom: var(--space-4);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-2);
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: var(--radius-full);
+      transition: width 0.5s ease;
+    }
+
+    .achievement-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      margin-right: var(--space-2);
+      margin-bottom: var(--space-2);
+    }
+
+    .streak-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: var(--space-1);
+      margin-top: var(--space-3);
+    }
+
+    .streak-day {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .streak-day.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .streak-day.today {
+      border: 2px solid var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="margin-bottom: var(--space-6);">📊 Аналитика обучения</h1>
+
+    <div class="stat-grid">
+      <div class="stat-card stagger-item">
+        <div class="stat-value" id="totalHours">0</div>
+        <div class="stat-label">Часов обучения</div>
+      </div>
+      <div class="stat-card stagger-item" style="animation-delay: 50ms">
+        <div class="stat-value" id="completedLessons">0</div>
+        <div class="stat-label">Уроков пройдено</div>
+      </div>
+      <div class="stat-card stagger-item" style="animation-delay: 100ms">
+        <div class="stat-value" id="currentStreak">0</div>
+        <div class="stat-label">Дней подряд</div>
+      </div>
+      <div class="stat-card stagger-item" style="animation-delay: 150ms">
+        <div class="stat-value" id="avgScore">0%</div>
+        <div class="stat-label">Средний балл</div>
+      </div>
+    </div>
+
+    <div class="chart-card stagger-item" style="animation-delay: 200ms">
+      <div class="chart-title">Активность по дням недели</div>
+      <div class="bar-chart" id="weeklyChart"></div>
+    </div>
+
+    <div class="chart-card stagger-item" style="animation-delay: 250ms">
+      <div class="chart-title">Прогресс по курсам</div>
+      <div id="courseProgress"></div>
+    </div>
+
+    <div class="chart-card stagger-item" style="animation-delay: 300ms">
+      <div class="chart-title">🔥 Streak календарь</div>
+      <div class="streak-calendar" id="streakCalendar"></div>
+    </div>
+
+    <div class="chart-card stagger-item" style="animation-delay: 350ms">
+      <div class="chart-title">🏆 Достижения</div>
+      <div id="achievementsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.location.href = 'index.html');
+
+    const user = tg.initDataUnsafe.user || { id: 0 };
+    const API_URL = 'https://felix2-0.vercel.app/api';
+
+    // Mock data
+    const stats = {
+      totalHours: 24,
+      completedLessons: 15,
+      currentStreak: 7,
+      avgScore: 87
+    };
+
+    const weeklyActivity = [
+      { day: 'Пн', hours: 2.5 },
+      { day: 'Вт', hours: 1.8 },
+      { day: 'Ср', hours: 3.2 },
+      { day: 'Чт', hours: 2.1 },
+      { day: 'Пт', hours: 4.0 },
+      { day: 'Сб', hours: 1.5 },
+      { day: 'Вс', hours: 2.8 }
+    ];
+
+    const courseProgress = [
+      { name: 'Основы трейдинга', progress: 75 },
+      { name: 'Python для начинающих', progress: 45 },
+      { name: 'Психология успеха', progress: 90 }
+    ];
+
+    const achievements = [
+      { icon: '🎯', name: 'Первый урок' },
+      { icon: '🔥', name: '7 дней подряд' },
+      { icon: '⭐', name: 'Отличник' },
+      { icon: '📚', name: 'Книголюб' }
+    ];
+
+    function loadStats() {
+      document.getElementById('totalHours').textContent = stats.totalHours;
+      document.getElementById('completedLessons').textContent = stats.completedLessons;
+      document.getElementById('currentStreak').textContent = stats.currentStreak;
+      document.getElementById('avgScore').textContent = stats.avgScore + '%';
+    }
+
+    function renderWeeklyChart() {
+      const container = document.getElementById('weeklyChart');
+      const maxHours = Math.max(...weeklyActivity.map(d => d.hours));
+
+      container.innerHTML = weeklyActivity.map((day, index) => {
+        const height = (day.hours / maxHours) * 100;
+        return `
+          <div class="bar stagger-item" style="height: ${height}%; animation-delay: ${index * 50}ms">
+            <div class="bar-value">${day.hours}ч</div>
+            <div class="bar-label">${day.day}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCourseProgress() {
+      const container = document.getElementById('courseProgress');
+
+      container.innerHTML = courseProgress.map((course, index) => `
+        <div class="progress-item stagger-item" style="animation-delay: ${index * 50}ms">
+          <div class="progress-header">
+            <span style="font-weight: 600;">${course.name}</span>
+            <span style="color: var(--text-secondary);">${course.progress}%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${course.progress}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderStreakCalendar() {
+      const container = document.getElementById('streakCalendar');
+      const today = new Date().getDate();
+      const daysInMonth = 28; // Simplified
+
+      const days = [];
+      for (let i = 1; i <= daysInMonth; i++) {
+        const isActive = Math.random() > 0.3; // Mock active days
+        const isToday = i === today;
+        days.push(`
+          <div class="streak-day ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}">
+            ${i}
+          </div>
+        `);
+      }
+
+      container.innerHTML = days.join('');
+    }
+
+    function renderAchievements() {
+      const container = document.getElementById('achievementsList');
+
+      container.innerHTML = achievements.map((achievement, index) => `
+        <div class="achievement-badge stagger-item" style="animation-delay: ${index * 50}ms">
+          <span style="font-size: 20px;">${achievement.icon}</span>
+          <span>${achievement.name}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize
+    loadStats();
+    renderWeeklyChart();
+    renderCourseProgress();
+    renderStreakCalendar();
+    renderAchievements();
+
+    console.log('📊 Analytics page loaded');
+  </script>
+</body>
+</html>
