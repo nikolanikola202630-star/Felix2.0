@@ -553,3 +553,12 @@ window.FelixApp.openCourse = openCourse;
 window.FelixApp.continueLesson = continueLesson;
 
 console.log('🎓 Felix Academy Flagship loaded');
+
+// Функция возврата на главную
+function goHome() {
+  haptic.light();
+  window.location.href = 'index.html';
+}
+
+// Экспорт функций для глобального доступа
+window.goHome = goHome;
