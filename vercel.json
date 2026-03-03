@@ -17,11 +17,25 @@
     },
     {
       "src": "/miniapp/(.*)",
-      "dest": "/miniapp/$1"
+      "dest": "/miniapp/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      }
     },
     {
       "src": "/",
       "dest": "/public/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/miniapp/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }
