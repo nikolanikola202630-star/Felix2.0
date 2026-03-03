@@ -8,42 +8,28 @@ const GROQ_API_KEY = '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';
 
 // In-memory хранилище (для локального тестирования)
 const users = new Map();
-const courses = [
-  {
-    id: 1,
-    title: 'Основы трейдинга',
-    price: 2990,
-    rating: 4.8,
-    category: 'trading',
-    lessons: [
-      { id: 1, title: 'Введение в трейдинг', duration: 15, is_free: true },
-      { id: 2, title: 'Технический анализ', duration: 25, is_free: false },
-      { id: 3, title: 'Управление рисками', duration: 20, is_free: false }
-    ]
-  },
-  {
-    id: 2,
-    title: 'Python для начинающих',
-    price: 0,
-    rating: 4.9,
-    category: 'it',
-    lessons: [
-      { id: 4, title: 'Основы Python', duration: 20, is_free: true },
-      { id: 5, title: 'Переменные и типы данных', duration: 30, is_free: true }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Психология успеха',
-    price: 1990,
-    rating: 4.7,
-    category: 'psychology',
-    lessons: [
-      { id: 6, title: 'Мышление победителя', duration: 25, is_free: true },
-      { id: 7, title: 'Управление эмоциями', duration: 30, is_free: false }
-    ]
-  }
-];
+
+// Загрузка курсов из JSON
+const fs = require('fs');
+const coursesData = JSON.parse(fs.readFileSync('./data/courses-structure.json', 'utf8'));
+const courses = coursesData.courses.map(course => {
+  // Подсчитываем общее количество уроков
+  const totalLessons = course.themes.reduce((sum, theme) => sum + theme.lessons.length, 0);
+  
+  return {
+    id: course.id,
+    title: course.title,
+    price: course.price,
+    rating: course.rating,
+    category: course.category,
+    students: course.students,
+    duration_hours: course.duration_hours,
+    level: course.level,
+    instructor: course.instructor,
+    themes: course.themes,
+    totalLessons
+  };
+});
 
 let offset = 0;
 
@@ -260,9 +246,15 @@ AI запросов: ${user.ai_requests}
         let coursesList = '<b>📚 Доступные курсы:</b>\n\n';
         courses.forEach(course => {
           const price = course.price > 0 ? `${course.price} ₽` : 'Бесплатно';
-          coursesList += `${course.id}. ${course.title}\n`;
-          coursesList += `   ⭐ ${course.rating} | ${price}\n`;
-          coursesList += `   📖 ${course.lessons.length} уроков\n\n`;
+          const level = course.level === 'beginner' ? '🟢 Начальный' : 
+                       course.level === 'intermediate' ? '🟡 Средний' : 
+                       course.level === 'advanced' ? '🔴 Продвинутый' : '⚪ Все уровни';
+          
+          coursesList += `${course.id}. <b>${course.title}</b>\n`;
+          coursesList += `   ${course.instructor.avatar} ${course.instructor.name}\n`;
+          coursesList += `   ⭐ ${course.rating} | ${price} | ${level}\n`;
+          coursesList += `   📖 ${course.totalLessons} уроков | ⏱️ ${course.duration_hours}ч\n`;
+          coursesList += `   👥 ${course.students} студентов\n\n`;
         });
         coursesList += 'Открой Академию для подробностей! 👇';
         await send(chatId, coursesList);

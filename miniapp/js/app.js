@@ -1,10 +1,21 @@
 // Felix Academy Flagship - Main JavaScript
-// Объединяет все функции в одном приложении
+// Премиум версия с оптимизацией и haptic feedback
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
+
+// Haptic Feedback Helper
+const haptic = {
+  light: () => tg.HapticFeedback?.impactOccurred('light'),
+  medium: () => tg.HapticFeedback?.impactOccurred('medium'),
+  heavy: () => tg.HapticFeedback?.impactOccurred('heavy'),
+  success: () => tg.HapticFeedback?.notificationOccurred('success'),
+  warning: () => tg.HapticFeedback?.notificationOccurred('warning'),
+  error: () => tg.HapticFeedback?.notificationOccurred('error'),
+  selection: () => tg.HapticFeedback?.selectionChanged()
+};
 
 // Конфигурация
 const CONFIG = {
@@ -31,10 +42,13 @@ window.FelixApp = {
 async function init() {
   console.log('🚀 Felix Academy Flagship - Initializing...');
   
+  // Показать skeleton loaders
+  showSkeletonLoaders();
+  
   // Показать данные пользователя
   displayUserInfo();
   
-  // Загрузить данные
+  // Загрузить данные параллельно
   await Promise.all([
     loadUserStats(),
     loadCourses(),
@@ -47,7 +61,27 @@ async function init() {
     handleReferral(FelixApp.startParam);
   }
   
+  // Haptic feedback при загрузке
+  haptic.success();
+  
   console.log('✅ App initialized');
+}
+
+// Skeleton Loaders
+function showSkeletonLoaders() {
+  const skeletonHTML = `
+    <div class="skeleton-card">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-meta"></div>
+      </div>
+    </div>
+  `.repeat(3);
+  
+  document.getElementById('continueCourses').innerHTML = skeletonHTML;
+  document.getElementById('freeLessons').innerHTML = skeletonHTML;
+  document.getElementById('popularCourses').innerHTML = skeletonHTML;
 }
 
 // Отображение информации о пользователе
@@ -86,59 +120,75 @@ async function loadUserStats() {
 // Загрузка курсов
 async function loadCourses() {
   try {
-    // TODO: Загрузить с API
-    // const courses = await fetch(`${CONFIG.API_URL}/courses`).then(r => r.json());
+    // Загружаем с API
+    const response = await fetch(`${CONFIG.API_URL}/courses-full`);
+    const data = await response.json();
     
-    // Тестовые данные
-    const allCourses = [
+    if (data.success) {
+      FelixApp.data.courses = data.courses;
+      
+      // Мои курсы (в процессе) - пока тестовые
+      const myCourses = [
+        {
+          ...data.courses[0],
+          progress: 45,
+          last_lesson_id: 2,
+          current_theme: 1
+        }
+      ];
+      
+      FelixApp.data.myCourses = myCourses;
+      
+      // Рендер
+      renderCarousel('continueCourses', myCourses, 'continue');
+      renderCarousel('freeLessons', data.courses.filter(c => c.freeLessons > 0), 'course');
+      renderCarousel('popularCourses', data.courses.sort((a, b) => b.students - a.students), 'course');
+    }
+  } catch (error) {
+    console.error('Error loading courses:', error);
+    
+    // Fallback - тестовые данные
+    const fallbackCourses = [
       {
         id: 1,
-        title: 'Основы трейдинга',
+        title: 'Детективная лаборатория сознания',
         price: 2990,
         rating: 4.8,
-        image: 'https://via.placeholder.com/280x160?text=Trading',
-        category: 'trading',
-        is_free: false
+        image: 'https://via.placeholder.com/280x160/667eea/ffffff?text=Психология',
+        category: 'psychology',
+        is_free: false,
+        students: 1247,
+        totalLessons: 5
       },
       {
         id: 2,
-        title: 'Python для начинающих',
-        price: 0,
+        title: 'Путь к лучшей версии себя',
+        price: 3990,
         rating: 4.9,
-        image: 'https://via.placeholder.com/280x160?text=Python',
-        category: 'it',
-        is_free: true
+        image: 'https://via.placeholder.com/280x160/764ba2/ffffff?text=Саморазвитие',
+        category: 'self-development',
+        is_free: false,
+        students: 2156,
+        totalLessons: 25
       },
       {
         id: 3,
-        title: 'Психология успеха',
-        price: 1990,
+        title: 'От идеи до устойчивого предприятия',
+        price: 4990,
         rating: 4.7,
-        image: 'https://via.placeholder.com/280x160?text=Psychology',
-        category: 'psychology',
-        is_free: false
+        image: 'https://via.placeholder.com/280x160/10b981/ffffff?text=Бизнес',
+        category: 'business',
+        is_free: false,
+        students: 892,
+        totalLessons: 25
       }
     ];
     
-    FelixApp.data.courses = allCourses;
+    FelixApp.data.courses = fallbackCourses;
     
-    // Мои курсы (в процессе)
-    const myCourses = [
-      {
-        ...allCourses[0],
-        progress: 45,
-        last_lesson_id: 2
-      }
-    ];
-    
-    FelixApp.data.myCourses = myCourses;
-    
-    // Рендер
-    renderCarousel('continueCourses', myCourses, 'continue');
-    renderCarousel('freeLessons', allCourses.filter(c => c.is_free), 'course');
-    renderCarousel('popularCourses', allCourses, 'course');
-  } catch (error) {
-    console.error('Error loading courses:', error);
+    renderCarousel('continueCourses', [], 'continue');
+    renderCarousel('freeLessons', fallbackCourses, 'course');
+    renderCarousel('popularCourses', fallbackCourses, 'course');
   }
 }
 
@@ -214,20 +264,20 @@ function renderCarousel(containerId, items, type) {
   }
   
   if (type === 'continue') {
-    container.innerHTML = items.map(item => `
-      <div class="card" onclick="openCourse(${item.id})">
-        <img src="${item.image}" alt="${item.title}" class="card-image">
+    container.innerHTML = items.map((item, index) => `
+      <div class="card stagger-item" onclick="openCourse(${item.id})" style="animation-delay: ${index * 50}ms">
+        <img src="${item.image}" alt="${item.title}" class="card-image" loading="lazy">
         <div class="card-content">
           <div class="card-title">${item.title}</div>
-          <div style="margin: 8px 0;">
-            <div style="font-size: 12px; color: var(--hint); margin-bottom: 4px;">
+          <div style="margin: var(--space-2) 0;">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-1); font-weight: 500;">
               Прогресс: ${item.progress}%
             </div>
-            <div style="width: 100%; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; overflow: hidden;">
-              <div style="width: ${item.progress}%; height: 100%; background: var(--primary);"></div>
+            <div style="width: 100%; height: 6px; background: var(--bg-tertiary); border-radius: var(--radius-full); overflow: hidden;">
+              <div style="width: ${item.progress}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.5s ease;"></div>
             </div>
           </div>
-          <button style="width: 100%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px;" 
+          <button class="btn btn-primary" style="width: 100%; margin-top: var(--space-2);" 
                   onclick="continueLesson(${item.last_lesson_id}); event.stopPropagation();">
             Продолжить →
           </button>
@@ -235,16 +285,19 @@ function renderCarousel(containerId, items, type) {
       </div>
     `).join('');
   } else {
-    container.innerHTML = items.map(item => `
-      <div class="card" onclick="openCourse(${item.id})">
-        <img src="${item.image}" alt="${item.title}" class="card-image">
+    container.innerHTML = items.map((item, index) => `
+      <div class="card stagger-item" onclick="openCourse(${item.id})" style="animation-delay: ${index * 50}ms">
+        <img src="${item.image}" alt="${item.title}" class="card-image" loading="lazy">
         <div class="card-content">
           <div class="card-title">${item.title}</div>
           <div class="card-meta">
             <span class="card-price ${item.price === 0 ? 'free' : ''}">
               ${item.price > 0 ? item.price + ' ₽' : 'Бесплатно'}
             </span>
-            <span>⭐ ${item.rating}</span>
+            <span style="display: flex; align-items: center; gap: 4px;">
+              <span style="color: #F59E0B;">⭐</span>
+              <span style="font-weight: 600;">${item.rating}</span>
+            </span>
           </div>
         </div>
       </div>
@@ -261,8 +314,8 @@ function renderActivities(activities) {
     return;
   }
   
-  container.innerHTML = activities.map(activity => `
-    <div class="activity-item">
+  container.innerHTML = activities.map((activity, index) => `
+    <div class="activity-item stagger-item" style="animation-delay: ${index * 50}ms">
       <div class="activity-icon">${activity.icon}</div>
       <div class="activity-content">
         <div class="activity-title">${activity.title}</div>
@@ -280,18 +333,37 @@ function handleReferral(code) {
   // await fetch(`${CONFIG.API_URL}/referral/save`, {...});
   
   if (code.startsWith('ref_partner')) {
+    haptic.success();
     tg.showAlert('✨ Вы перешли по партнерской ссылке! Получите бонусы при покупке.');
   } else if (code.startsWith('ref_user')) {
+    haptic.success();
     tg.showAlert('🎁 Вы перешли по реферальной ссылке! Получите бонусы при покупке.');
   }
 }
 
+// Добавить haptic feedback на все кнопки
+document.addEventListener('DOMContentLoaded', () => {
+  // Haptic на все кликабельные элементы
+  document.querySelectorAll('.action-btn, .nav-item, .card, .btn').forEach(el => {
+    el.addEventListener('click', () => haptic.light());
+  });
+  
+  // Haptic на hover для desktop
+  if (window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.action-btn, .card').forEach(el => {
+      el.addEventListener('mouseenter', () => haptic.selection());
+    });
+  }
+});
+
 // Навигация
 function goHome() {
+  haptic.light();
   window.location.reload();
 }
 
 function openSection(section) {
+  haptic.medium();
   FelixApp.currentSection = section;
   
   const routes = {
@@ -313,15 +385,18 @@ function openSection(section) {
   if (route) {
     window.location.href = route;
   } else {
+    haptic.warning();
     tg.showAlert(`Раздел "${section}" в разработке`);
   }
 }
 
 function openCourse(courseId) {
+  haptic.medium();
   window.location.href = `course.html?id=${courseId}`;
 }
 
 function continueLesson(lessonId) {
+  haptic.medium();
   window.location.href = `lesson.html?id=${lessonId}`;
 }
 
@@ -335,6 +410,55 @@ init().catch(error => {
   console.error('❌ Initialization error:', error);
   tg.showAlert('Ошибка загрузки приложения');
 });
+
+// Регистрация Service Worker для offline поддержки
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/miniapp/sw.js')
+      .then(registration => {
+        console.log('✅ Service Worker registered:', registration.scope);
+        
+        // Проверка обновлений
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Новая версия доступна
+              if (confirm('Доступна новая версия приложения. Обновить?')) {
+                newWorker.postMessage({ action: 'skipWaiting' });
+                window.location.reload();
+              }
+            }
+          });
+        });
+      })
+      .catch(error => {
+        console.error('❌ Service Worker registration failed:', error);
+      });
+  });
+}
+
+// Performance Monitoring
+if (window.performance && window.performance.timing) {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const perfData = window.performance.timing;
+      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+      const connectTime = perfData.responseEnd - perfData.requestStart;
+      const renderTime = perfData.domComplete - perfData.domLoading;
+      
+      console.log('📊 Performance Metrics:');
+      console.log(`  Page Load: ${pageLoadTime}ms`);
+      console.log(`  Connect: ${connectTime}ms`);
+      console.log(`  Render: ${renderTime}ms`);
+      
+      // Отправить метрики на сервер (опционально)
+      if (pageLoadTime > 3000) {
+        console.warn('⚠️ Slow page load detected');
+      }
+    }, 0);
+  });
+}
 
 // Экспорт для использования в других модулях
 window.FelixApp.openSection = openSection;

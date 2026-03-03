@@ -1,16 +1,15 @@
 {
   "version": 2,
-  "name": "felix-bot-v9",
   "builds": [
     {
-      "src": "api/**/*.js",
+      "src": "api/_router.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/_router.js"
     },
     {
       "src": "/miniapp/(.*)",
