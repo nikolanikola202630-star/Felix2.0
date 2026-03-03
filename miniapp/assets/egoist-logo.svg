@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle -->
+  <circle cx="256" cy="256" r="200" stroke="url(#gradient)" stroke-width="4" fill="none"/>
+  
+  <!-- E Symbol - Three flowing ribbons -->
+  <path d="M 200 180 Q 280 180 320 200 L 310 220 Q 270 200 200 200 Z" fill="url(#gradient)"/>
+  <path d="M 200 240 Q 280 240 320 260 L 310 280 Q 270 260 200 260 Z" fill="url(#gradient2)"/>
+  <path d="M 200 300 Q 280 300 320 320 L 310 340 Q 270 320 200 320 Z" fill="url(#gradient)"/>
+  
+  <!-- Text -->
+  <text x="256" y="440" font-family="serif" font-size="48" font-weight="700" fill="url(#textGradient)" text-anchor="middle" letter-spacing="8">EGOIST</text>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B87333;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#B87333;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C0C0C0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

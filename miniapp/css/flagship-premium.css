@@ -353,3 +353,67 @@ html {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* EGOIST ECOSYSTEM Footer */
+.app-footer {
+  margin-top: var(--space-16);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 20, 0.3);
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.footer-text {
+  opacity: 0.8;
+}
+
+.footer-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: all var(--transition-base);
+  font-weight: 500;
+}
+
+.footer-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+.egoist-logo {
+  font-size: 1.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  font-weight: 600;
+}
+
+.footer-year {
+  opacity: 0.6;
+  font-size: 0.8125rem;
+}
+
+/* Footer адаптивность */
+@media (max-width: 480px) {
+  .app-footer {
+    padding: var(--space-6) var(--space-3);
+    font-size: 0.8125rem;
+  }
+  
+  .footer-content {
+    gap: var(--space-1);
+  }
+}
