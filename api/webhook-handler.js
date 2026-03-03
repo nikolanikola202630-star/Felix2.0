@@ -1,9 +1,13 @@
 // Felix Academy Bot - Production Webhook Handler
-// EGOIST ECOSYSTEM Edition v9.0
+// EGOIST ECOSYSTEM Edition v9.0 FULL
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 const MINIAPP_URL = 'https://felix2-0.vercel.app/miniapp/index.html';
+
+// In-memory rate limiting
+const userRequests = new Map();
 
 // Send message helper
 async function send(chatId, text, keyboard = null) {
@@ -32,14 +36,64 @@ async function send(chatId, text, keyboard = null) {
   }
 }
 
+// AI helper
+async function getAIResponse(prompt, userId) {
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'Ты AI-ассистент Felix Academy. Помогаешь с обучением, отвечаешь кратко и по делу на русском.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      })
+    });
+
+    if (!res.ok) return 'AI временно недоступен';
+    
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || 'Не могу ответить';
+  } catch (error) {
+    console.error('AI error:', error);
+    return 'Ошибка AI';
+  }
+}
+
+// Rate limiting
+function checkRateLimit(userId) {
+  const now = Date.now();
+  const userReqs = userRequests.get(userId) || [];
+  const recentReqs = userReqs.filter(t => now - t < 3600000); // 1 hour
+  
+  if (recentReqs.length >= 10) {
+    return false;
+  }
+  
+  recentReqs.push(now);
+  userRequests.set(userId, recentReqs);
+  return true;
+}
+
 // Main webhook handler
 module.exports = async (req, res) => {
-  // Health check
   if (req.method === 'GET') {
     return res.json({
       status: 'ok',
       bot: 'Felix Academy - EGOIST ECOSYSTEM',
-      version: 'v9.0',
+      version: 'v9.0 FULL',
       timestamp: new Date().toISOString()
     });
   }
@@ -66,46 +120,52 @@ module.exports = async (req, res) => {
 
     console.log(`📨 ${userName} (${userId}): ${text}`);
 
-    // Handle commands
     if (text.startsWith('/')) {
       await handleCommand(chatId, userId, userName, text);
     } else {
-      // Regular message
-      await send(chatId, `Получил твое сообщение: "${text}"\n\nИспользуй /help для списка команд.`);
+      // AI ответ на обычное сообщение
+      if (!checkRateLimit(userId)) {
+        await send(chatId, '⏱️ Лимит AI запросов: 10/час. Попробуй позже.');
+        return res.json({ ok: true });
+      }
+      
+      const aiResponse = await getAIResponse(text, userId);
+      await send(chatId, `🤖 <b>Felix AI:</b>\n\n${aiResponse}`);
     }
 
     return res.json({ ok: true });
   } catch (error) {
     console.error('Webhook error:', error);
-    return res.status(200).json({ ok: true }); // Always 200 for Telegram
+    return res.status(200).json({ ok: true });
   }
 };
 
 // Handle commands
 async function handleCommand(chatId, userId, userName, text) {
   const [cmd, ...args] = text.slice(1).split(' ');
+  const arg = args.join(' ');
 
   const commands = {
     start: () => send(chatId, `⟁ <b>Felix Academy - EGOIST ECOSYSTEM</b>
 
 Привет, ${userName}! 👋
 
-Я Felix - твой персональный ассистент и консьерж образовательной платформы.
+Я Felix - твой AI-ассистент и консьерж образовательной платформы.
 
 <b>🎓 Что я предлагаю:</b>
 • Курсы по трейдингу, IT, психологии
-• AI-помощник 24/7
+• AI-помощник 24/7 (просто напиши мне)
 • Партнерская программа (20% комиссия)
 • Аналитика прогресса
-• Сертификаты после обучения
 
-<b>⚡ Быстрый старт:</b>
+<b>⚡ Команды:</b>
 /help - Все команды
+/ask [вопрос] - Спросить AI
 /profile - Твой профиль
 /partner_panel - Партнерский кабинет
-/admin - Админ-панель (для админов)
+/admin - Админ-панель
 
-<b>📱 Открой Академию через кнопку ниже!</b>
+<b>💡 Просто напиши мне любой вопрос - я отвечу!</b>
 
 <i>Создано в ⟁ EGOIST ECOSYSTEM © 2026</i>`),
 
@@ -116,14 +176,31 @@ async function handleCommand(chatId, userId, userName, text) {
 /help - Эта справка
 /profile - Твой профиль
 
-<b>💼 Партнерка:</b>
-/partner - Информация о программе
-/partner_panel - Открыть партнерский кабинет
+<b>🤖 AI-Ассистент:</b>
+/ask [вопрос] - Спросить AI
+Или просто напиши мне - я отвечу!
 
-<b>⚙️ Админ (только для админов):</b>
-/admin - Открыть админ-панель
+<b>💼 Партнерка:</b>
+/partner - Информация
+/partner_panel - Кабинет
+
+<b>⚙️ Админ:</b>
+/admin - Админ-панель
 
 <i>⟁ EGOIST ECOSYSTEM © 2026</i>`),
+
+    ask: async () => {
+      if (!arg) {
+        return send(chatId, '❓ Используй: /ask [твой вопрос]\n\nНапример:\n/ask что такое трейдинг?');
+      }
+      
+      if (!checkRateLimit(userId)) {
+        return send(chatId, '⏱️ Лимит AI запросов: 10/час. Попробуй позже.');
+      }
+      
+      const aiResponse = await getAIResponse(arg, userId);
+      await send(chatId, `🤖 <b>Felix AI:</b>\n\n${aiResponse}`);
+    },
 
     profile: () => send(chatId, `👤 <b>Твой профиль</b>
 
@@ -138,21 +215,14 @@ ID: <code>${userId}</code>
     partner: () => send(chatId, `💼 <b>Партнерская программа Felix Academy</b>
 
 <b>💰 Условия:</b>
-• 20% с каждой покупки по твоей ссылке
+• 20% с каждой покупки
 • Минимум для вывода: 1000 ₽
-• Выплаты на карту или криптовалюту
 • Пожизненные отчисления
 
-<b>🎯 Как работает:</b>
-1. Получи свою реферальную ссылку
-2. Поделись с друзьями
-3. Получай 20% с их покупок
-4. Выводи деньги когда угодно
-
-<b>🔗 Твоя партнерская ссылка:</b>
+<b>🔗 Твоя ссылка:</b>
 <code>https://t.me/fel12x_bot?start=ref_partner${userId}</code>
 
-Используй /partner_panel для открытия полного кабинета! 👇`),
+Используй /partner_panel для полного кабинета!`),
 
     partner_panel: () => {
       const partnerUrl = `${MINIAPP_URL.replace('index.html', 'partner-dashboard.html')}?user_id=${userId}`;
@@ -160,15 +230,9 @@ ID: <code>${userId}</code>
 
 Открываю твой партнерский кабинет...
 
-В кабинете ты найдешь:
-• 📊 Детальную статистику
-• 💰 Историю выплат
-• 🔗 Промо-материалы
-• 📈 Аналитику переходов
-
 <i>⟁ EGOIST ECOSYSTEM</i>`, {
         inline_keyboard: [[
-          { text: '💼 Открыть Партнерский Кабинет', web_app: { url: partnerUrl } }
+          { text: '💼 Открыть Кабинет', web_app: { url: partnerUrl } }
         ], [
           { text: '🎓 Главная', web_app: { url: MINIAPP_URL } }
         ]]
@@ -176,28 +240,18 @@ ID: <code>${userId}</code>
     },
 
     admin: () => {
-      // Замени на свой Telegram ID
       const ADMIN_IDS = [123456789];
       
       if (!ADMIN_IDS.includes(userId)) {
-        return send(chatId, '❌ У тебя нет прав администратора.');
+        return send(chatId, '❌ Нет прав администратора.');
       }
 
       const adminUrl = `${MINIAPP_URL.replace('index.html', 'admin-panel.html')}?admin_id=${userId}`;
-      return send(chatId, `⚙️ <b>Админ-панель Felix Academy</b>
-
-Добро пожаловать, администратор!
-
-<b>Доступные функции:</b>
-• 👥 Управление пользователями
-• 📚 Управление курсами
-• 💰 Финансы и выплаты
-• 📊 Аналитика платформы
-• ⚙️ Настройки системы
+      return send(chatId, `⚙️ <b>Админ-панель</b>
 
 <i>⟁ EGOIST ECOSYSTEM</i>`, {
         inline_keyboard: [[
-          { text: '⚙️ Открыть Админ-Панель', web_app: { url: adminUrl } }
+          { text: '⚙️ Админ-Панель', web_app: { url: adminUrl } }
         ], [
           { text: '📚 Управление Курсами', web_app: { url: adminUrl.replace('admin-panel', 'admin-courses') } }
         ], [
@@ -207,7 +261,6 @@ ID: <code>${userId}</code>
     }
   };
 
-  // Execute command
   const handler = commands[cmd];
   if (handler) {
     await handler();
