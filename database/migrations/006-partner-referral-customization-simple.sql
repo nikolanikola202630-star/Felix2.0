@@ -1,22 +1,6 @@
--- Partner Referral Bot Customization System
+-- Partner Referral Bot Customization System - SIMPLE VERSION
 -- EGOIST ECOSYSTEM Edition
 -- Allows partners to customize their referral bot experience
-
--- First, create partner_accounts table if not exists
-CREATE TABLE IF NOT EXISTS partner_accounts (
-  user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  referral_code VARCHAR(50) UNIQUE NOT NULL,
-  is_active BOOLEAN DEFAULT true,
-  total_referrals INTEGER DEFAULT 0,
-  total_earnings DECIMAL(10,2) DEFAULT 0,
-  created_by BIGINT,
-  updated_by BIGINT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_partner_accounts_referral_code ON partner_accounts(referral_code);
-CREATE INDEX IF NOT EXISTS idx_partner_accounts_active ON partner_accounts(is_active);
 
 -- Partner referral bot settings
 CREATE TABLE IF NOT EXISTS partner_referral_settings (
@@ -29,11 +13,6 @@ CREATE TABLE IF NOT EXISTS partner_referral_settings (
   
   -- Access conditions (JSON array of conditions)
   access_conditions JSONB DEFAULT '[]'::jsonb,
-  -- Example: [
-  --   {"type": "telegram_subscription", "channel": "@channel_name", "required": true},
-  --   {"type": "quiz", "questions": [...], "min_score": 80},
-  --   {"type": "form", "fields": [...]}
-  -- ]
   
   -- Branding
   primary_color VARCHAR(7) DEFAULT '#3B82F6',
@@ -42,17 +21,9 @@ CREATE TABLE IF NOT EXISTS partner_referral_settings (
   
   -- Buttons and links
   custom_buttons JSONB DEFAULT '[]'::jsonb,
-  -- Example: [
-  --   {"text": "Наш канал", "url": "https://t.me/channel"},
-  --   {"text": "Сайт", "url": "https://example.com"}
-  -- ]
   
   -- Auto-messages
   auto_messages JSONB DEFAULT '[]'::jsonb,
-  -- Example: [
-  --   {"trigger": "after_subscription", "delay_minutes": 5, "message": "..."},
-  --   {"trigger": "after_quiz", "message": "..."}
-  -- ]
   
   -- Restrictions
   max_referrals_per_day INTEGER DEFAULT 100,
@@ -93,9 +64,7 @@ CREATE TABLE IF NOT EXISTS partner_quiz_questions (
   partner_user_id BIGINT NOT NULL REFERENCES users(id),
   question TEXT NOT NULL,
   options JSONB NOT NULL,
-  -- Example: ["Ответ 1", "Ответ 2", "Ответ 3", "Ответ 4"]
   correct_answer INTEGER NOT NULL,
-  -- Index of correct answer (0-based)
   order_index INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -126,7 +95,6 @@ CREATE TABLE IF NOT EXISTS partner_form_fields (
   field_type VARCHAR(50) NOT NULL CHECK (field_type IN ('text', 'email', 'phone', 'select', 'multiselect', 'textarea')),
   field_label TEXT NOT NULL,
   field_options JSONB,
-  -- For select/multiselect: ["Option 1", "Option 2", ...]
   is_required BOOLEAN DEFAULT true,
   order_index INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW()
@@ -140,7 +108,6 @@ CREATE TABLE IF NOT EXISTS partner_form_responses (
   partner_user_id BIGINT NOT NULL REFERENCES users(id),
   user_id BIGINT NOT NULL REFERENCES users(id),
   responses JSONB NOT NULL,
-  -- Example: {"name": "John", "email": "john@example.com", ...}
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(partner_user_id, user_id)
 );
@@ -148,43 +115,7 @@ CREATE TABLE IF NOT EXISTS partner_form_responses (
 CREATE INDEX IF NOT EXISTS idx_partner_form_responses_partner ON partner_form_responses(partner_user_id);
 CREATE INDEX IF NOT EXISTS idx_partner_form_responses_user ON partner_form_responses(user_id);
 
--- Create partner_accounts table if not exists
-CREATE TABLE IF NOT EXISTS partner_accounts (
-  user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  referral_code VARCHAR(50) UNIQUE NOT NULL,
-  is_active BOOLEAN DEFAULT true,
-  commission_rate DECIMAL(5,2) DEFAULT 20.00,
-  total_earnings DECIMAL(10,2) DEFAULT 0,
-  created_by BIGINT,
-  updated_by BIGINT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_partner_accounts_referral_code ON partner_accounts(referral_code);
-CREATE INDEX IF NOT EXISTS idx_partner_accounts_active ON partner_accounts(is_active);
-
--- Insert default settings for admin users (they are partners by default)
-INSERT INTO partner_accounts (user_id, referral_code, is_active)
-VALUES 
-  (1907288209, LOWER(SUBSTRING(MD5('1907288209' || EXTRACT(EPOCH FROM NOW())::text) FROM 1 FOR 10)), true),
-  (8264612178, LOWER(SUBSTRING(MD5('8264612178' || EXTRACT(EPOCH FROM NOW())::text) FROM 1 FOR 10)), true)
-ON CONFLICT (user_id) DO NOTHING;
-
--- Insert default settings for existing partners
-INSERT INTO partner_referral_settings (partner_user_id)
-SELECT DISTINCT user_id 
-FROM partner_accounts 
-WHERE is_active = true
-ON CONFLICT (partner_user_id) DO NOTHING;
-
--- Example: Insert sample quiz questions for testing
-INSERT INTO partner_quiz_questions (partner_user_id, question, options, correct_answer, order_index) VALUES
-  (123456789, 'Что такое Felix Academy?', '["Образовательная платформа", "Социальная сеть", "Игра", "Магазин"]'::jsonb, 0, 1),
-  (123456789, 'Сколько курсов доступно?', '["1", "3", "5", "10"]'::jsonb, 1, 2),
-  (123456789, 'Какой AI используется?', '["ChatGPT", "Llama 3.3", "Claude", "Gemini"]'::jsonb, 1, 3)
-ON CONFLICT DO NOTHING;
-
+-- Комментарии к таблицам
 COMMENT ON TABLE partner_referral_settings IS 'Partner referral bot customization settings';
 COMMENT ON TABLE partner_access_log IS 'Log of access condition completions';
 COMMENT ON TABLE partner_quiz_questions IS 'Quiz questions for partner referral bot';

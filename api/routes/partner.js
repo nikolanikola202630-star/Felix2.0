@@ -15,6 +15,11 @@ module.exports = async (req, res) => {
       return require('../partner-stats')(req, res);
     }
 
+    // /api/partner-referral-settings (все подпути)
+    if (pathname.startsWith('/api/partner-referral-settings')) {
+      return require('../partner-referral-settings')(req, res);
+    }
+
     // 404
     return res.status(404).json({
       error: 'Partner endpoint not found',

@@ -416,6 +416,7 @@
       <button class="tab active" onclick="switchTab('overview')">📊 Обзор</button>
       <button class="tab" onclick="switchTab('courses')">📚 Мои курсы</button>
       <button class="tab" onclick="switchTab('students')">👥 Студенты</button>
+      <button class="tab" onclick="switchTab('referral')">🤖 Реферальный бот</button>
       <button class="tab" onclick="switchTab('chats')">💬 Чаты</button>
       <button class="tab" onclick="switchTab('analytics')">📈 Аналитика</button>
     </div>
@@ -458,6 +459,46 @@
     <!-- Студенты -->
     <div id="studentsTab" class="tab-content">
       <div id="studentsContainer" class="students-list"></div>
+    </div>
+
+    <!-- Реферальный бот -->
+    <div id="referralTab" class="tab-content">
+      <div class="card">
+        <h2 style="margin-bottom: 20px;">🤖 Персонализация реферального бота</h2>
+        <p style="color: var(--text-light); margin-bottom: 20px;">
+          Настройте своего реферального бота: измените приветствие, брендинг, добавьте условия доступа (подписка, квиз, анкета).
+        </p>
+        <button class="btn btn-primary" onclick="window.location.href='partner-referral-bot.html'">
+          ⚙️ Открыть настройки бота
+        </button>
+        
+        <div style="margin-top: 30px; padding: 20px; background: var(--bg); border-radius: 12px;">
+          <h3 style="margin-bottom: 15px;">📊 Статистика рефералов</h3>
+          <div class="stats-grid" style="margin-top: 15px;">
+            <div class="stat-card">
+              <div class="stat-value" id="totalReferrals">0</div>
+              <div class="stat-label">Всего переходов</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="activeReferrals">0</div>
+              <div class="stat-label">Активных</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="conversionRate">0%</div>
+              <div class="stat-label">Конверсия</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: var(--bg); border-radius: 12px;">
+          <h3 style="margin-bottom: 10px;">🔗 Ваша реферальная ссылка</h3>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="text" id="partnerRefLink" readonly 
+              style="flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: white;">
+            <button class="btn btn-secondary" onclick="copyPartnerRefLink()">📋 Копировать</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Чаты -->

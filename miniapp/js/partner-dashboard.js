@@ -480,3 +480,28 @@ function formatTime(dateString) {
 init();
 
 console.log('💼 Partner Dashboard loaded');
+
+
+// Copy partner referral link
+function copyPartnerRefLink() {
+  const link = document.getElementById('partnerRefLink');
+  if (link) {
+    link.select();
+    document.execCommand('copy');
+    
+    if (tg) {
+      tg.showAlert('✅ Реферальная ссылка скопирована!');
+    } else {
+      alert('✅ Реферальная ссылка скопирована!');
+    }
+  }
+}
+
+// Set referral link on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const userId = currentUser?.id || (tg?.initDataUnsafe?.user?.id) || 1907288209;
+  const refLinkInput = document.getElementById('partnerRefLink');
+  if (refLinkInput) {
+    refLinkInput.value = `https://t.me/felix_inputbot?start=ref_${userId}`;
+  }
+});

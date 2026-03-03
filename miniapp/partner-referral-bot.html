@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки Реферального Бота - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css?v=9.1">
+  <style>
+    .settings-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .settings-section h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: #fff;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .color-input {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .color-input input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .btn-save:active {
+      transform: scale(0.98);
+    }
+    .condition-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-add {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .preview-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    .preview-box h4 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .preview-message {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      color: #fff;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1>🤖 Настройки Реферального Бота</h1>
+    </header>
+
+    <div class="content">
+      <!-- Брендинг -->
+      <div class="settings-section">
+        <h3>🎨 Брендинг</h3>
+        
+        <div class="form-group">
+          <label>Название бота</label>
+          <input type="text" id="botName" placeholder="Felix Academy">
+        </div>
+
+        <div class="form-group">
+          <label>Эмодзи аватар</label>
+          <input type="text" id="botEmoji" placeholder="🎓" maxlength="2">
+        </div>
+
+        <div class="form-group">
+          <label>Основной цвет</label>
+          <div class="color-input">
+            <input type="color" id="primaryColor" value="#3B82F6">
+            <input type="text" id="primaryColorText" value="#3B82F6" readonly>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Дополнительный цвет</label>
+          <div class="color-input">
+            <input type="color" id="secondaryColor" value="#8B5CF6">
+            <input type="text" id="secondaryColorText" value="#8B5CF6" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Приветствие -->
+      <div class="settings-section">
+        <h3>💬 Приветственное сообщение</h3>
+        
+        <div class="form-group">
+          <label>Текст приветствия</label>
+          <textarea id="welcomeMessage" placeholder="Привет! 👋 Добро пожаловать в Felix Academy!"></textarea>
+        </div>
+
+        <div class="preview-box">
+          <h4>Предпросмотр:</h4>
+          <div class="preview-message" id="previewMessage">
+            <span id="previewEmoji">🎓</span> <strong id="previewName">Felix Academy</strong><br><br>
+            <span id="previewText">Привет! 👋 Добро пожаловать в Felix Academy!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Условия доступа -->
+      <div class="settings-section">
+        <h3>🔐 Условия доступа</h3>
+        <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 15px;">
+          ⚠️ Нельзя ставить условия оплаты! Только бесплатные условия.
+        </p>
+
+        <div id="conditionsList"></div>
+
+        <select id="conditionType" class="form-group">
+          <option value="">Выберите условие...</option>
+          <option value="telegram_subscription">📢 Подписка на канал</option>
+          <option value="quiz">❓ Квиз</option>
+          <option value="form">📝 Анкета</option>
+        </select>
+
+        <button class="btn-add" onclick="addCondition()">+ Добавить условие</button>
+      </div>
+
+      <!-- Ограничения -->
+      <div class="settings-section">
+        <h3>🛡️ Ограничения</h3>
+        
+        <div class="form-group">
+          <label>Макс. рефералов в день</label>
+          <input type="number" id="maxReferrals" value="100" min="1">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="requirePhone"> Требовать номер телефона
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="requireUsername"> Требовать username
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Минимальный возраст аккаунта (дней)</label>
+          <input type="number" id="minAccountAge" value="0" min="0">
+        </div>
+      </div>
+
+      <!-- Реферальная ссылка -->
+      <div class="settings-section">
+        <h3>🔗 Ваша реферальная ссылка</h3>
+        <div class="preview-box">
+          <input type="text" id="refLink" readonly style="width: 100%; background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; color: #fff;">
+          <button class="btn-add" onclick="copyRefLink()" style="width: 100%; margin-top: 10px;">📋 Копировать</button>
+        </div>
+      </div>
+
+      <button class="btn-save" onclick="saveSettings()">💾 Сохранить настройки</button>
+    </div>
+  </div>
+
+  <script src="js/footer.js?v=9.1"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const userId = tg.initDataUnsafe?.user?.id || 1907288209;
+    const API_URL = 'https://felix2-0.vercel.app';
+
+    // Load settings
+    async function loadSettings() {
+      try {
+        const res = await fetch(`${API_URL}/api/partner-referral-settings?partner_user_id=${userId}`);
+        const data = await res.json();
+        
+        if (data.success && data.settings) {
+          const s = data.settings;
+          document.getElementById('botName').value = s.bot_name || '';
+          document.getElementById('botEmoji').value = s.bot_avatar_emoji || '';
+          document.getElementById('primaryColor').value = s.primary_color || '#3B82F6';
+          document.getElementById('primaryColorText').value = s.primary_color || '#3B82F6';
+          document.getElementById('secondaryColor').value = s.secondary_color || '#8B5CF6';
+          document.getElementById('secondaryColorText').value = s.secondary_color || '#8B5CF6';
+          document.getElementById('welcomeMessage').value = s.welcome_message || '';
+          document.getElementById('maxReferrals').value = s.max_referrals_per_day || 100;
+          document.getElementById('requirePhone').checked = s.require_phone || false;
+          document.getElementById('requireUsername').checked = s.require_username || false;
+          document.getElementById('minAccountAge').value = s.min_account_age_days || 0;
+          
+          updatePreview();
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+        tg.showAlert('Ошибка загрузки настроек');
+      }
+    }
+
+    // Update preview
+    function updatePreview() {
+      document.getElementById('previewEmoji').textContent = document.getElementById('botEmoji').value || '🎓';
+      document.getElementById('previewName').textContent = document.getElementById('botName').value || 'Felix Academy';
+      document.getElementById('previewText').textContent = document.getElementById('welcomeMessage').value || 'Привет! 👋 Добро пожаловать в Felix Academy!';
+    }
+
+    // Save settings
+    async function saveSettings() {
+      try {
+        const settings = {
+          bot_name: document.getElementById('botName').value,
+          bot_avatar_emoji: document.getElementById('botEmoji').value,
+          primary_color: document.getElementById('primaryColor').value,
+          secondary_color: document.getElementById('secondaryColor').value,
+          welcome_message: document.getElementById('welcomeMessage').value,
+          max_referrals_per_day: parseInt(document.getElementById('maxReferrals').value),
+          require_phone: document.getElementById('requirePhone').checked,
+          require_username: document.getElementById('requireUsername').checked,
+          min_account_age_days: parseInt(document.getElementById('minAccountAge').value),
+          access_conditions: []
+        };
+
+        const res = await fetch(`${API_URL}/api/partner-referral-settings?partner_user_id=${userId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(settings)
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+          tg.showAlert('✅ Настройки сохранены!');
+        } else {
+          tg.showAlert('❌ Ошибка сохранения');
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        tg.showAlert('❌ Ошибка сохранения');
+      }
+    }
+
+    // Copy ref link
+    function copyRefLink() {
+      const link = document.getElementById('refLink');
+      link.select();
+      document.execCommand('copy');
+      tg.showAlert('✅ Ссылка скопирована!');
+    }
+
+    // Add condition
+    function addCondition() {
+      const type = document.getElementById('conditionType').value;
+      if (!type) return;
+      
+      tg.showAlert('Функция добавления условий скоро будет доступна!');
+    }
+
+    // Color inputs sync
+    document.getElementById('primaryColor').addEventListener('input', (e) => {
+      document.getElementById('primaryColorText').value = e.target.value;
+    });
+    document.getElementById('secondaryColor').addEventListener('input', (e) => {
+      document.getElementById('secondaryColorText').value = e.target.value;
+    });
+
+    // Live preview
+    document.getElementById('botName').addEventListener('input', updatePreview);
+    document.getElementById('botEmoji').addEventListener('input', updatePreview);
+    document.getElementById('welcomeMessage').addEventListener('input', updatePreview);
+
+    // Set ref link
+    document.getElementById('refLink').value = `https://t.me/felix_inputbot?start=ref_${userId}`;
+
+    // Load on start
+    loadSettings();
+  </script>
+</body>
+</html>
