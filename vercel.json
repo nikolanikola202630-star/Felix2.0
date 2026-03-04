@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/data/(.*)",
+      "dest": "/data/$1"
+    },
+    {
       "src": "/miniapp/(.*)",
       "dest": "/miniapp/$1"
     },
@@ -23,6 +27,19 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
         }
       ]
     }
