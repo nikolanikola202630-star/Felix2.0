@@ -8,7 +8,7 @@ require('dotenv').config();
 
 // Environment variables (NO HARDCODED KEYS!)
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
-const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/egoist.html';
+const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/academy.html';
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 if (!TOKEN) {
