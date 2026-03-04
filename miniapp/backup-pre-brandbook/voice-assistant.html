@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Голосовой помощник - Felix Academy</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/flagship-premium.css">
+  <style>
+    .assistant-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 16px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 16px;
+      max-width: 80%;
+      animation: slideIn 0.3s ease;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--bg-secondary);
+    }
+
+    .message-text {
+      margin-bottom: 4px;
+    }
+
+    .message-time {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    .voice-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 20px;
+    }
+
+    .record-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      font-size: 36px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .record-button:active {
+      transform: scale(0.95);
+    }
+
+    .record-button.recording {
+      animation: pulse 1.5s infinite;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .record-button.processing {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .status-text {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .voice-settings {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .voice-option {
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .voice-option.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="chat-messages" id="chatMessages">
+      <div class="empty-state">
+        <div class="empty-icon">🎙️</div>
+        <div>Привет! Я твой голосовой помощник.</div>
+        <div style="font-size: 14px; margin-top: 8px;">Нажми на кнопку и задай вопрос</div>
+      </div>
+    </div>
+
+    <div class="voice-controls">
+      <div class="voice-settings">
+        <div class="voice-option active" data-voice="Jarvis" onclick="selectVoice('Jarvis')">
+          🤖 Jarvis
+        </div>
+        <div class="voice-option" data-voice="Erin" onclick="selectVoice('Erin')">
+          👩 Erin
+        </div>
+        <div class="voice-option" data-voice="Ethan" onclick="selectVoice('Ethan')">
+          👨 Ethan
+        </div>
+      </div>
+
+      <button class="record-button" id="recordButton" ontouchstart="startRecording()" ontouchend="stopRecording()" onmousedown="startRecording()" onmouseup="stopRecording()">
+        🎤
+      </button>
+
+      <div class="status-text" id="statusText">
+        Удерживай для записи
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => window.location.href = 'index.html');
+
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let selectedVoice = 'Jarvis';
+    let conversationHistory = [];
+    let userId = tg.initDataUnsafe?.user?.id || 'demo';
+
+    // Load conversation history
+    const savedHistory = localStorage.getItem('voiceAssistantHistory');
+    if (savedHistory) {
+      try {
+        conversationHistory = JSON.parse(savedHistory);
+        renderHistory();
+      } catch (e) {
+        console.error('Failed to load history:', e);
+      }
+    }
+
+    async function startRecording() {
+      if (isRecording) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await processVoiceMessage(audioBlob);
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+
+        document.getElementById('recordButton').classList.add('recording');
+        document.getElementById('recordButton').textContent = '⏹️';
+        document.getElementById('statusText').textContent = '🔴 Говорите...';
+
+        tg.HapticFeedback?.impactOccurred('medium');
+
+      } catch (error) {
+        console.error('Microphone error:', error);
+        tg.showAlert('Ошибка доступа к микрофону');
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+
+        document.getElementById('recordButton').classList.remove('recording');
+        document.getElementById('recordButton').classList.add('processing');
+        document.getElementById('recordButton').textContent = '⏳';
+        document.getElementById('statusText').textContent = 'Обработка...';
+
+        tg.HapticFeedback?.impactOccurred('light');
+      }
+    }
+
+    async function processVoiceMessage(audioBlob) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        formData.append('action', 'process');
+        formData.append('userId', userId);
+        formData.append('language', 'ru');
+        formData.append('voice', selectedVoice);
+        formData.append('speed', '1.0');
+        
+        // Add conversation history (last 6 messages)
+        const recentHistory = conversationHistory.slice(-6).map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }));
+        formData.append('history', JSON.stringify(recentHistory));
+
+        const response = await fetch('/api/voice-assistant', {
+          method: 'POST',
+          headers: {
+            'X-User-Id': userId
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Server error');
+        }
+
+        // Get transcription and response from headers
+        const transcription = decodeURIComponent(response.headers.get('X-Transcription') || '');
+        const responseText = decodeURIComponent(response.headers.get('X-Response-Text') || '');
+
+        // Get audio
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        // Add to conversation
+        addMessage('user', transcription);
+        addMessage('assistant', responseText);
+
+        // Save to history
+        conversationHistory.push(
+          { role: 'user', content: transcription },
+          { role: 'assistant', content: responseText }
+        );
+        saveHistory();
+
+        // Play audio response
+        const audio = new Audio(audioUrl);
+        audio.play();
+
+        tg.HapticFeedback?.notificationOccurred('success');
+
+      } catch (error) {
+        console.error('Process error:', error);
+        tg.showAlert('Ошибка обработки запроса');
+        tg.HapticFeedback?.notificationOccurred('error');
+      } finally {
+        document.getElementById('recordButton').classList.remove('processing');
+        document.getElementById('recordButton').textContent = '🎤';
+        document.getElementById('statusText').textContent = 'Удерживай для записи';
+      }
+    }
+
+    function addMessage(role, text) {
+      const messagesContainer = document.getElementById('chatMessages');
+      
+      // Remove empty state
+      const emptyState = messagesContainer.querySelector('.empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${role}`;
+      messageDiv.innerHTML = `
+        <div class="message-text">${text}</div>
+        <div class="message-time">${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+      `;
+
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function selectVoice(voice) {
+      selectedVoice = voice;
+      
+      document.querySelectorAll('.voice-option').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      document.querySelector(`[data-voice="${voice}"]`).classList.add('active');
+      
+      tg.HapticFeedback?.impactOccurred('light');
+    }
+
+    function renderHistory() {
+      const messagesContainer = document.getElementById('chatMessages');
+      messagesContainer.innerHTML = '';
+
+      conversationHistory.forEach(msg => {
+        addMessage(msg.role, msg.content);
+      });
+    }
+
+    function saveHistory() {
+      // Keep last 20 messages
+      const historyToSave = conversationHistory.slice(-20);
+      localStorage.setItem('voiceAssistantHistory', JSON.stringify(historyToSave));
+    }
+
+    // Clear history button (optional)
+    tg.MainButton.setText('Очистить историю');
+    tg.MainButton.onClick(() => {
+      if (confirm('Очистить историю разговора?')) {
+        conversationHistory = [];
+        localStorage.removeItem('voiceAssistantHistory');
+        document.getElementById('chatMessages').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎙️</div>
+            <div>История очищена</div>
+          </div>
+        `;
+        tg.HapticFeedback?.notificationOccurred('success');
+      }
+    });
+    tg.MainButton.show();
+
+    console.log('🎙️ Voice Assistant loaded');
+  </script>
+</body>
+</html>

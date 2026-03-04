@@ -1,0 +1,307 @@
+/* Felix Academy V12 - Brandbook Variables */
+/* Old Money. Cold Mind. High Society. */
+
+:root {
+  /* ============================================
+     ЦВЕТОВАЯ ПАЛИТРА БРЕНДБУКА
+     ============================================ */
+  
+  /* Основные цвета */
+  --anthracite: #1A1C1E;           /* Антрацит - основной фон */
+  --noble-graphite: #2D2F31;       /* Благородный графит - карточки */
+  --cold-marble: #F5F5F3;          /* Холодный мрамор - текст на темном */
+  --old-gold: #C4A962;             /* Старое золото - акценты (макс 10%) */
+  --platinum: #E5E4E2;             /* Платина - второстепенные акценты */
+  --blood-cherry: #8B2C2C;         /* Кроваво-вишневый - ошибки */
+  --deep-emerald: #1E4D3E;         /* Глубокий изумруд - успех */
+
+  /* Альфа-каналы для золота */
+  --old-gold-alpha-10: rgba(196, 169, 98, 0.1);
+  --old-gold-alpha-20: rgba(196, 169, 98, 0.2);
+  --old-gold-alpha-30: rgba(196, 169, 98, 0.3);
+
+  /* Фоновые цвета */
+  --bg-primary: var(--anthracite);
+  --bg-secondary: var(--noble-graphite);
+  --bg-tertiary: #3A3C3E;
+  --bg-elevated: rgba(45, 47, 49, 0.95);
+  --bg-card: rgba(45, 47, 49, 0.6);
+
+  /* Текстовые цвета */
+  --text-primary: var(--cold-marble);
+  --text-secondary: var(--platinum);
+  --text-tertiary: #A8A8A6;
+  --text-accent: var(--old-gold);
+  --text-inverse: var(--anthracite);
+
+  /* Акцентные цвета */
+  --accent-primary: var(--old-gold);
+  --accent-secondary: var(--platinum);
+  --accent-success: var(--deep-emerald);
+  --accent-error: var(--blood-cherry);
+  --accent-warning: #B8860B;       /* Темное золото для предупреждений */
+
+  /* Границы */
+  --border: rgba(229, 228, 226, 0.08);
+  --border-hover: rgba(229, 228, 226, 0.15);
+  --border-focus: var(--old-gold);
+  --border-gold: var(--old-gold);
+
+  /* Тени - более глубокие и контрастные */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.7), 0 4px 8px -2px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 30px -8px rgba(0, 0, 0, 0.8), 0 10px 15px -5px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 4px 16px rgba(196, 169, 98, 0.4);
+
+  /* ============================================
+     ТИПОГРАФИКА
+     ============================================ */
+  
+  /* Шрифты */
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-accent: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+
+  /* Размеры шрифтов */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+
+  /* Веса шрифтов */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* Межбуквенное расстояние */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Межстрочный интервал */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* ============================================
+     РАДИУСЫ
+     ============================================ */
+  
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* ============================================
+     ОТСТУПЫ
+     ============================================ */
+  
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ============================================
+     ПЕРЕХОДЫ И АНИМАЦИИ
+     ============================================ */
+  
+  /* Длительность */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+
+  /* Easing - строгое, как в брендбуке */
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+
+  /* Готовые переходы */
+  --transition-fast: var(--duration-fast) var(--ease-in-out);
+  --transition-base: var(--duration-base) var(--ease-in-out);
+  --transition-slow: var(--duration-slow) var(--ease-in-out);
+  --transition-all: all var(--duration-base) var(--ease-in-out);
+
+  /* ============================================
+     Z-INDEX
+     ============================================ */
+  
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ============================================
+     ТЕКСТУРЫ И ЭФФЕКТЫ
+     ============================================ */
+  
+  /* Шумовая текстура (для фонов) */
+  --noise-opacity: 0.03;
+  
+  /* Градиенты */
+  --gradient-gold: linear-gradient(135deg, #C4A962 0%, #D4B972 100%);
+  --gradient-dark: linear-gradient(135deg, #1A1C1E 0%, #2D2F31 100%);
+  --gradient-marble: linear-gradient(135deg, #F5F5F3 0%, #E5E4E2 100%);
+  
+  /* Backdrop blur */
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(24px);
+
+  /* ============================================
+     РАЗМЕРЫ ИКОНОК
+     ============================================ */
+  
+  --icon-xs: 16px;
+  --icon-sm: 20px;
+  --icon-md: 24px;
+  --icon-lg: 32px;
+  --icon-xl: 48px;
+  --icon-2xl: 64px;
+
+  /* ============================================
+     ТОЛЩИНА ЛИНИЙ
+     ============================================ */
+  
+  --line-thin: 1px;
+  --line-normal: 1.5px;
+  --line-thick: 2px;
+}
+
+/* ============================================
+   СВЕТЛАЯ ТЕМА (для админки или специальных разделов)
+   ============================================ */
+
+[data-theme="light"] {
+  --bg-primary: var(--cold-marble);
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F0F0EE;
+  --bg-elevated: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.8);
+
+  --text-primary: var(--anthracite);
+  --text-secondary: var(--noble-graphite);
+  --text-tertiary: #6B6B69;
+  --text-accent: var(--old-gold);
+
+  --border: rgba(26, 28, 30, 0.1);
+  --border-hover: rgba(26, 28, 30, 0.2);
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 30px -8px rgba(0, 0, 0, 0.25), 0 10px 15px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   АДАПТИВНОСТЬ
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    --text-xs: 10px;
+    --text-sm: 12px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 18px;
+    --text-2xl: 22px;
+    --text-3xl: 28px;
+    --text-4xl: 32px;
+    --text-5xl: 40px;
+
+    --space-1: 3px;
+    --space-2: 6px;
+    --space-3: 10px;
+    --space-4: 14px;
+    --space-6: 20px;
+    --space-8: 28px;
+    --space-12: 40px;
+    --space-16: 56px;
+  }
+}
+
+/* ============================================
+   УТИЛИТЫ ДЛЯ БРЕНДБУКА
+   ============================================ */
+
+/* Золотой текст */
+.text-gold {
+  color: var(--old-gold);
+}
+
+/* Золотой градиент для текста */
+.text-gradient-gold {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Золотая граница */
+.border-gold {
+  border-color: var(--old-gold);
+}
+
+/* Золотое свечение */
+.glow-gold {
+  box-shadow: var(--shadow-gold);
+}
+
+/* Шумовая текстура */
+.texture-noise {
+  position: relative;
+}
+
+.texture-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Мраморная текстура */
+.texture-marble {
+  background: var(--gradient-marble);
+  position: relative;
+}
+
+/* Uppercase для заголовков */
+.heading-uppercase {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+/* Стиль гравюры для иконок */
+.icon-engraved {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+}

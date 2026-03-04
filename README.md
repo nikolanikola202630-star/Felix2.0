@@ -1,12 +1,30 @@
-# Felix Bot v9.0 - Production Ready AI Assistant
+# Felix Academy V12 - Elite Educational Platform
 
-Modern Telegram bot with AI capabilities, machine learning, and comprehensive Mini App interface.
+> **Old Money. Cold Mind. High Society.**
+
+Modern Telegram bot with AI capabilities, machine learning, and comprehensive Mini App interface. Designed with elegance and sophistication for the intellectual elite.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/felix-bot)
+
+## 🎨 Brandbook V12 ✅ Интегрирован
+
+Felix Academy V12 теперь имеет полный брендбук с премиальным дизайном:
+
+- **Философия:** Old Money. Cold Mind. High Society.
+- **Цвета:** Антрацит, Золото, Изумруд, Мрамор
+- **Типографика:** Cormorant Garamond, Montserrat, Playfair Display
+- **Tone of Voice:** Формальный, элегантный, премиальный
+- **Статус:** ✅ Интегрирован (March 4, 2026)
+
+**Быстрый старт:** [BRANDBOOK-START-HERE.md](BRANDBOOK-START-HERE.md)  
+**Полный брендбук:** [BRANDBOOK-V12.md](BRANDBOOK-V12.md)  
+**Демо:** [miniapp/brandbook-demo.html](miniapp/brandbook-demo.html)  
+**Отчёт об интеграции:** [BRANDBOOK-INTEGRATION-COMPLETE.md](BRANDBOOK-INTEGRATION-COMPLETE.md)
 
 ## ✨ Features
 
 - 🤖 **AI-Powered** - Groq (Llama 3.3 70B) with context awareness
+- 🎙️ **Voice Assistant** - Full STT → LLM → TTS pipeline with Groq
 - 🧠 **Machine Learning** - Personalization and adaptive learning
 - 💾 **Full Database** - PostgreSQL with 22 tables
 - 📱 **Mini App** - Beautiful Telegram Web App interface
@@ -220,10 +238,19 @@ git push origin main
 
 ## 📝 Documentation
 
+### Core Documentation
 - [DEPLOYMENT-V9.md](DEPLOYMENT-V9.md) - Full deployment guide
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 - [API-ENDPOINTS.md](API-ENDPOINTS.md) - API documentation
 - [АНАЛИЗ-ПРОЕКТА-FELIX-BOT.md](АНАЛИЗ-ПРОЕКТА-FELIX-BOT.md) - Project analysis
+
+### Brandbook V12
+- [BRANDBOOK-README.md](BRANDBOOK-README.md) - **Quick start guide** ⭐
+- [BRANDBOOK-V12.md](BRANDBOOK-V12.md) - Complete brandbook
+- [BRANDBOOK-IMPLEMENTATION.md](BRANDBOOK-IMPLEMENTATION.md) - Implementation guide
+- [BRANDBOOK-VOICE-EXAMPLES.md](BRANDBOOK-VOICE-EXAMPLES.md) - Communication examples
+- [BRANDBOOK-ICONS.md](BRANDBOOK-ICONS.md) - Icon system
+- [miniapp/brandbook-demo.html](miniapp/brandbook-demo.html) - Live demo
 
 ## 🧪 Testing
 
@@ -272,10 +299,17 @@ git push
 
 MIT License - see [LICENSE](LICENSE) file
 
+## 📚 Additional Documentation
+
+- [Voice Assistant Setup](./VOICE-ASSISTANT-SETUP.md) - Full guide for voice assistant
+- [Voice Assistant Quick Start](./VOICE-ASSISTANT-QUICKSTART.md) - Get started in 5 minutes
+- [API Endpoints](./API-ENDPOINTS.md) - Complete API documentation
+- [Deployment Guide](./docs/deployment.md) - Deployment instructions
+
 ## 🙏 Acknowledgments
 
 - Telegram Bot API
-- Groq AI (Llama 3.3 70B)
+- Groq AI (Llama 3.3 70B, Whisper, Play TTS)
 - Supabase
 - Vercel
 

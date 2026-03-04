@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Felix Academy V12 - Dashboard</title>
+  
+  <!-- Preconnect для шрифтов -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Стили брендбука -->
+  <link rel="stylesheet" href="styles/brandbook-variables.css">
+  <link rel="stylesheet" href="css/brandbook-components.css">
+  
+  <style>
+    /* Дополнительные стили для dashboard */
+    .app-container-brandbook {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: var(--space-4);
+      min-height: 100vh;
+    }
+    
+    .onboarding-block {
+      background: var(--bg-secondary);
+      border: var(--line-thin) solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+      text-align: center;
+    }
+    
+    .onboarding-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+    }
+    
+    .onboarding-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      color: var(--text-primary);
+      margin-bottom: var(--space-3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+    
+    .onboarding-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: var(--leading-relaxed);
+      margin-bottom: var(--space-5);
+    }
+    
+    .continue-learning-card {
+      background: var(--bg-secondary);
+      border: var(--line-thin) solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .continue-learning-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-gold);
+    }
+    
+    .recommendations-grid {
+      display: grid;
+      gap: var(--space-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container-brandbook">
+    <!-- Header -->
+    <header class="header-brandbook">
+      <div class="logo-brandbook">
+        <div class="logo-icon">🦁</div>
+        <div>
+          <div class="logo-text">Felix Academy</div>
+          <div class="logo-subtitle">Old Money. Cold Mind. High Society.</div>
+          <span class="logo-est">EST. 2024</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-brandbook">
+      <!-- Welcome Card -->
+      <div class="welcome-card-brandbook">
+        <div class="welcome-content-brandbook">
+          <div class="avatar-brandbook">👤</div>
+          <div class="welcome-text-brandbook">
+            <h2>Добро пожаловать</h2>
+            <p>Ваш путь к мастерству</p>
+            <div class="level-badge-brandbook">
+              ⚜️ Уровень 5
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid-brandbook">
+        <div class="stat-card-brandbook">
+          <span class="stat-icon-brandbook">📚</span>
+          <div class="stat-value-brandbook">12</div>
+          <div class="stat-label-brandbook">Курсов</div>
+        </div>
+        
+        <div class="stat-card-brandbook">
+          <span class="stat-icon-brandbook">🎯</span>
+          <div class="stat-value-brandbook">87%</div>
+          <div class="stat-label-brandbook">Прогресс</div>
+        </div>
+        
+        <div class="stat-card-brandbook">
+          <span class="stat-icon-brandbook">⏱️</span>
+          <div class="stat-value-brandbook">24</div>
+          <div class="stat-label-brandbook">Часов</div>
+        </div>
+        
+        <div class="stat-card-brandbook">
+          <span class="stat-icon-brandbook">🏆</span>
+          <div class="stat-value-brandbook">15</div>
+          <div class="stat-label-brandbook">Достижений</div>
+        </div>
+      </div>
+
+      <!-- Dynamic Content Block -->
+      <div id="progressBlock"></div>
+      <div id="recommendationsBlock"></div>
+
+      <!-- Continue Learning Section -->
+      <section class="section-brandbook">
+        <div class="section-header-brandbook">
+          <h3 class="section-title-brandbook">Продолжить обучение</h3>
+          <span class="view-all-brandbook">Все курсы</span>
+        </div>
+
+        <div class="continue-learning-card">
+          <div class="card-header-brandbook">
+            <div class="card-icon-brandbook">📜</div>
+            <div class="card-info-brandbook">
+              <div class="card-title-brandbook">Основы инвестирования</div>
+              <div class="card-meta-brandbook">
+                <span>Урок 5 из 12</span>
+                <span>•</span>
+                <span class="card-badge-brandbook">В процессе</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="progress-container-brandbook">
+            <div class="progress-header-brandbook">
+              <span class="progress-label-brandbook">Прогресс</span>
+              <span class="progress-value-brandbook">42%</span>
+            </div>
+            <div class="progress-bar-brandbook">
+              <div class="progress-fill-brandbook" style="width: 42%"></div>
+            </div>
+          </div>
+          
+          <button class="btn-brandbook btn-brandbook-primary btn-brandbook-full mt-4">
+            Продолжить
+          </button>
+        </div>
+      </section>
+
+      <!-- Recommendations Section -->
+      <section class="section-brandbook">
+        <div class="section-header-brandbook">
+          <h3 class="section-title-brandbook">Рекомендации</h3>
+          <span class="view-all-brandbook">Каталог</span>
+        </div>
+
+        <div class="recommendations-grid">
+          <div class="card-brandbook">
+            <div class="card-header-brandbook">
+              <div class="card-icon-brandbook">💼</div>
+              <div class="card-info-brandbook">
+                <div class="card-title-brandbook">Финансовая грамотность</div>
+                <div class="card-meta-brandbook">
+                  <span>8 уроков</span>
+                  <span>•</span>
+                  <span>4 часа</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-brandbook">
+            <div class="card-header-brandbook">
+              <div class="card-icon-brandbook">📊</div>
+              <div class="card-info-brandbook">
+                <div class="card-title-brandbook">Анализ рынка</div>
+                <div class="card-meta-brandbook">
+                  <span>12 уроков</span>
+                  <span>•</span>
+                  <span>6 часов</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-brandbook">
+            <div class="card-header-brandbook">
+              <div class="card-icon-brandbook">🎓</div>
+              <div class="card-info-brandbook">
+                <div class="card-title-brandbook">Стратегии успеха</div>
+                <div class="card-meta-brandbook">
+                  <span>10 уроков</span>
+                  <span>•</span>
+                  <span>5 часов</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/dashboard-brandbook.js"></script>
+</body>
+</html>

@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Felix Elite - AI Assistant</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/animations.css?v=8.2">
+    <link rel="stylesheet" href="css/elite-enhanced.css?v=8.2">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #f59e0b;
+            --accent-dark: #d97706;
+            --success: #10b981;
+            --error: #ef4444;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            
+            /* Light theme */
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background:
+                radial-gradient(1200px 600px at 0% 0%, rgba(129, 140, 248, 0.28), transparent 60%),
+                radial-gradient(900px 500px at 100% 100%, rgba(245, 158, 11, 0.22), transparent 60%),
+                linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #3b0764 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+            overflow: hidden;
+        }
+
+        #loadingScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #loadingScreen::before {
+            content: '';
+            position: absolute;
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(99, 102, 241, 0.03) 65%, transparent 70%);
+            filter: blur(12px);
+            animation: pulseGlow 2.8s ease-in-out infinite;
+        }
+
+        .loading-core {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .loader {
+            width: 92px;
+            height: 92px;
+            margin: 0 auto;
+            border: 3px solid rgba(255, 255, 255, 0.18);
+            border-top-color: rgba(255, 255, 255, 0.92);
+            border-radius: 50%;
+            box-shadow:
+                0 0 0 8px rgba(255, 255, 255, 0.04),
+                0 0 34px rgba(129, 140, 248, 0.32),
+                inset 0 0 24px rgba(255, 255, 255, 0.14);
+            animation: spin 1s linear infinite, breathe 2s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.035); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(0.95); opacity: 0.62; }
+            50% { transform: scale(1.05); opacity: 0.88; }
+        }
+
+        .loading-text {
+            color: #f8fafc;
+            margin-top: 24px;
+            font-size: 12px;
+            letter-spacing: 0.38em;
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0.86;
+        }
+
+        .loading-brand {
+            margin-top: 14px;
+            font-size: 38px;
+            line-height: 1.1;
+            font-family: 'Orbitron', 'Manrope', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            background: linear-gradient(90deg, #f8fafc 0%, #c7d2fe 45%, #fde68a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 8px 36px rgba(255, 255, 255, 0.14);
+        }
+
+        .loading-subtext {
+            position: absolute;
+            bottom: 44px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            color: rgba(248, 250, 252, 0.72);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.42em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            text-shadow: 0 2px 14px rgba(0, 0, 0, 0.32);
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--surface);
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            min-width: min-content;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        /* Container */
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-gradient {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .support-fab {
+            position: fixed;
+            right: 16px;
+            bottom: 22px;
+            z-index: 300;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            box-shadow: 0 12px 26px rgba(239, 68, 68, 0.35);
+            cursor: pointer;
+        }
+
+        .support-fab:active {
+            transform: scale(0.96);
+        }
+
+        /* Course Card */
+        .course-card {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .course-card:active {
+            transform: scale(0.98);
+        }
+
+        .course-image {
+            width: 100%;
+            height: 160px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .course-content {
+            padding: 16px;
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width 0.3s;
+        }
+
+        /* Achievement Badge */
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .achievement-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .achievement-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Settings */
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .setting-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .setting-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .setting-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .setting-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Avatar Grid */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .avatar-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar-option.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.1);
+        }
+
+        .avatar-option:active {
+            transform: scale(0.95);
+        }
+
+        /* Slider */
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Partner Card */
+        .partner-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .partner-card:active {
+            transform: scale(0.98);
+        }
+
+        .partner-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .partner-info {
+            flex: 1;
+        }
+
+        .partner-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .partner-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Library Item */
+        .library-item {
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .library-item:active {
+            transform: scale(0.98);
+        }
+
+        .library-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .library-icon {
+            font-size: 24px;
+        }
+
+        .library-title {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .library-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Chart */
+        .chart {
+            height: 200px;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--gradient-primary);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .leaderboard-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .leaderboard-rank.gold {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        .leaderboard-rank.silver {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+        }
+
+        .leaderboard-rank.bronze {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+        }
+
+        .leaderboard-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--gradient-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .leaderboard-score {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .leaderboard-xp {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--bg);
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.premium {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-core">
+            <div class="loader"></div>
+            <div class="loading-text">Loading</div>
+            <div class="loading-brand">Felix Assistant</div>
+        </div>
+        <div class="loading-subtext">EGOIST ECOSYSTEM</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <div class="logo-text">Felix Elite</div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleTheme()">🌙</button>
+                <button class="icon-btn" onclick="showSettings()">⚙️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('home')">🏠 Главная</button>
+            <button class="nav-tab" onclick="showTab('academy')">📚 Академия</button>
+            <button class="nav-tab" onclick="showTab('notes')">📝 Конспекты</button>
+            <button class="nav-tab" onclick="showTab('partners')">🤝 Партнеры</button>
+            <button class="nav-tab" onclick="showTab('library')">📖 Библиотека</button>
+            <button class="nav-tab" onclick="showTab('analytics')">📊 Аналитика</button>
+            <button class="nav-tab" onclick="showTab('rating')">🏆 Рейтинг</button>
+            <button class="nav-tab" onclick="showTab('profile')">👤 Профиль</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        <!-- Home Tab -->
+        <div id="homeTab" class="tab-content">
+            <div class="profile-card animate-scale-in">
+                <div class="profile-avatar animate-float">
+                    🤖
+                </div>
+                <div class="profile-name">Добро пожаловать!</div>
+                <div class="profile-status">Твой AI-ассистент готов к работе</div>
+            </div>
+
+            <div class="stats-grid stagger-fade-in">
+                <div class="stat-card-enhanced">
+                    <span class="stat-icon">📊</span>
+                    <div class="stat-value-enhanced" id="statLevel">1</div>
+                    <div class="stat-label-enhanced">Уровень</div>
+                </div>
+                <div class="stat-card-enhanced">
+                    <span class="stat-icon">⚡</span>
+                    <div class="stat-value-enhanced" id="statXP">0</div>
+                    <div class="stat-label-enhanced">Опыт</div>
+                </div>
+                <div class="stat-card-enhanced">
+                    <span class="stat-icon">📚</span>
+                    <div class="stat-value-enhanced" id="statCourses">0</div>
+                    <div class="stat-label-enhanced">Курсов</div>
+                </div>
+                <div class="stat-card-enhanced">
+                    <span class="stat-icon">🏆</span>
+                    <div class="stat-value-enhanced" id="statAchievements">0</div>
+                    <div class="stat-label-enhanced">Достижений</div>
+                </div>
+            </div>
+
+            <div class="card-enhanced animate-fade-in-up">
+                <div class="card-title mb-16">🚀 Быстрые действия</div>
+                <button class="btn-primary-enhanced mb-16" onclick="showTab('ai')">
+                    <span>🤖</span>
+                    <span>Задать вопрос AI</span>
+                </button>
+                <button class="btn-secondary-enhanced" onclick="showTab('academy')">
+                    <span>📚</span>
+                    <span>Начать обучение</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Academy Tab -->
+        <div id="academyTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">📚 Мои курсы</div>
+                <div id="myCoursesList"></div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-title mb-16">🔥 Популярные курсы</div>
+                <div id="coursesList"></div>
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notesTab" class="tab-content hidden">
+            <!-- Voice Recording -->
+            <div class="card card-gradient fade-in">
+                <div class="card-header">
+                    <div class="card-title">🎤 Запись лекции</div>
+                    <div class="card-icon" id="recordingStatus">⏺️</div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-primary mb-16" id="recordBtn" onclick="toggleRecording()">
+                        <span id="recordBtnIcon">🎤</span>
+                        <span id="recordBtnText">Начать запись</span>
+                    </button>
+                    <div id="recordingTime" class="text-center" style="color: white; font-size: 24px; font-weight: 700; display: none;">
+                        00:00
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Audio -->
+            <div class="card fade-in">
+                <div class="card-title mb-16">📤 Загрузить аудио</div>
+                <input type="file" id="audioFile" accept="audio/*" style="display: none;" onchange="handleAudioUpload(event)">
+                <button class="btn btn-secondary" onclick="document.getElementById('audioFile').click()">
+                    <span>📁</span>
+                    <span>Выбрать файл</span>
+                </button>
+                <div id="uploadStatus" style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;"></div>
+            </div>
+
+            <!-- Processing -->
+            <div id="processingCard" class="card fade-in hidden">
+                <div class="card-title mb-16">⏳ Обработка...</div>
+                <div class="progress-bar mb-16">
+                    <div class="progress-fill" id="processingProgress" style="width: 0%"></div>
+                </div>
+                <div id="processingStatus" style="color: var(--text-secondary); font-size: 14px;"></div>
+            </div>
+
+            <!-- Generated Notes -->
+            <div id="notesResult" class="card fade-in hidden">
+                <div class="card-header">
+                    <div class="card-title">📝 Конспект готов!</div>
+                    <button class="icon-btn" onclick="downloadNotes()">⬇️</button>
+                </div>
+                <div id="notesContent" style="margin-top: 16px; white-space: pre-wrap; line-height: 1.6;"></div>
+                <div style="margin-top: 20px; display: flex; gap: 8px;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="saveNotes()">
+                        💾 Сохранить
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="enhanceNotes()">
+                        ✨ Улучшить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Saved Notes List -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <div class="card-title">📚 Мои конспекты</div>
+                    <div id="notesCount" style="color: var(--text-secondary); font-size: 14px;">0</div>
+                </div>
+                <div id="savedNotesList"></div>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profileTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div id="profileInfo"></div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <div class="card-title">📊 Статистика</div>
+                </div>
+                <div id="profileStats"></div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <div class="card-title">🏆 Достижения</div>
+                    <div id="achievementsCount" style="color: var(--text-secondary); font-size: 14px;">0/20</div>
+                </div>
+                <div id="achievementsList"></div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <div class="card-title">📜 Последняя активность</div>
+                </div>
+                <div id="activityList"></div>
+            </div>
+        </div>
+
+        <!-- AI Tab -->
+        <div id="aiTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">🤖 AI Команды</div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Выбери команду для работы с AI
+                </p>
+                <div id="aiCommandsList"></div>
+            </div>
+        </div>
+
+        <!-- Partners Tab -->
+        <div id="partnersTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">🤝 Партнеры</div>
+                <div id="partnersList"></div>
+            </div>
+        </div>
+
+        <!-- Library Tab -->
+        <div id="libraryTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">📖 Библиотека</div>
+                <div id="libraryList"></div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analyticsTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">📊 Аналитика</div>
+                <div id="analyticsContent"></div>
+            </div>
+        </div>
+
+        <!-- Rating Tab -->
+        <div id="ratingTab" class="tab-content hidden">
+            <div class="card fade-in">
+                <div class="card-title mb-16">🏆 Рейтинг пользователей</div>
+                <div id="ratingList"></div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="card-title">⚙️ Настройки</div>
+                    <button class="icon-btn" onclick="closeSettings()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Communication Style -->
+                    <div class="setting-group">
+                        <div class="setting-label">💬 Формат общения</div>
+                        <div class="setting-options">
+                            <button class="setting-btn" data-setting="style" data-value="formal" onclick="updateSetting('style', 'formal')">
+                                Формальный
+                            </button>
+                            <button class="setting-btn active" data-setting="style" data-value="casual" onclick="updateSetting('style', 'casual')">
+                                Неформальный
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Language -->
+                    <div class="setting-group">
+                        <div class="setting-label">🌐 Язык</div>
+                        <div class="setting-options">
+                            <button class="setting-btn active" data-setting="language" data-value="ru" onclick="updateSetting('language', 'ru')">
+                                🇷🇺 Русский
+                            </button>
+                            <button class="setting-btn" data-setting="language" data-value="en" onclick="updateSetting('language', 'en')">
+                                🇬🇧 English
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="setting-group">
+                        <div class="setting-label">🎨 Аватар</div>
+                        <div class="avatar-grid" id="avatarGrid"></div>
+                    </div>
+
+                    <!-- Theme -->
+                    <div class="setting-group">
+                        <div class="setting-label">🎨 Тема</div>
+                        <div class="setting-options">
+                            <button class="setting-btn" data-setting="theme" data-value="light" onclick="updateSetting('theme', 'light')">
+                                ☀️ Светлая
+                            </button>
+                            <button class="setting-btn" data-setting="theme" data-value="dark" onclick="updateSetting('theme', 'dark')">
+                                🌙 Темная
+                            </button>
+                            <button class="setting-btn active" data-setting="theme" data-value="auto" onclick="updateSetting('theme', 'auto')">
+                                🔄 Авто
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Model -->
+                    <div class="setting-group">
+                        <div class="setting-label">🤖 AI Модель</div>
+                        <div class="setting-options">
+                            <button class="setting-btn active" data-setting="model" data-value="llama-3.3-70b-versatile" onclick="updateSetting('model', 'llama-3.3-70b-versatile')">
+                                Llama 3.3 70B
+                            </button>
+                            <button class="setting-btn" data-setting="model" data-value="llama-3.3-8b-instant" onclick="updateSetting('model', 'llama-3.3-8b-instant')">
+                                Llama 3.3 8B
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Temperature -->
+                    <div class="setting-group">
+                        <div class="setting-label">🌡️ Температура AI: <span id="tempValue">0.7</span></div>
+                        <input type="range" class="slider" min="0" max="10" value="7" step="1" oninput="updateTemperature(this.value)">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                            <span>Точный</span>
+                            <span>Креативный</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary mt-20" onclick="saveSettings()">
+                        💾 Сохранить настройки
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="support-fab" onclick="openHumanSupport()">Не бот?</button>
+
+    <script src="js/app.js?v=202603032000"></script>
+    <script src="js/voice.js?v=8.2"></script>
+</body>
+</html>

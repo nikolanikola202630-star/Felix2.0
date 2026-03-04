@@ -450,7 +450,7 @@ function openSection(section) {
   const routes = {
     'academy': 'catalog.html',
     'ai': 'ai-chat.html',
-    'voice': 'voice.html',
+    'voice': 'voice-assistant.html',
     'partner': 'partner.html',
     'community': 'community.html',
     'analytics': 'analytics.html',
