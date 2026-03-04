@@ -2,26 +2,29 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/_router.js",
+      "src": "api/**/*.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "miniapp/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/_router.js"
-    },
     {
       "src": "/miniapp/(.*)",
       "dest": "/miniapp/$1"
     },
     {
-      "src": "/",
-      "dest": "/miniapp/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/miniapp/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }

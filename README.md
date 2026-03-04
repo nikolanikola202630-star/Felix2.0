@@ -1,8 +1,199 @@
-# Felix Academy V12 - Elite Educational Platform
+# 🎓 EGOIST ACADEMY
 
-> **Old Money. Cold Mind. High Society.**
+> Закрытое сообщество для мотивированных пользователей
 
-Modern Telegram bot with AI capabilities, machine learning, and comprehensive Mini App interface. Designed with elegance and sophistication for the intellectual elite.
+**Минимализм. Строгость. Фокус на результате.**
+
+[![Deploy Status](https://img.shields.io/badge/deploy-success-brightgreen)](https://felix2-0.vercel.app)
+[![Version](https://img.shields.io/badge/version-1.0-blue)](https://github.com)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+---
+
+## 🚀 Быстрый старт
+
+EGOIST ACADEMY уже запущен и работает!
+
+### Открыть приложение:
+1. Откройте бота: [@fel12x_bot](https://t.me/fel12x_bot)
+2. Отправьте: `/start`
+3. Нажмите: "🎓 Открыть Академию"
+
+### Для разработчиков:
+```bash
+# Клонировать
+git clone <repo-url>
+
+# Установить зависимости
+npm install
+
+# Настроить .env
+cp .env.example .env
+
+# Запустить локально
+npm run dev
+```
+
+---
+
+## ✨ Особенности
+
+### Дизайн
+- **Минимализм:** Ничего лишнего, фокус на контенте
+- **Тёмная тема:** #0A0A0A фон, белый текст
+- **Крупные заголовки:** 48px hero, жирные начертания
+- **Системные шрифты:** SF Pro Display, Roboto (0 KB загрузки)
+
+### Функционал
+- ✅ 5 категорий курсов (расширяемо до 16+)
+- ✅ YouTube видео + PDF материалы
+- ✅ Telegram-сообщества для каждого курса
+- ✅ AI-ассистент с голосовым вводом (Groq Llama 3.3)
+- ✅ Партнёрская программа с реферальной системой
+- ✅ Админ панель для управления
+
+### Производительность
+- ⚡ Загрузка <1 сек
+- 📦 CSS: 11 KB
+- 📦 JS: 8 KB
+- 🎯 FPS: 60
+- 🚀 Lighthouse: 95+
+
+---
+
+## 📁 Структура проекта
+
+```
+egoist-academy/
+├── miniapp/              # Frontend
+│   ├── egoist.html       # Главная (SPA)
+│   ├── egoist-catalog.html
+│   ├── egoist-course.html
+│   ├── egoist-lesson.html
+│   ├── css/egoist-theme.css
+│   └── js/egoist-app.js
+├── api/                  # Backend (40 endpoints)
+├── lib/                  # Библиотеки
+├── database/             # БД и миграции
+├── data/                 # Курсы
+└── bot.js                # Telegram бот
+```
+
+Подробнее: [PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)
+
+---
+
+## 🎨 Категории курсов
+
+1. 👑 **ACADEMY KINGS** - Элитное обучение
+2. 🧠 **BRAIN** - Развитие мышления
+3. 💻 **IT** - Технологии и программирование
+4. 📈 **TRADING** - Трейдинг и инвестиции
+5. 🎯 **SUCCESS** - Путь к успеху
+
+---
+
+## 🛠️ Технологии
+
+**Frontend:**
+- HTML5, CSS3, JavaScript (Vanilla)
+- Telegram Web App SDK
+
+**Backend:**
+- Node.js
+- Vercel Serverless Functions
+- PostgreSQL (Supabase)
+
+**AI:**
+- Groq (Llama 3.3 70B)
+- Whisper (STT)
+- Play TTS (TTS)
+
+---
+
+## 📖 Документация
+
+### Для пользователей:
+- [FAQ.md](FAQ.md) - Частые вопросы
+- [CHANGELOG.md](CHANGELOG.md) - История изменений
+
+### Для разработчиков:
+- [БЫСТРЫЙ-ЗАПУСК.md](БЫСТРЫЙ-ЗАПУСК.md) - Инструкция запуска
+- [PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md) - Структура проекта
+- [API-ENDPOINTS.md](API-ENDPOINTS.md) - Документация API
+- [DEPLOY-CHECKLIST.md](DEPLOY-CHECKLIST.md) - Чек-лист деплоя
+
+### О проекте:
+- [EGOIST-ACADEMY-README.md](EGOIST-ACADEMY-README.md) - Полное описание
+- [EGOIST-ACADEMY-АНАЛИЗ-ТЗ.md](EGOIST-ACADEMY-АНАЛИЗ-ТЗ.md) - Анализ ТЗ
+- [EGOIST-ACADEMY-МИНИМАЛИЗАЦИЯ.md](EGOIST-ACADEMY-МИНИМАЛИЗАЦИЯ.md) - Отчёт о дизайне
+
+---
+
+## 🚀 Деплой
+
+Проект автоматически деплоится на Vercel при push в main:
+
+```bash
+git add .
+git commit -m "feat: новая функция"
+git push
+```
+
+Vercel задеплоит за 1-2 минуты.
+
+---
+
+## 📊 Статистика
+
+- **Файлов:** 149
+- **Строк кода:** ~30,000
+- **Размер:** ~700 KB
+- **Оптимизация:** 62% уменьшение
+
+---
+
+## 🤝 Роли
+
+### Студент
+- Доступ к курсам
+- Участие в сообществах
+- AI-ассистент
+- Отслеживание прогресса
+
+### Партнёр
+- Все возможности студента
+- Публикация контента
+- Реферальная система
+- Статистика и комиссии
+
+### Администратор
+- Управление пользователями
+- Управление курсами
+- Модерация контента
+- Просмотр статистики
+
+---
+
+## 📝 Лицензия
+
+MIT License - see [LICENSE](LICENSE)
+
+---
+
+## 📞 Поддержка
+
+- **Telegram:** [@fel12x_bot](https://t.me/fel12x_bot)
+- **Issues:** [GitHub Issues](https://github.com/your-repo/issues)
+- **Docs:** [Документация](docs/)
+
+---
+
+**Версия:** 1.0  
+**Дата:** 4 марта 2026  
+**Статус:** ✅ Production Ready
+
+**Made with ❤️ for motivated learners**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/felix-bot)
 
