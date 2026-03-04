@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+#!/usr/bin/env node
+// Полная перестройка проекта с нуля
+
+const fs = require('fs');
+const path = require('path');
+
+console.log('\n🔨 ПОЛНАЯ ПЕРЕСТРОЙКА EGOIST ACADEMY\n');
+
+// 1. Создать минимальный HTML
+console.log('1️⃣ Создание HTML файлов...');
+
+const html = `<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -100,4 +111,24 @@
     }
   </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync('miniapp/index.html', html);
+fs.writeFileSync('miniapp/egoist.html', html);
+fs.writeFileSync('miniapp/academy.html', html);
+
+console.log('   ✅ HTML файлы созданы\n');
+
+// 2. Проверка размеров
+console.log('2️⃣ Проверка файлов...');
+const files = ['miniapp/index.html', 'miniapp/egoist.html', 'miniapp/academy.html'];
+files.forEach(file => {
+  const stats = fs.statSync(file);
+  console.log(`   ${file}: ${stats.size} bytes`);
+});
+
+console.log('\n✅ Готово! Файлы созданы.\n');
+console.log('📝 Следующие шаги:');
+console.log('   git add miniapp/*.html');
+console.log('   git commit -m "fix: минимальная рабочая версия HTML"');
+console.log('   git push\n');
