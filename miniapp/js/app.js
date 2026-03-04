@@ -352,9 +352,7 @@ function renderCarousel(containerId, items, type) {
         <div class="card-content">
           <div class="card-title">${item.title}</div>
           <div class="card-meta">
-            <span class="card-price ${item.price === 0 ? 'free' : ''}">
-              ${item.price > 0 ? item.price + ' ₽' : 'Бесплатно'}
-            </span>
+            <span class="card-price free">Бесплатно</span>
             <span style="display: flex; align-items: center; gap: 4px;">
               <span style="color: #F59E0B;">⭐</span>
               <span style="font-weight: 600;">${item.rating}</span>

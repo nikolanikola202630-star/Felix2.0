@@ -7,6 +7,17 @@ class APIClient {
     this.timeout = 30000;
     this.retries = 3;
     this.cache = new Map();
+    this.errorHandler = new window.FrontendErrorHandler();
+  }
+
+  // Получить initData от Telegram
+  getInitData() {
+    const tg = window.Telegram?.WebApp;
+    if (!tg) {
+      console.warn('⚠️ Telegram WebApp not available');
+      return null;
+    }
+    return tg.initData;
   }
 
   // Базовый запрос
@@ -17,7 +28,8 @@ class APIClient {
       headers = {},
       cache = false,
       cacheTTL = 300000,
-      retry = true
+      retry = true,
+      requireAuth = true
     } = options;
 
     // Проверка кэша
@@ -34,6 +46,16 @@ class APIClient {
         ...headers
       }
     };
+
+    // Добавить initData для аутентификации
+    if (requireAuth) {
+      const initData = this.getInitData();
+      if (initData) {
+        config.headers['X-Telegram-Init-Data'] = initData;
+      } else if (process.env.NODE_ENV !== 'development') {
+        throw new Error('Telegram authentication required');
+      }
+    }
 
     if (body) {
       config.body = JSON.stringify(body);

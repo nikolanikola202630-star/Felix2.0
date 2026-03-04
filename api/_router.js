@@ -17,6 +17,11 @@ module.exports = async (req, res) => {
 
     // Роутинг по группам
     
+    // 0. V12 Unified API (приоритет)
+    if (pathname === '/api/app' || pathname.startsWith('/api/app?')) {
+      return require('./app-v12')(req, res);
+    }
+    
     // 1. Courses группа
     if (pathname.startsWith('/api/courses') || 
         pathname.startsWith('/api/lessons') ||

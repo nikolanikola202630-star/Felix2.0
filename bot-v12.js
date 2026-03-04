@@ -10,7 +10,7 @@ const config = {
   token: process.env.TELEGRAM_BOT_TOKEN,
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseKey: process.env.SUPABASE_KEY,
-  webAppUrl: process.env.WEB_APP_URL || 'https://felix2-0.vercel.app/miniapp/app-v12.html',
+  webAppUrl: process.env.WEB_APP_URL || 'https://felix2-0.vercel.app/miniapp/app.html',
   adminIds: (process.env.ADMIN_IDS || '').split(',').map(id => parseInt(id)).filter(Boolean)
 };
 

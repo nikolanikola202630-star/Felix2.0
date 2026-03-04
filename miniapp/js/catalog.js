@@ -186,20 +186,15 @@ class CatalogManager {
               <span>📚</span>
               <span>${totalLessons} уроков</span>
             </div>
-            ${freeLessons > 0 ? `
             <div class="meta-item" style="color: var(--success);">
               <span>🎁</span>
-              <span>${freeLessons} бесплатно</span>
+              <span>Бесплатно</span>
             </div>
-            ` : ''}
           </div>
           
           <div class="course-footer">
-            <div class="course-price ${course.price === 0 ? 'free' : ''}">
-              ${course.price === 0 ? 'Бесплатно' : course.price.toLocaleString('ru-RU') + ' ₽'}
-            </div>
             <button class="course-btn" onclick="event.stopPropagation(); catalogManager.openCourse(${course.id})">
-              ${course.price === 0 ? 'Начать' : 'Подробнее'}
+              Начать обучение
             </button>
           </div>
         </div>

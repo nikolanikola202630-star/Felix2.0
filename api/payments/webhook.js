@@ -1,3 +1,17 @@
+// ============================================
+// PAYMENT: Temporarily disabled for free access
+// Uncomment to restore payment webhooks
+// ============================================
+
+module.exports = async (req, res) => {
+  return res.status(200).json({ 
+    success: true,
+    message: 'Payment webhooks disabled during free access period.',
+    free_access: true
+  });
+};
+
+/* PAYMENT: Original webhook code - uncomment to restore
 // Webhook для обработки платежей от Telegram
 const {
   verifyTelegramPaymentWebhook,
@@ -121,3 +135,4 @@ module.exports = async (req, res) => {
     }
   });
 };
+*/

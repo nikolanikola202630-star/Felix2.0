@@ -1,3 +1,17 @@
+// ============================================
+// PAYMENT: Temporarily disabled for free access
+// Uncomment to restore invoice creation
+// ============================================
+
+module.exports = async (req, res) => {
+  return res.status(200).json({ 
+    success: false,
+    message: 'All courses are now free. No payment required.',
+    free_access: true
+  });
+};
+
+/* PAYMENT: Original invoice code - uncomment to restore
 // API endpoint для создания invoice для оплаты курса
 const { createInvoiceLink, rublesToStars } = require('../../lib/payments/telegram-stars');
 const { paymentLimiter } = require('../../lib/middleware/rate-limit');
@@ -93,3 +107,4 @@ module.exports = async (req, res) => {
     }
   });
 };
+*/

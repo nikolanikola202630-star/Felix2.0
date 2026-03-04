@@ -34,14 +34,49 @@ module.exports = async (req, res) => {
         });
       }
 
-      const userId = parseInt(user_id);
-
+      // PAYMENT: Free access - return all courses
+      // Uncomment below to restore purchase-based filtering
+      
+      /* PAYMENT: Original purchase check - uncomment to restore
       // Получить покупки пользователя
       const purchases = await getUserPurchases(userId);
+      */
+      
+      // FREE ACCESS: Return all courses as "purchased"
+      const purchases = []; // Empty during free period
 
       // Загрузить данные курсов
       const coursesData = JSON.parse(fs.readFileSync(coursesPath, 'utf8'));
 
+      // FREE ACCESS: All courses are available
+      const allCourses = coursesData.courses.map(course => {
+        const totalLessons = course.themes?.reduce((sum, theme) => 
+          sum + (theme.lessons?.length || 0), 0) || 0;
+
+        return {
+          purchase_id: null,
+          course_id: course.id,
+          title: course.title,
+          description: course.description,
+          category: course.category,
+          level: course.level,
+          image: course.image,
+          instructor: course.instructor,
+          rating: course.rating,
+          total_lessons: totalLessons,
+          duration_hours: course.duration_hours,
+          purchased_at: null,
+          amount_paid: 0,
+          currency: 'FREE',
+          progress: 0,
+          completed_lessons: 0,
+          last_lesson_id: null,
+          is_free: true,
+          free_access_period: true
+        };
+      });
+
+      /* PAYMENT: Original course filtering - uncomment to restore
       // Собрать информацию о купленных курсах
       const myCourses = purchases.map(purchase => {
         const course = coursesData.courses.find(c => c.id === purchase.course_id);
@@ -111,11 +146,12 @@ module.exports = async (req, res) => {
         user_id: userId,
         count: allCourses.length,
         courses: allCourses,
+        free_access_period: true,
         stats: {
           total_courses: allCourses.length,
-          paid_courses: myCourses.length,
-          free_courses: freeCourses.length,
-          total_spent: purchases.reduce((sum, p) => sum + (p.amount || 0), 0),
+          paid_courses: 0, // All free during this period
+          free_courses: allCourses.length,
+          total_spent: 0,
           total_lessons: allCourses.reduce((sum, c) => sum + c.total_lessons, 0),
           total_hours: allCourses.reduce((sum, c) => sum + (c.duration_hours || 0), 0)
         }

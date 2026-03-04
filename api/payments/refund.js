@@ -1,3 +1,17 @@
+// ============================================
+// PAYMENT: Temporarily disabled for free access
+// Uncomment to restore refund functionality
+// ============================================
+
+module.exports = async (req, res) => {
+  return res.status(200).json({ 
+    success: false,
+    message: 'Refunds not applicable during free access period.',
+    free_access: true
+  });
+};
+
+/* PAYMENT: Original refund code - uncomment to restore
 // API endpoint для возврата платежа
 const { refundStarPayment } = require('../../lib/payments/telegram-stars');
 const { paymentLimiter } = require('../../lib/middleware/rate-limit');
@@ -104,3 +118,4 @@ module.exports = async (req, res) => {
     }
   });
 };
+*/

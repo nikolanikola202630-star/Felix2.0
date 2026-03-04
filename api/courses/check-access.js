@@ -51,10 +51,14 @@ module.exports = async (req, res) => {
         });
       }
 
-      // Проверить доступ
-      let hasAccess = false;
-      let reason = 'not_purchased';
+      // PAYMENT: Free access - all courses available
+      // Uncomment below to restore purchase checks
+      
+      // Check access - FREE ACCESS MODE
+      let hasAccess = true; // Always true during free period
+      let reason = 'free_access_period';
 
+      /* PAYMENT: Original purchase check - uncomment to restore
       // Бесплатный курс
       if (course.price === 0) {
         hasAccess = true;
@@ -67,6 +71,7 @@ module.exports = async (req, res) => {
           reason = 'purchased';
         }
       }
+      */
 
       // Получить доступные уроки
       const lessons = [];

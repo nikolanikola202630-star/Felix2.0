@@ -1,3 +1,9 @@
+// ============================================
+// PAYMENT: Temporarily disabled for free access
+// Uncomment this file to restore payment functionality
+// ============================================
+
+/*
 // API для платежей через Telegram Stars
 const { db } = require('../lib/db-academy');
 
@@ -119,3 +125,20 @@ async function handleWebhook(req, res) {
 
   return res.status(400).json({ error: 'Unknown update type' });
 }
+*/
+
+// Temporary handler for free access period
+module.exports = async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  return res.status(200).json({ 
+    success: false,
+    message: 'Payment system temporarily disabled. All courses are free.',
+    free_access: true
+  });
+};
