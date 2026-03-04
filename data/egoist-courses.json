@@ -1,0 +1,75 @@
+{
+  "courses": [
+    {
+      "id": "academy-kings",
+      "title": "ACADEMY KINGS",
+      "icon": "👑",
+      "category": "elite",
+      "description": "Элитное обучение для избранных. Эксклюзивные материалы и менторство от лучших экспертов.",
+      "price": 0,
+      "is_free": true,
+      "lessons_count": 12,
+      "duration_hours": 8,
+      "community_link": "https://t.me/+egoist_academy_kings",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Введение в элитное мышление",
+          "description": "Узнайте, как мыслят успешные люди",
+          "duration": 45,
+          "is_free": true,
+          "video_url": "https://www.youtube.com/watch?v=...",
+          "pdf_url": "https://..."
+        }
+      ]
+    },
+    {
+      "id": "brain",
+      "title": "BRAIN",
+      "icon": "🧠",
+      "category": "development",
+      "description": "Развитие мышления, памяти и когнитивных способностей.",
+      "price": 0,
+      "is_free": true,
+      "lessons_count": 15,
+      "duration_hours": 10,
+      "community_link": "https://t.me/+egoist_brain"
+    },
+    {
+      "id": "it",
+      "title": "IT",
+      "icon": "💻",
+      "category": "technology",
+      "description": "Программирование, технологии и цифровые навыки будущего.",
+      "price": 0,
+      "is_free": true,
+      "lessons_count": 20,
+      "duration_hours": 15,
+      "community_link": "https://t.me/+egoist_it"
+    },
+    {
+      "id": "trading",
+      "title": "TRADING",
+      "icon": "📈",
+      "category": "finance",
+      "description": "Трейдинг, инвестиции и финансовые рынки.",
+      "price": 0,
+      "is_free": true,
+      "lessons_count": 18,
+      "duration_hours": 12,
+      "community_link": "https://t.me/+egoist_trading"
+    },
+    {
+      "id": "success",
+      "title": "SUCCESS",
+      "icon": "🎯",
+      "category": "motivation",
+      "description": "Путь к успеху: цели, мотивация, достижения.",
+      "price": 0,
+      "is_free": true,
+      "lessons_count": 10,
+      "duration_hours": 6,
+      "community_link": "https://t.me/+egoist_success"
+    }
+  ]
+}

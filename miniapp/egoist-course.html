@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Курс - EGOIST ACADEMY</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="css/egoist-theme.css">
+</head>
+<body style="padding: var(--space-4); padding-bottom: 100px;">
+  <div class="container">
+    <button class="btn btn-ghost mb-6" onclick="history.back()">
+      ← Назад
+    </button>
+
+    <div id="courseContent"></div>
+  </div>
+
+  <script src="core/state.js"></script>
+  <script src="core/utils.js"></script>
+  <script>
+    const courses = {
+      'academy-kings': {
+        title: 'ACADEMY KINGS',
+        icon: '👑',
+        description: 'Элитное обучение для избранных. Эксклюзивные материалы и менторство от лучших экспертов.',
+        lessons: [
+          { id: 1, title: 'Введение в элитное мышление', duration: 45, free: true },
+          { id: 2, title: 'Психология успеха', duration: 60, free: false },
+          { id: 3, title: 'Нетворкинг на высшем уровне', duration: 50, free: false }
+        ]
+      },
+      'brain': {
+        title: 'BRAIN',
+        icon: '🧠',
+        description: 'Развитие мышления, памяти и когнитивных способностей. Научные методики улучшения работы мозга.',
+        lessons: [
+          { id: 1, title: 'Как работает мозг', duration: 40, free: true },
+          { id: 2, title: 'Техники запоминания', duration: 55, free: false },
+          { id: 3, title: 'Критическое мышление', duration: 50, free: false }
+        ]
+      },
+      'it': {
+        title: 'IT',
+        icon: '💻',
+        description: 'Программирование, технологии и цифровые навыки будущего. От основ до продвинутых техник.',
+        lessons: [
+          { id: 1, title: 'Основы программирования', duration: 60, free: true },
+          { id: 2, title: 'Web-разработка', duration: 90, free: false },
+          { id: 3, title: 'AI и машинное обучение', duration: 75, free: false }
+        ]
+      },
+      'trading': {
+        title: 'TRADING',
+        icon: '📈',
+        description: 'Трейдинг, инвестиции и финансовые рынки. Стратегии успешной торговли.',
+        lessons: [
+          { id: 1, title: 'Основы трейдинга', duration: 50, free: true },
+          { id: 2, title: 'Технический анализ', duration: 70, free: false },
+          { id: 3, title: 'Управление рисками', duration: 60, free: false }
+        ]
+      },
+      'success': {
+        title: 'SUCCESS',
+        icon: '🎯',
+        description: 'Путь к успеху: цели, мотивация, достижения. Практические инструменты для роста.',
+        lessons: [
+          { id: 1, title: 'Постановка целей', duration: 40, free: true },
+          { id: 2, title: 'Мотивация и дисциплина', duration: 45, free: false },
+          { id: 3, title: 'Привычки успешных людей', duration: 50, free: false }
+        ]
+      }
+    };
+
+    function renderCourse() {
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get('id');
+      const course = courses[courseId];
+
+      if (!course) {
+        document.getElementById('courseContent').innerHTML = '<p>Курс не найден</p>';
+        return;
+      }
+
+      const totalDuration = course.lessons.reduce((sum, l) => sum + l.duration, 0);
+      const hours = Math.floor(totalDuration / 60);
+      const minutes = totalDuration % 60;
+
+      document.getElementById('courseContent').innerHTML = `
+        <div class="course-header mb-8">
+          <div style="font-size: 64px; margin-bottom: var(--space-4);">${course.icon}</div>
+          <h1 class="mb-4">${course.title}</h1>
+          <p class="text-secondary mb-6" style="font-size: var(--text-lg); line-height: var(--leading-relaxed);">
+            ${course.description}
+          </p>
+          
+          <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-6);">
+            <div class="badge badge-default">
+              📚 ${course.lessons.length} уроков
+            </div>
+            <div class="badge badge-default">
+              ⏱ ${hours}ч ${minutes}м
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full" onclick="startCourse()">
+            Начать обучение
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="lessons-section">
+          <h3 class="mb-4">Программа курса</h3>
+          <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            ${course.lessons.map((lesson, index) => `
+              <div class="card" onclick="openLesson('${courseId}', ${lesson.id})" style="cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                  <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold);">
+                    ${index + 1}
+                  </div>
+                  <div style="flex: 1;">
+                    <div style="font-weight: var(--font-semibold); margin-bottom: var(--space-1);">
+                      ${lesson.title}
+                    </div>
+                    <div style="display: flex; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-tertiary);">
+                      <span>⏱ ${lesson.duration} мин</span>
+                      ${lesson.free ? '<span class="badge badge-success">Бесплатно</span>' : ''}
+                    </div>
+                  </div>
+                  <div style="color: var(--text-tertiary);">→</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function startCourse() {
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get('id');
+      openLesson(courseId, 1);
+    }
+
+    function openLesson(courseId, lessonId) {
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+      }
+      window.location.href = `egoist-lesson.html?course=${courseId}&lesson=${lessonId}`;
+    }
+
+    // Инициализация
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+
+    renderCourse();
+  </script>
+</body>
+</html>

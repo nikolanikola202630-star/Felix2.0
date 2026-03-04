@@ -5,7 +5,7 @@
 
 // Environment variables (NO HARDCODED KEYS!)
 const TOKEN = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
-const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/app.html';
+const MINIAPP_URL = process.env.MINIAPP_URL || 'https://felix2-0.vercel.app/miniapp/egoist.html';
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 if (!TOKEN) {
@@ -23,9 +23,9 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 // In-memory хранилище (для локального тестирования)
 const users = new Map();
 
-// Загрузка курсов из JSON
+// Загрузка курсов из JSON - EGOIST ACADEMY
 const fs = require('fs');
-const coursesData = JSON.parse(fs.readFileSync('./data/courses-structure.json', 'utf8'));
+const coursesData = JSON.parse(fs.readFileSync('./data/egoist-courses.json', 'utf8'));
 const courses = coursesData.courses.map(course => {
   // Подсчитываем общее количество уроков
   const totalLessons = course.themes.reduce((sum, theme) => sum + theme.lessons.length, 0);
